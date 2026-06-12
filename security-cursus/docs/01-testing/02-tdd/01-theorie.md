@@ -31,17 +31,17 @@ Dat klinkt als een klein verschil, maar het verandert fundamenteel hoe je code s
 
 ---
 
-## 3. De drie wetten van Uncle Bob
+## 3. De drie regels van Uncle Bob
 
 Robert C. Martin, beter bekend als Uncle Bob, formuleerde drie strikte regels die het TDD-proces definiëren.
 
-**Wet 1:** je mag geen productiecode schrijven, behalve om een falende test te doen slagen.
+**Regel 1:** je mag geen productiecode schrijven, behalve om een falende test te doen slagen.
 
-**Wet 2:** je mag niet meer tests schrijven dan nodig om de test te doen falen. Een compilatiefout telt als falen.
+**Regel 2:** je mag niet meer tests schrijven dan nodig om de test te doen falen. Een compilatiefout telt als falen.
 
-**Wet 3:** je mag niet meer productiecode schrijven dan nodig om de falende test te doen slagen.
+**Regel 3:** je mag niet meer productiecode schrijven dan nodig om de falende test te doen slagen.
 
-Deze drie wetten dwingen je in een strak ritme van kleine stappen. Elke stap duurt maximaal enkele minuten. Je schrijft nooit grote stukken code in één keer.
+Deze drie regels dwingen je in een strak ritme van kleine stappen. Elke stap duurt maximaal enkele minuten. Je schrijft nooit grote stukken code in één keer.
 
 Wet 3 heeft een belangrijk gevolg dat studenten moeilijk vinden: als de eenvoudigst mogelijke implementatie `return true` is, dan schrijf je `return true`. Niet meer. De volgende test zal je dwingen om verder te gaan.
 
@@ -396,7 +396,7 @@ In les 5 (Integration Testing) zullen we zien hoe je dit principe uitbreidt naar
 | Red | Schrijf een test die faalt, de implementatie bestaat nog niet |
 | Green | Schrijf de minimale code om de test te doen slagen, niet meer |
 | Refactor | Verbeter de code zonder het gedrag te wijzigen, alle tests blijven groen |
-| Wet 1 | Geen productiecode zonder falende test |
-| Wet 2 | Niet meer tests schrijven dan nodig om te falen |
-| Wet 3 | Niet meer productiecode schrijven dan nodig om de test te doen slagen |
+| Regel 1 | Geen productiecode zonder falende test |
+| Regel 2 | Niet meer tests schrijven dan nodig om te falen |
+| Regel 3 | Niet meer productiecode schrijven dan nodig om de test te doen slagen |
 | Testlijst | Noteer vooraf welke gevallen je verwacht, dit is je plan van aanpak |

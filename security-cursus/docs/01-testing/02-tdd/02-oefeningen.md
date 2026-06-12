@@ -106,8 +106,6 @@ public class CouponService : ICouponService
 
 Voeg daarna een constructor toe aan `CartService` die een `ICouponService` ontvangt, net zoals `OrderService` in Les 1 een `IPaymentGateway` ontving.
 
-### Opdracht
-
 <h3 class="opdracht-titel">Opdracht</h3>
 
 Breid `CartService` uit met een methode `ApplyCoupon(string code)`. Schrijf eerst de testlijst, dan de tests, dan de implementatie.
