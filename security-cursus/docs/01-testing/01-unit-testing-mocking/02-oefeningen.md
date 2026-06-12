@@ -54,18 +54,14 @@ Schrijf minstens zes tests in een klasse `DiscountCalculatorTests`. Gebruik ZOMB
 | Exception | kortingspercentage is 101 |
 | Many | meerdere combinaties via `[Theory]` en `[InlineData]` |
 
-:::tip
-Als je 25% korting geeft op een prijs van 80 euro, verwacht je 60 euro terug. Als je 100% korting geeft, verwacht je 0.
-:::
+**Verwacht resultaat:** 25% korting op 80 euro geeft 60 euro. 100% korting geeft 0.
 
-:::warning Exception testen
-Test of een exception echt gegooid wordt zo:
+**Exception testen** doe je zo:
 
 ```csharp
 Action act = () => calculator.ApplyDiscount(100.0, -1);
 act.Should().Throw<ArgumentException>();
 ```
-:::
 
 ---
 
@@ -131,13 +127,13 @@ namespace ShopWave
 
 Schrijf tests voor alle drie de scenario's: ongeldig bedrag, betaling geslaagd en betaling mislukt.
 
-:::tip Structuur van een test met Moq
+**Structuur van een test met Moq:**
+
 ```csharp
 Mock<IPaymentGateway> mockGateway = new Mock<IPaymentGateway>();
 mockGateway.Setup(x => x.ProcessPayment(50.0)).Returns(true);
 OrderService service = new OrderService(mockGateway.Object);
 ```
-:::
 
 ---
 
@@ -217,12 +213,11 @@ Schrijf minstens vier tests. Voeg bij twee tests ook een `Verify`-controle toe:
 1. Als het product niet op voorraad is, mag `ProcessPayment` **nooit** aangeroepen worden.
 2. Als het bedrag ongeldig is, mag `IsInStock` **nooit** aangeroepen worden.
 
-:::tip
-Gebruik `Times.Never` om te controleren dat een methode niet aangeroepen werd:
+**`Times.Never` gebruiken** om te controleren dat een methode niet aangeroepen werd:
+
 ```csharp
 mockGateway.Verify(g => g.ProcessPayment(It.IsAny<double>()), Times.Never);
 ```
-:::
 
 ---
 
@@ -278,9 +273,7 @@ Schrijf minstens twee tests:
 1. Controleer het correcte eindbedrag bij een concrete combinatie van prijs, hoeveelheid en kortingspercentage.
 2. Controleer via `Verify` dat `GetShippingCost` precies eenmaal aangeroepen wordt.
 
-:::tip Voorbeeld om te controleren
-Drie producten aan 10 euro per stuk, 0% korting, verzendkost 5 euro. Verwacht eindbedrag: 35 euro.
-:::
+**Voorbeeld:** drie producten aan 10 euro per stuk, 0% korting, verzendkost 5 euro. Verwacht eindbedrag: 35 euro.
 
 ---
 
