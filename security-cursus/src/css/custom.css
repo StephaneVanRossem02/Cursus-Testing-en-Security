@@ -130,7 +130,7 @@
 .opdracht-titel {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #ffffff !important;
   background-color: #c0392b;
   padding: 0.45rem 0.9rem;
   border-radius: 4px;
