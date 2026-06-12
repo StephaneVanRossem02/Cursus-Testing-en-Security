@@ -41,7 +41,7 @@ namespace ShopWave
 }
 ```
 
-### Opdracht
+<h3 class="opdracht-titel">Opdracht</h3>
 
 Schrijf minstens zes tests in een klasse `DiscountCalculatorTests`. Gebruik ZOMBIES als houvast:
 
@@ -123,7 +123,7 @@ namespace ShopWave
 }
 ```
 
-### Opdracht
+<h3 class="opdracht-titel">Opdracht</h3>
 
 Schrijf tests voor alle drie de scenario's: ongeldig bedrag, betaling geslaagd en betaling mislukt.
 
@@ -206,7 +206,7 @@ namespace ShopWave
 }
 ```
 
-### Opdracht
+<h3 class="opdracht-titel">Opdracht</h3>
 
 Schrijf minstens vier tests. Voeg bij twee tests ook een `Verify`-controle toe:
 
@@ -266,7 +266,7 @@ namespace ShopWave
 }
 ```
 
-### Opdracht
+<h3 class="opdracht-titel">Opdracht</h3>
 
 Schrijf minstens twee tests:
 

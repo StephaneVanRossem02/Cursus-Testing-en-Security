@@ -126,6 +126,23 @@
   font-size: inherit;
 }
 
+/* ── Opdracht-titel in oefeningen ── */
+.opdracht-titel {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #1a5276;
+  padding: 0.45rem 0.9rem;
+  border-radius: 4px;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+[data-theme='dark'] .opdracht-titel {
+  background-color: #2e86c1;
+  color: #ffffff;
+}
+
 /* ── Pagination ── */
 .pagination-nav__link {
   border-color: var(--ifm-color-primary-lightest);

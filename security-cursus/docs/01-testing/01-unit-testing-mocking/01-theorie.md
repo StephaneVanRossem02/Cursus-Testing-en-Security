@@ -407,7 +407,7 @@ public void ValidatePassword_WithHardcodedAdmin_FailsSecurityCheck()
 
 Vanaf les 2 gaan we verder op dit pad: hashing, encryptie, JWT-tokens en SQL injection. Al die concepten kan je testen met dezelfde technieken die je vandaag geleerd hebt.
 
-**Samenvatting:**
+## 11. Samenvatting
 
 | Concept | Wat je moet onthouden |
 |--------|-----------------------|
