@@ -131,7 +131,7 @@
   font-size: 1.05rem;
   font-weight: 700;
   color: #ffffff;
-  background-color: #1a5276;
+  background-color: #c0392b;
   padding: 0.45rem 0.9rem;
   border-radius: 4px;
   margin-top: 1.5rem;
@@ -139,7 +139,7 @@
 }
 
 [data-theme='dark'] .opdracht-titel {
-  background-color: #2e86c1;
+  background-color: #e74c3c;
   color: #ffffff;
 }
 
