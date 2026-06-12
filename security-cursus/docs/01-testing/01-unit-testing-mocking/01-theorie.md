@@ -24,9 +24,7 @@ De kernvraag is: op welk moment vind je een bug het liefst?
 
 Automatische tests verschuiven het moment van ontdekking naar links. Hoe vroeger je een bug vindt, hoe goedkoper die is om te repareren.
 
-:::note Link met security
-Hetzelfde principe geldt voor beveiligingsfouten. Een SQL injection die je zelf ontdekt terwijl je aan het programmeren bent, is een leermoment. Dezelfde SQL injection die een aanvaller ontdekt na de release, is een datalek. In les 2 en verder leer je hoe je ook beveiligingsproblemen automatisch kunt opsporen met tests.
-:::
+**Link met security:** hetzelfde principe geldt voor beveiligingsfouten. Een SQL injection die je zelf ontdekt terwijl je aan het programmeren bent, is een leermoment. Dezelfde SQL injection die een aanvaller ontdekt na de release, is een datalek. In les 2 en verder leer je hoe je ook beveiligingsproblemen automatisch kunt opsporen met tests.
 
 ---
 
@@ -46,11 +44,7 @@ Een goede unit test heeft vijf eigenschappen:
 
 Een bijkomend voordeel: een goed geschreven test werkt als **levende documentatie**. Een nieuwe collega die de testklasse leest, begrijpt meteen wat de klasse doet en welke randgevallen er bestaan. In tegenstelling tot een Word-document raakt een test nooit verouderd: als de code verandert en de test klopt niet meer, faalt hij.
 
-:::tip Mini-controle
-Stel: een test verbindt met een database om zijn resultaat te controleren. Is dit een goede unit test? Waarom wel of niet?
-
-**Antwoord:** nee. De test is niet geïsoleerd. Als de database tijdelijk onbeschikbaar is, faalt de test zonder dat er iets mis is met jouw code. Zo'n test noemen we een integratietest, niet een unit test.
-:::
+**Mini-controle:** stel dat een test verbindt met een database om zijn resultaat te controleren. Is dit een goede unit test? Nee. De test is niet geïsoleerd. Als de database tijdelijk onbeschikbaar is, faalt de test zonder dat er iets mis is met jouw code. Zo'n test noemen we een integratietest, niet een unit test.
 
 ---
 
@@ -88,12 +82,9 @@ public void CalculateTotal_WithOneProduct_ReturnsCorrectTotal()
 
 Je ziet meteen wat er klaargezet wordt, wat er gedaan wordt en wat er gecontroleerd wordt.
 
-:::warning Veelgemaakte fout
-Schrijf nooit meerdere `Act`-stappen in één test. Elke test controleert precies één scenario. Moet je twee dingen testen? Schrijf twee tests.
-:::
+**Veelgemaakte fout:** schrijf nooit meerdere `Act`-stappen in één test. Elke test controleert precies één scenario. Moet je twee dingen testen? Schrijf twee tests.
 
-:::tip Mini-controle
-Kijk naar de volgende test. Welk deel is Arrange, welk deel is Act en welk deel is Assert?
+**Mini-controle:** kijk naar de volgende test. Welk deel is Arrange, welk deel is Act en welk deel is Assert?
 
 ```csharp
 [Fact]
@@ -105,8 +96,7 @@ public void ApplyDiscount_WithZeroPercent_ReturnsOriginalPrice()
 }
 ```
 
-**Antwoord:** de eerste regel is Arrange, de tweede regel is Act, de derde regel is Assert. De commentaarregels ontbreken hier, maar de structuur is hetzelfde.
-:::
+De eerste regel is Arrange, de tweede regel is Act, de derde regel is Assert.
 
 ---
 
@@ -136,11 +126,7 @@ ZOMBIES helpt je ook de **volgorde** bepalen. Begin bij Zero en One, want die zi
 - **Exception:** kortingspercentage is negatief of groter dan 100
 - **Simple:** elke test controleert één combinatie van invoerwaarden
 
-:::tip Mini-controle
-Een methode `Divide(double a, double b)` deelt twee getallen. Welke ZOMBIES-gevallen zou je testen? Schrijf de gevallen op voor je verder leest.
-
-**Mogelijk antwoord:** Zero (b is 0, verwacht exception), One (a is 1 of b is 1), Boundary (heel groot of heel klein getal), Exception (b is 0 gooit een DivideByZeroException), Simple (elke test controleert één combinatie).
-:::
+**Mini-controle:** een methode `Divide(double a, double b)` deelt twee getallen. Welke ZOMBIES-gevallen zou je testen? Schrijf de gevallen op voor je verder leest. Mogelijk antwoord: Zero (b is 0, verwacht exception), One (a is 1 of b is 1), Boundary (heel groot of heel klein getal), Exception (b is 0 gooit een DivideByZeroException), Simple (elke test controleert één combinatie).
 
 ---
 
@@ -189,15 +175,9 @@ public void CalculateTotal_WithValidInputs_ReturnsCorrectTotal(
 
 xUnit voert deze test drie keer uit, één keer per rij met `[InlineData]`. In de Test Explorer in Visual Studio zie je elk geval afzonderlijk staan, met de exacte invoerwaarden als naam.
 
-:::note Wat gebeurt er onder de motorkap?
-Het attribuut `[Fact]` is een aanduiding voor het xUnit-framework. Wanneer je op "Run All" klikt in de Test Explorer, scant xUnit via **reflectie** alle klassen in het testproject. Het zoekt naar methoden met `[Fact]` of `[Theory]` en voert die uit. Het resultaat (geslaagd of gefaald) geeft het terug aan Visual Studio. Je schrijft dus gewone C#-methoden; xUnit zorgt voor de rest.
-:::
+**Wat gebeurt er onder de motorkap?** Het attribuut `[Fact]` is een aanduiding voor het xUnit-framework. Wanneer je op "Run All" klikt in de Test Explorer, scant xUnit via **reflectie** alle klassen in het testproject. Het zoekt naar methoden met `[Fact]` of `[Theory]` en voert die uit. Het resultaat (geslaagd of gefaald) geeft het terug aan Visual Studio. Je schrijft dus gewone C#-methoden; xUnit zorgt voor de rest.
 
-:::tip Mini-controle
-Wanneer gebruik je `[Fact]` en wanneer gebruik je `[Theory]`?
-
-**Antwoord:** gebruik `[Fact]` als je één concreet scenario test. Gebruik `[Theory]` als je dezelfde logica wil testen met meerdere combinaties van invoerwaarden, bv. vijf verschillende kortingspercentages.
-:::
+**Mini-controle:** wanneer gebruik je `[Fact]` en wanneer gebruik je `[Theory]`? Gebruik `[Fact]` als je één concreet scenario test. Gebruik `[Theory]` als je dezelfde logica wil testen met meerdere combinaties van invoerwaarden, bv. vijf verschillende kortingspercentages.
 
 ---
 
@@ -315,15 +295,9 @@ OrderService service = new OrderService(new PaymentGateway());
 
 **In tests** geef je een nep-versie mee die je volledig controleert. Die nep-versie noemen we een **mock**.
 
-:::note Waarom werkt dit?
-`OrderService` kent alleen de interface `IPaymentGateway`, niet de concrete klasse `PaymentGateway`. Hierdoor kan je om het even welk object meegeven, zolang het de interface implementeert. In tests gebruik je een mock; in productie gebruik je de echte gateway. De code van `OrderService` verandert niet.
-:::
+**Waarom werkt dit?** `OrderService` kent alleen de interface `IPaymentGateway`, niet de concrete klasse `PaymentGateway`. Hierdoor kan je om het even welk object meegeven, zolang het de interface implementeert. In tests gebruik je een mock; in productie gebruik je de echte gateway. De code van `OrderService` verandert niet.
 
-:::tip Mini-controle
-Je hebt een klasse `ReportGenerator` die een `DatabaseConnection` aanmaakt in haar constructor. Hoe zou je die klasse testbaar maken?
-
-**Antwoord:** maak een interface `IDatabaseConnection`, laat `ReportGenerator` die ontvangen via de constructor in plaats van zelf een `DatabaseConnection` aan te maken. In tests geef je een mock mee; in productie de echte verbinding.
-:::
+**Mini-controle:** je hebt een klasse `ReportGenerator` die een `DatabaseConnection` aanmaakt in haar constructor. Hoe zou je die klasse testbaar maken? Maak een interface `IDatabaseConnection`, laat `ReportGenerator` die ontvangen via de constructor in plaats van zelf een `DatabaseConnection` aan te maken. In tests geef je een mock mee; in productie de echte verbinding.
 
 ---
 
@@ -398,15 +372,9 @@ public void PlaceOrder_WhenPaymentSucceeds_ReturnsBevestigd()
 }
 ```
 
-:::warning Veelgemaakte fout
-Studenten vergeten `Times.Never` te gebruiken om te bewijzen dat een methode NIET aangeroepen werd. Als het product niet op voorraad is, moet de betaalgateway nooit aangesproken worden. Controleer dat altijd expliciet met `Verify(..., Times.Never)`, anders test je dat gedrag niet.
-:::
+**Veelgemaakte fout:** studenten vergeten `Times.Never` te gebruiken om te bewijzen dat een methode niet aangeroepen werd. Als het product niet op voorraad is, moet de betaalgateway nooit aangesproken worden. Controleer dat altijd expliciet met `Verify(..., Times.Never)`, anders test je dat gedrag niet.
 
-:::tip Mini-controle
-Wat is het verschil tussen `Setup` en `Verify`?
-
-**Antwoord:** `Setup` bepaalt wat de mock teruggeeft als een methode aangeroepen wordt. `Verify` controleert achteraf of een methode daadwerkelijk aangeroepen werd, en hoe vaak. Je kan `Verify` gebruiken zonder `Setup`, en omgekeerd.
-:::
+**Mini-controle:** wat is het verschil tussen `Setup` en `Verify`? `Setup` bepaalt wat de mock teruggeeft als een methode aangeroepen wordt. `Verify` controleert achteraf of een methode daadwerkelijk aangeroepen werd, en hoe vaak. Je kan `Verify` gebruiken zonder `Setup`, en omgekeerd.
 
 ---
 
@@ -429,30 +397,18 @@ Dit is een ernstig beveiligingsprobleem. Een unit test maakt dat meteen zichtbaa
 
 ```csharp
 [Fact]
-public void ValidatePassword_WithWrongPassword_ReturnsFalse()
-{
-    PasswordValidator validator = new PasswordValidator();
-    bool result = validator.ValidatePassword("verkeerd");
-    result.Should().BeFalse();
-}
-```
-
-Maar ook:
-
-```csharp
-[Fact]
 public void ValidatePassword_WithHardcodedAdmin_FailsSecurityCheck()
 {
     PasswordValidator validator = new PasswordValidator();
     bool result = validator.ValidatePassword("admin123");
-    // Een hardcoded wachtwoord mag NOOIT geldig zijn in productie
     result.Should().BeFalse("hardcoded wachtwoorden zijn een beveiligingsrisico");
 }
 ```
 
 Vanaf les 2 gaan we verder op dit pad: hashing, encryptie, JWT-tokens en SQL injection. Al die concepten kan je testen met dezelfde technieken die je vandaag geleerd hebt.
 
-:::note Samenvatting
+**Samenvatting:**
+
 | Concept | Wat je moet onthouden |
 |--------|-----------------------|
 | Unit test | Controleert één methode, geïsoleerd, snel, herhaalbaar |
@@ -468,4 +424,3 @@ Vanaf les 2 gaan we verder op dit pad: hashing, encryptie, JWT-tokens en SQL inj
 | `Setup(...).Returns(...)` | Bepaalt wat de mock teruggeeft |
 | `It.IsAny<T>()` | Geldt voor elke waarde van het opgegeven type |
 | `Verify(...)` | Controleert of een methode aangeroepen werd en hoe vaak |
-:::
