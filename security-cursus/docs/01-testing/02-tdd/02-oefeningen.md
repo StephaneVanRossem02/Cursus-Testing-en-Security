@@ -1,19 +1,23 @@
 ---
-title: "Les 3: TDD — Red-Green-Refactor — Oefeningen"
+title: "Les 3: Oefeningen - Test Driven Development"
 sidebar_label: "Oefeningen"
 ---
 
-# Les 3: TDD — Red-Green-Refactor — Oefeningen
+# Oefeningen: Test Driven Development
 
-> **Code-afspraken:** geen top-level statements · altijd `{}` · max één `return` · geen `break`/`continue` · geen underscore-prefix op parameters · geen geneste klassen · geen ternary/null-conditional · geen tuples · `double` i.p.v. `decimal` · identifiers Engels · tekst Nederlands
+Werk de oefeningen in volgorde. Schrijf bij elke oefening **eerst** de testlijst, dan de eerste test, dan de minimale implementatie, en refactor waar nodig. Volg de Red-Green-Refactor cyclus consequent.
 
 ---
 
-## Oefening 1 — CartService via TDD
+## Oefening 1: CartService via TDD
 
-**Opgave:** Bouw `CartService` volledig via TDD (Red-Green-Refactor). Stel eerst je testlijst op. De klasse moet ondersteunen: leeg mandje heeft totaal 0, artikel toevoegen, meerdere artikelen, artikel verwijderen, negatief aantal → `ArgumentException`, mandje leegmaken.
+**Leerdoel:** je bouwt een klasse volledig via TDD door de Red-Green-Refactor cyclus stap voor stap te doorlopen.
 
-**CartItem.cs**
+**Moeilijkheidsgraad:** basis
+
+### Startcode
+
+Maak deze klasse aan in `ShopWave`. Je hoeft hem niet aan te passen, maar je hebt hem nodig als bouwsteen voor `CartService`.
 
 ```csharp
 namespace ShopWave
@@ -26,160 +30,61 @@ namespace ShopWave
 
         public CartItem(string name, double price, int quantity)
         {
-            this.Name     = name;
-            this.Price    = price;
-            this.Quantity = quantity;
+            Name     = name;
+            Price    = price;
+            Quantity = quantity;
         }
     }
 }
 ```
 
-**CartService.cs**
+### Stap 1: stel je testlijst op
 
-```csharp
-namespace ShopWave
-{
-    public class CartService
-    {
-        private readonly Dictionary<string, CartItem> items;
+Noteer alle testgevallen die je verwacht nodig te hebben voor `CartService`. Schrijf ze op voor je ook maar één lijn code aanraakt. De lijst hieronder is een vertrekpunt, maar je mag gevallen toevoegen als je ze ontdekt tijdens het implementeren.
 
-        public CartService()
-        {
-            this.items = new Dictionary<string, CartItem>();
-        }
-
-        public double Total
-        {
-            get
-            {
-                double total = 0;
-
-                foreach (CartItem item in this.items.Values)
-                {
-                    total += item.Price * item.Quantity;
-                }
-
-                return total;
-            }
-        }
-
-        public void AddItem(string name, double price, int quantity = 1)
-        {
-            if (quantity < 0)
-            {
-                throw new ArgumentException("Aantal mag niet negatief zijn.", nameof(quantity));
-            }
-
-            if (this.items.ContainsKey(name))
-            {
-                this.items[name].Quantity += quantity;
-            }
-            else
-            {
-                this.items[name] = new CartItem(name, price, quantity);
-            }
-        }
-
-        public void RemoveItem(string name)
-        {
-            if (this.items.ContainsKey(name))
-            {
-                this.items.Remove(name);
-            }
-        }
-
-        public void Clear()
-        {
-            this.items.Clear();
-        }
-    }
-}
+```
+[ ] Nieuw aangemaakt mandje heeft een totaal van 0
+[ ] Eén artikel toevoegen verhoogt het totaal met de prijs van dat artikel
+[ ] Meerdere artikelen optellen geeft het correcte totaal
+[ ] Hoeveelheid meegeven vermenigvuldigt de prijs correct
+[ ] Een artikel verwijderen verlaagt het totaal
+[ ] Een negatieve hoeveelheid geeft een ArgumentException
+[ ] Het mandje leegmaken reset het totaal naar 0
 ```
 
-**CartServiceTests.cs**
+### Stap 2: bouw CartService via TDD
+
+Maak een lege `CartService`-klasse aan in `ShopWave` en een testklasse `CartServiceTests` in `ShopWave.Tests`. Werk de testlijst van boven naar onder af. Doorloop voor elk geval de volledige Red-Green-Refactor cyclus voor je naar het volgende gaat.
+
+**Verwacht resultaat:**
+
+| Actie | Verwacht totaal |
+|-------|----------------|
+| Leeg mandje | 0 |
+| Laptop (999.99) toevoegen | 999.99 |
+| Laptop + Muis (29.99) | 1029.98 |
+| 4 pennen aan 2.50 | 10.00 |
+| Laptop + Muis, dan Muis verwijderen | 999.99 |
+| Laptop toevoegen, dan Clear() | 0 |
+
+**Negatieve hoeveelheid testen** doe je zo:
 
 ```csharp
-using FluentAssertions;
-using ShopWave;
-
-namespace ShopWave.Tests
-{
-    public class CartServiceTests
-    {
-        // ZOMBIES: Zero
-        [Fact]
-        public void Total_EmptyCart_ReturnsZero()
-        {
-            CartService cart = new CartService();
-            double result    = cart.Total;
-            result.Should().Be(0.0);
-        }
-
-        // ZOMBIES: One
-        [Fact]
-        public void AddItem_SingleItem_UpdatesTotal()
-        {
-            CartService cart = new CartService();
-            cart.AddItem("Laptop", 999.99);
-            cart.Total.Should().Be(999.99);
-        }
-
-        // ZOMBIES: Many
-        [Fact]
-        public void AddItem_MultipleItems_ReturnsCombinedTotal()
-        {
-            CartService cart = new CartService();
-            cart.AddItem("Laptop", 999.99);
-            cart.AddItem("Muis",    29.99);
-            cart.Total.Should().Be(1029.98);
-        }
-
-        [Fact]
-        public void AddItem_WithQuantity_MultipliesPriceByQuantity()
-        {
-            CartService cart = new CartService();
-            cart.AddItem("Pen", 2.50, 4);
-            cart.Total.Should().Be(10.0);
-        }
-
-        [Fact]
-        public void RemoveItem_ExistingItem_UpdatesTotal()
-        {
-            CartService cart = new CartService();
-            cart.AddItem("Laptop", 999.99);
-            cart.AddItem("Muis",    29.99);
-            cart.RemoveItem("Muis");
-            cart.Total.Should().Be(999.99);
-        }
-
-        // ZOMBIES: Exception
-        [Fact]
-        public void AddItem_WithNegativeQuantity_ThrowsArgumentException()
-        {
-            CartService cart = new CartService();
-            Action act = () => cart.AddItem("Laptop", 999.99, -1);
-            act.Should().Throw<ArgumentException>();
-        }
-
-        [Fact]
-        public void Clear_NonEmptyCart_ResetsTotal()
-        {
-            CartService cart = new CartService();
-            cart.AddItem("Laptop", 999.99);
-            cart.Clear();
-            cart.Total.Should().Be(0.0);
-        }
-    }
-}
+Action act = () => cart.AddItem("Laptop", 999.99, -1);
+act.Should().Throw<ArgumentException>();
 ```
 
 ---
 
-## Oefening 2 — CartService met coupon (ICouponService)
+## Oefening 2: CartService uitbreiden met couponondersteuning
 
-**Opgave:** Breid `CartService` uit met coupon-ondersteuning via `ICouponService` (Dependency Injection). Geldige coupon verlaagt het totaal; ongeldige heeft geen effect; na gebruik wordt coupon gemarkeerd; dezelfde coupon kan niet twee keer gebruikt worden.
+**Leerdoel:** je combineert TDD met Dependency Injection en Moq om een uitbreiding te schrijven op een bestaande klasse.
 
-**ICouponService.cs**
+**Moeilijkheidsgraad:** gemiddeld
+
+### Startcode
+
+Moq werkt alleen met interfaces. Maak eerst deze interface aan in `ShopWave`:
 
 ```csharp
 namespace ShopWave
@@ -193,91 +98,101 @@ namespace ShopWave
 }
 ```
 
-**CartService.cs (met coupon)**
+Laat `CouponService` uit de demo deze interface implementeren:
 
 ```csharp
-namespace ShopWave
-{
-    public class CartService
-    {
-        private readonly Dictionary<string, CartItem> items;
-        private readonly ICouponService               couponService;
-        private          double                        couponDiscount;
-
-        public CartService(ICouponService couponService)
-        {
-            this.items          = new Dictionary<string, CartItem>();
-            this.couponService  = couponService;
-            this.couponDiscount = 0;
-        }
-
-        public double Total
-        {
-            get
-            {
-                double subtotal = 0;
-
-                foreach (CartItem item in this.items.Values)
-                {
-                    subtotal += item.Price * item.Quantity;
-                }
-
-                double result = subtotal * (1 - this.couponDiscount / 100.0);
-
-                return result;
-            }
-        }
-
-        public void AddItem(string name, double price, int quantity = 1)
-        {
-            if (quantity < 0)
-            {
-                throw new ArgumentException("Aantal mag niet negatief zijn.", nameof(quantity));
-            }
-
-            if (this.items.ContainsKey(name))
-            {
-                this.items[name].Quantity += quantity;
-            }
-            else
-            {
-                this.items[name] = new CartItem(name, price, quantity);
-            }
-        }
-
-        public void ApplyCoupon(string code)
-        {
-            if (this.couponService.IsValid(code))
-            {
-                this.couponDiscount = this.couponService.GetDiscount(code);
-                this.couponService.MarkAsUsed(code);
-            }
-        }
-
-        public void RemoveItem(string name)
-        {
-            if (this.items.ContainsKey(name))
-            {
-                this.items.Remove(name);
-            }
-        }
-
-        public void Clear()
-        {
-            this.items.Clear();
-        }
-    }
-}
+public class CouponService : ICouponService
 ```
+
+Voeg daarna een constructor toe aan `CartService` die een `ICouponService` ontvangt, net zoals `OrderService` in Les 1 een `IPaymentGateway` ontving.
+
+### Opdracht
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+Breid `CartService` uit met een methode `ApplyCoupon(string code)`. Schrijf eerst de testlijst, dan de tests, dan de implementatie.
+
+Vereisten:
+
+- Een geldige coupon verlaagt het totaal met het opgegeven percentage
+- Een ongeldige coupon heeft geen effect op het totaal
+- Na het toepassen van een coupon wordt die als gebruikt gemarkeerd via `MarkAsUsed`
+- Dezelfde coupon kan niet tweemaal worden toegepast
+
+**Structuur van een test met twee mocks:**
+
+```csharp
+Mock<ICouponService> mockCoupon = new Mock<ICouponService>();
+mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(true);
+mockCoupon.Setup(c => c.GetDiscount("ZOMER10")).Returns(10);
+
+CartService cart = new CartService(mockCoupon.Object);
+cart.AddItem("Laptop", 100.0);
+cart.ApplyCoupon("ZOMER10");
+
+cart.Total.Should().Be(90.0);
+```
+
+**Verwacht resultaat:**
+
+| Situatie | Verwacht totaal bij basisprijs 100.00 |
+|---------|--------------------------------------|
+| Geen coupon | 100.00 |
+| Geldige coupon van 10% | 90.00 |
+| Ongeldige coupon | 100.00 |
+
+Controleer ook via `Verify` dat `MarkAsUsed` precies eenmaal aangeroepen wordt bij een geldige coupon, en nooit bij een ongeldige.
 
 ---
 
-## Oefening 3 — OrderService uitbreiden via TDD
+## Oefening 3: OrderService uitbreiden via TDD
 
-**Opgave:** Breid `OrderService.PlaceOrder` uit met coupon-ondersteuning. Geldige coupon verlaagt het bedrag; ongeldige coupon → bestelling toch geplaatst zonder korting; al gebruikte coupon → `"Coupon reeds gebruikt."` Gebruik Moq voor alle drie interfaces.
+**Leerdoel:** je past TDD toe op een bestaande klasse en combineert meerdere mocks in één test.
+
+**Moeilijkheidsgraad:** uitdaging
+
+### Startcode
+
+De `OrderService` uit Les 1 krijgt een extra parameter:
 
 ```csharp
 public string PlaceOrder(int productId, int quantity, double amount, string couponCode = "")
 ```
 
-Tests omvatten minstens: geen coupon, geldige coupon, ongeldige coupon, al gebruikte coupon, en combinatie met niet-beschikbaar product.
+`OrderService` ontvangt nu ook een `ICouponService` via de constructor, naast `IPaymentGateway` en `IStockService`.
+
+### Opdracht
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+Stel eerst je testlijst op. Bouw daarna de uitbreiding via TDD.
+
+Vereisten:
+
+- Als geen coupon meegegeven wordt, verloopt de bestelling zoals in Les 1
+- Een geldige coupon verlaagt het te betalen bedrag voor de betaling plaatsvindt
+- Een ongeldige coupon heeft geen effect: de bestelling wordt toch geplaatst zonder korting
+- Een al gebruikte coupon geeft de melding `"Coupon reeds gebruikt."` terug en plaatst geen bestelling
+
+Schrijf minstens vijf tests. Gebruik Moq voor `IPaymentGateway`, `IStockService` en `ICouponService`.
+
+**Verwacht resultaat per scenario:**
+
+| Situatie | Verwacht resultaat |
+|---------|-------------------|
+| Geen coupon, betaling geslaagd | "Bestelling bevestigd" |
+| Geldige coupon, betaling geslaagd | "Bestelling bevestigd" (lager bedrag doorgestuurd naar gateway) |
+| Ongeldige coupon, betaling geslaagd | "Bestelling bevestigd" (origineel bedrag) |
+| Al gebruikte coupon | "Coupon reeds gebruikt." |
+| Product niet op voorraad | "Product niet beschikbaar" |
+
+---
+
+## Oefening 4: Reflectie
+
+Beantwoord deze vragen voor jezelf voor je de oplossingen bekijkt.
+
+1. In stap 2 van de demo schreven we `return true` als volledige implementatie. Waarom is dat correct in TDD, ook al weet je dat het onvolledig is?
+2. In stap 4 dwong de test ons om van een `List<string>` naar een `List<Coupon>` over te stappen. Wat zegt dit over hoe TDD het ontwerp beinvloedt?
+3. Wat is het verschil tussen de refactorfase en de groene fase? Waarom mag je tijdens de groene fase niet refactoren?
+4. Beschrijf een moment tijdens het uitwerken van de oefeningen waarbij een test je dwong iets te ontdekken wat je niet had verwacht.
