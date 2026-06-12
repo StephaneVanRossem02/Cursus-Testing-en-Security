@@ -32,7 +32,7 @@ Automatische tests verschuiven het moment van ontdekking naar links. Hoe vroeger
 
 Een **unit test** is een stuk code dat één methode of klasse controleert, volledig losgemaakt van de rest van de applicatie. Met "losgemaakt" bedoelen we: geen database, geen netwerkverbinding, geen bestanden op schijf. Alleen de logica van de methode zelf wordt gecontroleerd.
 
-Een goede unit test heeft vijf eigenschappen:
+Een goede unit test heeft vijf eigenschappen.
 
 | Eigenschap | Uitleg |
 |-----------|--------|
@@ -222,7 +222,7 @@ public class OrderService
 
 `OrderService` maakt zelf een `PaymentGateway` aan. Die gateway communiceert met een extern betaalsysteem. Als je `PlaceOrder` wil testen, heb je altijd een echte verbinding nodig met dat externe systeem.
 
-Dat levert drie concrete problemen op:
+Dat levert drie concrete problemen op.
 
 1. **De test is traag.** Netwerkcommunicatie duurt tientallen milliseconden, soms langer. Bij honderd zulke tests wacht je minuten.
 2. **De test kan falen door een oorzaak buiten jouw code.** Als de betaalprovider een storing heeft, falen jouw tests, ook al is jouw code correct.
