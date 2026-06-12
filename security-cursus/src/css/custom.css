@@ -1,0 +1,147 @@
+/* AP Hogeschool — Testing & Security */
+
+:root {
+  --ifm-color-primary: #c0392b;
+  --ifm-color-primary-dark: #ac3326;
+  --ifm-color-primary-darker: #a23022;
+  --ifm-color-primary-darkest: #87271b;
+  --ifm-color-primary-light: #c94e43;
+  --ifm-color-primary-lighter: #ce5649;
+  --ifm-color-primary-lightest: #d96f66;
+  --ifm-code-font-size: 93%;
+  --ifm-line-height-base: 1.75;
+  --ifm-navbar-shadow: 0 1px 0 0 var(--ifm-color-primary);
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --sw-testing-color: #1a5276;
+  --sw-security-color: #c0392b;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #e74c3c;
+  --ifm-color-primary-dark: #e33527;
+  --ifm-color-primary-darker: #d93323;
+  --ifm-color-primary-darkest: #b32b1d;
+  --ifm-color-primary-light: #e9665a;
+  --ifm-color-primary-lighter: #eb7068;
+  --ifm-color-primary-lightest: #ef9089;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --sw-testing-color: #5dade2;
+  --sw-security-color: #e74c3c;
+}
+
+/* ── Navbar ── */
+.navbar {
+  border-bottom: 2px solid var(--ifm-color-primary);
+  box-shadow: none;
+}
+
+/* ── Sidebar ── */
+.menu__link--active:not(.menu__link--sublist) {
+  background-color: rgba(192, 57, 43, 0.08);
+  border-right: 3px solid var(--ifm-color-primary);
+}
+
+[data-theme='dark'] .menu__link--active:not(.menu__link--sublist) {
+  background-color: rgba(231, 76, 60, 0.12);
+}
+
+.menu__caret::before,
+.menu__link--sublist-caret::after {
+  background-color: var(--ifm-color-primary) !important;
+}
+
+/* ── Headings in docs ── */
+.theme-doc-markdown h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  border-bottom: 3px solid var(--ifm-color-primary);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.theme-doc-markdown h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  border-left: 4px solid var(--ifm-color-primary);
+  padding-left: 0.7rem;
+  margin-top: 2.25rem;
+}
+
+.theme-doc-markdown h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ifm-color-text-base);
+  opacity: 0.85;
+  margin-top: 1.5rem;
+}
+
+/* ── Blockquotes (code-afspraken, notities) ── */
+.theme-doc-markdown blockquote {
+  border-left: 4px solid var(--ifm-color-primary);
+  background-color: rgba(192, 57, 43, 0.05);
+  border-radius: 0 8px 8px 0;
+  padding: 0.8rem 1.1rem;
+  margin: 1.25rem 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+[data-theme='dark'] .theme-doc-markdown blockquote {
+  background-color: rgba(231, 76, 60, 0.09);
+}
+
+/* ── Horizontal rules — oefening-dividers ── */
+.theme-doc-markdown hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--ifm-color-primary-lightest),
+    var(--ifm-color-primary-lightest) 30%,
+    transparent 80%
+  );
+  margin: 2.5rem 0;
+}
+
+/* ── Inline code ── */
+.theme-doc-markdown code {
+  background-color: rgba(192, 57, 43, 0.07);
+  border: 1px solid rgba(192, 57, 43, 0.18);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.88em;
+}
+
+[data-theme='dark'] .theme-doc-markdown code {
+  background-color: rgba(231, 76, 60, 0.12);
+  border-color: rgba(231, 76, 60, 0.25);
+}
+
+/* Code inside code-blocks: reset the custom styling */
+.theme-doc-markdown pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* ── Pagination ── */
+.pagination-nav__link {
+  border-color: var(--ifm-color-primary-lightest);
+}
+
+.pagination-nav__link:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+/* ── Table of contents ── */
+.table-of-contents__link--active {
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+/* ── Breadcrumbs ── */
+.breadcrumbs__item--active .breadcrumbs__link {
+  color: var(--ifm-color-primary);
+}
