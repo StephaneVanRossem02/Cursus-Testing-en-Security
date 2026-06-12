@@ -5,19 +5,6 @@ sidebar_label: "Oefeningen"
 
 # Oefeningen: Unit Testing en Mocking
 
-:::note Code-afspraken voor alle oefeningen
-- Geen top-level statements
-- Altijd accolades `{}` bij `if`, `for`, `while`, ook als er maar één regel in staat
-- Maximaal één `return` per methode
-- Geen `break` of `continue`
-- Geen underscore-prefix op parameters
-- Geen geneste klassen
-- Geen ternary (`? :`), geen null-conditional (`?.`), geen null-coalescing (`??`)
-- Geen tuples
-- Gebruik `double` in plaats van `decimal`
-- Identifiers in het Engels, tekst in het Nederlands
-:::
-
 ---
 
 ## Oefening 1: DiscountCalculator
@@ -26,19 +13,37 @@ sidebar_label: "Oefeningen"
 
 **Moeilijkheidsgraad:** laag
 
-### Opgave
+### De klasse
 
-Maak een klasse `DiscountCalculator` in de namespace `ShopWave` met de volgende methode:
+Maak een nieuw testproject aan en voeg onderstaande klasse toe. Jij schrijft de tests, niet de implementatie.
 
+```csharp
+namespace ShopWave
+{
+    public class DiscountCalculator
+    {
+        public double ApplyDiscount(double originalPrice, int discountPercent)
+        {
+            double result;
+
+            if (discountPercent < 0 || discountPercent > 100)
+            {
+                throw new ArgumentException(
+                    "Kortingspercentage moet tussen 0 en 100 liggen.",
+                    nameof(discountPercent));
+            }
+
+            result = originalPrice * (1 - discountPercent / 100.0);
+
+            return result;
+        }
+    }
+}
 ```
-double ApplyDiscount(double originalPrice, int discountPercent)
-```
 
-De methode berekent de prijs na korting. Als `discountPercent` kleiner is dan 0 of groter dan 100, gooit de methode een `ArgumentException`.
+### Opdracht
 
-### Stap 1: schrijf eerst de tests
-
-Schrijf minstens zes tests in een testklasse `DiscountCalculatorTests`. Gebruik ZOMBIES als houvast:
+Schrijf minstens zes tests in een klasse `DiscountCalculatorTests`. Gebruik ZOMBIES als houvast:
 
 | Geval | Wat test je? |
 |-------|-------------|
@@ -49,22 +54,12 @@ Schrijf minstens zes tests in een testklasse `DiscountCalculatorTests`. Gebruik 
 | Exception | kortingspercentage is 101 |
 | Many | meerdere combinaties via `[Theory]` en `[InlineData]` |
 
-### Stap 2: schrijf de implementatie
-
-Schrijf daarna de klasse `DiscountCalculator` zodat alle tests slagen.
-
-:::tip Verwacht resultaat
-Als je 10% korting geeft op een prijs van 80 euro, is het resultaat 72 euro. Als je 100% korting geeft, is het resultaat 0.
+:::tip
+Als je 25% korting geeft op een prijs van 80 euro, verwacht je 60 euro terug. Als je 100% korting geeft, verwacht je 0.
 :::
 
-:::warning Controleer dit
-Een `ArgumentException` gooit je zo:
-
-```csharp
-throw new ArgumentException("Foutmelding.", nameof(discountPercent));
-```
-
-Test of de exception ook echt gegooid wordt:
+:::warning Exception testen
+Test of een exception echt gegooid wordt zo:
 
 ```csharp
 Action act = () => calculator.ApplyDiscount(100.0, -1);
@@ -76,37 +71,65 @@ act.Should().Throw<ArgumentException>();
 
 ## Oefening 2: OrderService zonder stock
 
-**Leerdoel:** je maakt een klasse testbaar via Dependency Injection en schrijft een mock met Moq.
+**Leerdoel:** je schrijft tests voor een klasse die een interface gebruikt als afhankelijkheid, en je maakt een mock aan met Moq.
 
 **Moeilijkheidsgraad:** gemiddeld
 
-### Opgave
+### De klassen
 
-ShopWave verwerkt bestellingen via een betaalgateway. Maak de volgende interface en klasse:
-
-**Interface `IPaymentGateway`:**
-
-```
-bool ProcessPayment(double amount)
-```
-
-**Klasse `OrderService`:**
-
-```
-string PlaceOrder(double amount)
+```csharp
+namespace ShopWave
+{
+    public interface IPaymentGateway
+    {
+        bool ProcessPayment(double amount);
+    }
+}
 ```
 
-De methode:
-- gooit een `ArgumentException` als `amount` kleiner is dan of gelijk aan 0
-- roept `ProcessPayment` aan op de betaalgateway
-- geeft `"Bestelling bevestigd"` terug als de betaling geslaagd is
-- geeft `"Betaling mislukt"` terug als de betaling mislukt is
+```csharp
+namespace ShopWave
+{
+    public class OrderService
+    {
+        private readonly IPaymentGateway _gateway;
 
-`OrderService` mag `IPaymentGateway` **niet** zelf aanmaken. De gateway wordt meegegeven via de constructor.
+        public OrderService(IPaymentGateway gateway)
+        {
+            _gateway = gateway;
+        }
 
-### Tests
+        public string PlaceOrder(double amount)
+        {
+            string result;
 
-Schrijf tests voor alle drie de scenario's: ongeldig bedrag, betaling geslaagd en betaling mislukt. Gebruik `Mock<IPaymentGateway>` en `Setup(...).Returns(...)`.
+            if (amount <= 0)
+            {
+                throw new ArgumentException(
+                    "Bedrag moet groter zijn dan nul.",
+                    nameof(amount));
+            }
+
+            bool success = _gateway.ProcessPayment(amount);
+
+            if (success)
+            {
+                result = "Bestelling bevestigd";
+            }
+            else
+            {
+                result = "Betaling mislukt";
+            }
+
+            return result;
+        }
+    }
+}
+```
+
+### Opdracht
+
+Schrijf tests voor alle drie de scenario's: ongeldig bedrag, betaling geslaagd en betaling mislukt.
 
 :::tip Structuur van een test met Moq
 ```csharp
@@ -124,74 +147,131 @@ OrderService service = new OrderService(mockGateway.Object);
 
 **Moeilijkheidsgraad:** gemiddeld
 
-### Opgave
+### De klassen
 
-Voeg een tweede afhankelijkheid toe aan `OrderService`: een `IStockService`.
-
-**Interface `IStockService`:**
-
-```
-bool IsInStock(int productId, int quantity)
-```
-
-Pas de signatuur van `PlaceOrder` aan:
-
-```
-string PlaceOrder(int productId, int quantity, double amount)
+```csharp
+namespace ShopWave
+{
+    public interface IStockService
+    {
+        bool IsInStock(int productId, int quantity);
+    }
+}
 ```
 
-De aangepaste logica:
-- als `amount` kleiner is dan of gelijk aan 0: gooi een `ArgumentException`, controleer de voorraad **niet**
-- als het product niet op voorraad is: geef `"Product niet beschikbaar"` terug, roep de gateway **niet** aan
-- als het product op voorraad is en de betaling geslaagd is: geef `"Bestelling bevestigd"` terug
-- als het product op voorraad is en de betaling mislukt is: geef `"Betaling mislukt"` terug
+```csharp
+namespace ShopWave
+{
+    public class OrderService
+    {
+        private readonly IPaymentGateway _gateway;
+        private readonly IStockService _stockService;
 
-### Tests
+        public OrderService(IPaymentGateway gateway, IStockService stockService)
+        {
+            _gateway = gateway;
+            _stockService = stockService;
+        }
+
+        public string PlaceOrder(int productId, int quantity, double amount)
+        {
+            string result;
+
+            if (amount <= 0)
+            {
+                throw new ArgumentException(
+                    "Bedrag moet groter zijn dan nul.",
+                    nameof(amount));
+            }
+
+            bool inStock = _stockService.IsInStock(productId, quantity);
+
+            if (!inStock)
+            {
+                result = "Product niet beschikbaar";
+            }
+            else
+            {
+                bool success = _gateway.ProcessPayment(amount);
+
+                if (success)
+                {
+                    result = "Bestelling bevestigd";
+                }
+                else
+                {
+                    result = "Betaling mislukt";
+                }
+            }
+
+            return result;
+        }
+    }
+}
+```
+
+### Opdracht
 
 Schrijf minstens vier tests. Voeg bij twee tests ook een `Verify`-controle toe:
 
 1. Als het product niet op voorraad is, mag `ProcessPayment` **nooit** aangeroepen worden.
 2. Als het bedrag ongeldig is, mag `IsInStock` **nooit** aangeroepen worden.
 
-:::warning Let op
-Als je `Times.Never` wil gebruiken, mag je geen `Setup` vergeten die het gedrag van de mock instelt. Anders geeft Moq een onverwachte aanroep-fout.
-
-Controleer ook: als het product op voorraad is en de betaling slaagt, moet `ProcessPayment` **precies eenmaal** aangeroepen zijn.
+:::tip
+Gebruik `Times.Never` om te controleren dat een methode niet aangeroepen werd:
+```csharp
+mockGateway.Verify(g => g.ProcessPayment(It.IsAny<double>()), Times.Never);
+```
 :::
 
 ---
 
 ## Oefening 4: CheckoutService
 
-**Leerdoel:** je combineert meerdere klassen en mocks in een realistische berekening.
+**Leerdoel:** je test een klasse die meerdere afhankelijkheden combineert.
 
 **Moeilijkheidsgraad:** hoog
 
-### Opgave
+### De klassen
 
-Maak een klasse `CheckoutService` die het eindbedrag berekent inclusief verzendkosten.
-
-**Interface `IShippingService`:**
-
-```
-double GetShippingCost(double totalAfterDiscount)
-```
-
-**Klasse `CheckoutService`:**
-
-```
-double CalculateFinalTotal(double unitPrice, int quantity, int discountPercent)
+```csharp
+namespace ShopWave
+{
+    public interface IShippingService
+    {
+        double GetShippingCost(double totalAfterDiscount);
+    }
+}
 ```
 
-De methode:
-1. berekent het subtotaal: `unitPrice * quantity`
-2. past de korting toe via `DiscountCalculator`
-3. haalt de verzendkost op via `IShippingService`
-4. telt het resultaat van stap 2 en stap 3 bij elkaar op
+```csharp
+namespace ShopWave
+{
+    public class CheckoutService
+    {
+        private readonly IShippingService _shippingService;
+        private readonly DiscountCalculator _discountCalculator;
 
-`CheckoutService` ontvangt `IShippingService` via de constructor. `DiscountCalculator` mag je intern aanmaken (die heeft geen externe afhankelijkheid).
+        public CheckoutService(IShippingService shippingService)
+        {
+            _shippingService = shippingService;
+            _discountCalculator = new DiscountCalculator();
+        }
 
-### Tests
+        public double CalculateFinalTotal(double unitPrice, int quantity, int discountPercent)
+        {
+            double subtotal = unitPrice * quantity;
+            double afterDiscount = _discountCalculator.ApplyDiscount(subtotal, discountPercent);
+            double shippingCost = _shippingService.GetShippingCost(afterDiscount);
+            double finalTotal = afterDiscount + shippingCost;
+
+            return finalTotal;
+        }
+    }
+}
+```
+
+### Opdracht
 
 Schrijf minstens twee tests:
 
@@ -199,7 +279,7 @@ Schrijf minstens twee tests:
 2. Controleer via `Verify` dat `GetShippingCost` precies eenmaal aangeroepen wordt.
 
 :::tip Voorbeeld om te controleren
-Drie producten aan 10 euro per stuk, 0% korting, verzendkost 5 euro. Verwacht resultaat: 35 euro.
+Drie producten aan 10 euro per stuk, 0% korting, verzendkost 5 euro. Verwacht eindbedrag: 35 euro.
 :::
 
 ---
