@@ -1,211 +1,277 @@
 ---
-title: "Les 5: Integration Testing — Oefeningen"
+title: "Les 5: Oefeningen - Integration Testing"
 sidebar_label: "Oefeningen"
 ---
 
-# Les 5: Integration Testing — Oefeningen
+# Oefeningen: Integration Testing
 
-> **Code-afspraken:** geen top-level statements · altijd `{}` · max één `return` · geen `break`/`continue` · geen underscore-prefix op parameters · geen geneste klassen · geen ternary/null-conditional · geen tuples · `double` i.p.v. `decimal` · identifiers Engels · tekst Nederlands
+Werk de oefeningen in volgorde. Gebruik bij elke oefening echte klassen voor eigen code. Mock alleen externe diensten zoals betaalgateways.
 
 ---
 
-## Oefening 1 — Volledige loginflow als integration test
+## Oefening 1: CheckoutService integreren
 
-**Opgave:** Test de volledige loginflow met **echte klassen** (geen mocks voor eigen code). Gebruik de `onCodeGenerated`-callback als methodereferentie om de 2FA-code op te vangen.
+**Leerdoel:** je schrijft een integration test waarbij meerdere eigen klassen samenwerken zonder mocks voor eigen code.
+
+**Moeilijkheidsgraad:** basis
+
+### Startcode
+
+Voeg deze klasse toe aan `ShopWave`. Je hoeft hem niet aan te passen.
 
 ```csharp
-// LoginFlowIntegrationTests.cs
-using FluentAssertions;
-using ShopWave.Security;
-
-namespace ShopWave.Tests
+namespace ShopWave
 {
-    public class LoginFlowIntegrationTests
+    public class CheckoutService
     {
-        private string capturedCode = string.Empty;
+        private readonly CartService     _cartService;
+        private readonly IPaymentGateway _gateway;
 
-        private void OnCodeGenerated(string email, string code)
+        public CheckoutService(CartService cartService, IPaymentGateway gateway)
         {
-            this.capturedCode = code;
+            _cartService = cartService;
+            _gateway     = gateway;
         }
 
-        [Fact]
-        public void Login_CorrectPassword_ThenVerifyCode_ReturnsGeslaagd()
+        public string Checkout()
         {
-            // Arrange
-            TwoFactorService twoFactorService = new TwoFactorService(
-                validitySeconds: 60,
-                onCodeGenerated: this.OnCodeGenerated);
+            double amount = _cartService.Total;
+            string result;
 
-            AccountRepository repository = new AccountRepository(twoFactorService);
-            repository.Register("alice@shopwave.be", "wachtwoord123");
+            if (amount <= 0)
+            {
+                result = "Mandje is leeg";
+            }
+            else
+            {
+                bool success = _gateway.ProcessPayment(amount);
+                result = success ? "Betaling geslaagd" : "Betaling mislukt";
+            }
 
-            // Act
-            string loginResult  = repository.Login("alice@shopwave.be", "wachtwoord123");
-            string verifyResult = repository.VerifyTwoFactor("alice@shopwave.be", this.capturedCode);
-
-            // Assert
-            loginResult.Should().Be("2FA vereist.");
-            verifyResult.Should().Be("Inloggen geslaagd.");
-        }
-
-        [Fact]
-        public void Login_SameCodeUsedTwice_SecondVerifyFails()
-        {
-            // Arrange
-            TwoFactorService twoFactorService = new TwoFactorService(
-                validitySeconds: 60,
-                onCodeGenerated: this.OnCodeGenerated);
-
-            AccountRepository repository = new AccountRepository(twoFactorService);
-            repository.Register("alice@shopwave.be", "wachtwoord123");
-            repository.Login("alice@shopwave.be", "wachtwoord123");
-
-            // Act
-            string firstVerify  = repository.VerifyTwoFactor("alice@shopwave.be", this.capturedCode);
-            string secondVerify = repository.VerifyTwoFactor("alice@shopwave.be", this.capturedCode);
-
-            // Assert
-            firstVerify.Should().Be("Inloggen geslaagd.");
-            secondVerify.Should().NotBe("Inloggen geslaagd.");
-        }
-
-        [Fact]
-        public void Login_ThreeWrongPasswords_BlocksAccount()
-        {
-            // Arrange
-            TwoFactorService  twoFactorService = new TwoFactorService();
-            AccountRepository repository       = new AccountRepository(twoFactorService);
-            repository.Register("alice@shopwave.be", "wachtwoord123");
-
-            // Act
-            repository.Login("alice@shopwave.be", "fout1");
-            repository.Login("alice@shopwave.be", "fout2");
-            string thirdResult  = repository.Login("alice@shopwave.be", "fout3");
-            string afterLockout = repository.Login("alice@shopwave.be", "wachtwoord123");
-
-            // Assert
-            thirdResult.Should().Be("Account geblokkeerd.");
-            afterLockout.Should().Be("Account geblokkeerd.");
+            return result;
         }
     }
 }
 ```
 
----
+Je hebt ook de `CartService` en `CouponService` uit les 3 nodig. Gebruik de versie met `ICouponService`-constructor.
 
-## Oefening 2 — Verlopen 2FA-code
+<h3 class="opdracht-titel">Opdracht</h3>
 
-**Opgave:** Integration test die verifieert dat een verlopen 2FA-code de checkout tegenhoudt. Gebruik `validitySeconds: 0` en `Thread.Sleep(10)`.
+Schrijf integration tests voor de volledige checkout-flow. Gebruik echte `CartService`- en `CouponService`-instanties. Mock alleen `IPaymentGateway`.
 
-```csharp
-[Fact]
-public void VerifyTwoFactor_WithExpiredCode_Fails()
-{
-    // Arrange
-    TwoFactorService twoFactorService = new TwoFactorService(
-        validitySeconds: 0,
-        onCodeGenerated: this.OnCodeGenerated);
+Test minstens de volgende scenario's:
 
-    AccountRepository repository = new AccountRepository(twoFactorService);
-    repository.Register("alice@shopwave.be", "wachtwoord123");
-    repository.Login("alice@shopwave.be", "wachtwoord123");
+| Scenario | Verwacht resultaat |
+|---------|-------------------|
+| Mandje met één artikel, betaling geslaagd | "Betaling geslaagd" |
+| Leeg mandje | "Mandje is leeg" |
+| Artikel toevoegen met geldige coupon, controleer het juiste bedrag naar de gateway | bedrag na korting |
+| Betaling mislukt | "Betaling mislukt" |
 
-    System.Threading.Thread.Sleep(10);
-
-    // Act
-    string result = repository.VerifyTwoFactor("alice@shopwave.be", this.capturedCode);
-
-    // Assert
-    result.Should().NotBe("Inloggen geslaagd.");
-}
-```
+**Controleer bij het couponscenario** via `mockGateway.Verify(...)` of het exacte bedrag na korting naar de gateway gestuurd wordt.
 
 ---
 
-## Oefening 3 — Handtekeningintegriteit na manipulatie
+## Oefening 2: DiscountCalculator integreren
 
-**Opgave:** Integration test: handtekening geldig op originele orderdata, ongeldig na prijsmanipulatie. Voeg CIA-commentaar toe bij elke assert.
+**Leerdoel:** je test de samenwerking tussen `CartService` en een berekeningsklasse zonder mock.
+
+**Moeilijkheidsgraad:** basis
+
+### Startcode
+
+Voeg deze klasse toe aan `ShopWave`:
 
 ```csharp
-// OrderIntegrityIntegrationTests.cs
-using FluentAssertions;
-using ShopWave.Security;
-
-namespace ShopWave.Tests
+namespace ShopWave
 {
-    public class OrderIntegrityIntegrationTests
+    public class DiscountCalculator
     {
-        [Fact]
-        public void CreateSignedOrder_AfterManipulation_SignatureIsInvalid()
+        public double Apply(double amount, int discountPercent)
         {
-            // Arrange — CIA: Integrity — handtekening beschermt orderdata
-            SecureOrderService service = new SecureOrderService();
+            if (discountPercent < 0 || discountPercent > 100)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(discountPercent),
+                    "Kortingspercentage moet tussen 0 en 100 liggen.");
+            }
 
-            // Act
-            OrderResult order = service.CreateSignedOrder(
-                "alice@shopwave.be", "Laptop", 999.99);
-
-            // Assert — originele data is geldig
-            bool originalValid = service.ValidateOrder(order.OrderData, order.Signature);
-            originalValid.Should().BeTrue(
-                "de handtekening van de originele orderdata moet geldig zijn");
-
-            // Simuleer prijsmanipulatie door een aanvaller
-            string manipulatedData = order.OrderData.Replace("999.99", "1.00");
-
-            // Assert — gemanipuleerde data is ongeldig (CIA: Integrity)
-            bool manipulatedValid = service.ValidateOrder(manipulatedData, order.Signature);
-            manipulatedValid.Should().BeFalse(
-                "een aangetaste handtekening moet gedetecteerd worden");
+            return amount * (1 - discountPercent / 100.0);
         }
     }
 }
 ```
 
----
-
-## Oefening 5 — Meerdere accounts tegelijk
-
-**Opgave:** Integration test voor twee accounts door de volledige flow. Verifieer dat de handtekeningen van Alice en Bob niet uitwisselbaar zijn.
+Pas `CartService` aan zodat die `DiscountCalculator` gebruikt in de `Total`-berekening als er een coupon is toegepast:
 
 ```csharp
-[Fact]
-public void TwoAccounts_SignaturesAreNotInterchangeable()
+// Constructor uitbreiden
+public CartService(ICouponService couponService, DiscountCalculator discountCalculator)
 {
-    // Arrange
-    string aliceCode = string.Empty;
-    string bobCode   = string.Empty;
+    _items              = new Dictionary<string, CartItem>();
+    _couponService      = couponService;
+    _discountCalculator = discountCalculator;
+    _couponDiscount     = 0;
+}
 
-    TwoFactorService aliceTfs = new TwoFactorService(
-        validitySeconds: 60,
-        onCodeGenerated: (email, code) => { aliceCode = code; });
+// Total aanpassen
+public double Total
+{
+    get
+    {
+        double subtotal = 0;
 
-    TwoFactorService bobTfs = new TwoFactorService(
-        validitySeconds: 60,
-        onCodeGenerated: (email, code) => { bobCode = code; });
+        foreach (CartItem item in _items.Values)
+        {
+            subtotal += item.Price * item.Quantity;
+        }
 
-    AccountRepository aliceRepo = new AccountRepository(aliceTfs);
-    AccountRepository bobRepo   = new AccountRepository(bobTfs);
-
-    aliceRepo.Register("alice@shopwave.be", "alicePw");
-    bobRepo.Register("bob@shopwave.be", "bobPw");
-
-    aliceRepo.Login("alice@shopwave.be", "alicePw");
-    bobRepo.Login("bob@shopwave.be", "bobPw");
-
-    aliceRepo.VerifyTwoFactor("alice@shopwave.be", aliceCode);
-    bobRepo.VerifyTwoFactor("bob@shopwave.be", bobCode);
-
-    SecureOrderService service = new SecureOrderService();
-
-    // Act
-    OrderResult aliceOrder = service.CreateSignedOrder("alice@shopwave.be", "Laptop", 999.99);
-    OrderResult bobOrder   = service.CreateSignedOrder("bob@shopwave.be",   "Tablet",  499.99);
-
-    // Assert — handtekening van Alice is ongeldig voor de orderdata van Bob
-    bool aliceSigOnBobData = service.ValidateOrder(bobOrder.OrderData, aliceOrder.Signature);
-    aliceSigOnBobData.Should().BeFalse(
-        "handtekeningen zijn niet uitwisselbaar tussen accounts");
+        return _couponDiscount > 0
+            ? _discountCalculator.Apply(subtotal, _couponDiscount)
+            : subtotal;
+    }
 }
 ```
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+Schrijf integration tests waarbij `CartService`, `CouponService` en `DiscountCalculator` alle drie echt zijn. Mock niets van eigen code.
+
+Test minstens:
+
+| Scenario | Verwacht resultaat |
+|---------|-------------------|
+| Artikel 100.00, coupon ZOMER10 (10%), DiscountCalculator toegepast | 90.00 |
+| Artikel 100.00, ongeldige coupon | 100.00 |
+| Artikel 50.00, coupon WELKOM20 (20%) | 40.00 |
+| Twee artikelen totaal 200.00, coupon TROUWE5 (5%) | 190.00 |
+
+**Wat je controleert:** het eindtotaal is correct na de volledige keten van `CartService.ApplyCoupon` via `CouponService` via `DiscountCalculator.Apply`.
+
+---
+
+## Oefening 3: de volledige bestelflow
+
+**Leerdoel:** je test een end-to-end scenario door alle eigen klassen samen te laten werken.
+
+**Moeilijkheidsgraad:** gemiddeld
+
+### Startcode
+
+Je hebt de volgende klassen nodig uit les 1, les 3 en oefening 2:
+- `CartService` (met `ICouponService` en `DiscountCalculator`)
+- `CouponService` (implementeert `ICouponService`)
+- `DiscountCalculator`
+- `OrderService` (met `IPaymentGateway`, `IStockService`, `ICouponService`)
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+Schrijf integration tests voor de volledige flow: een klant vult een mandje, past een coupon toe en plaatst een bestelling via `OrderService`.
+
+De flow:
+1. Maak een `CartService` aan met een echte `CouponService` en `DiscountCalculator`
+2. Voeg artikelen toe aan het mandje
+3. Pas een coupon toe via `CartService.ApplyCoupon`
+4. Haal het totaal op via `CartService.Total`
+5. Roep `OrderService.PlaceOrder` aan met dat totaal
+
+Test minstens:
+
+| Scenario | Verwacht resultaat |
+|---------|-------------------|
+| Geldige coupon ZOMER10 (10%), basisprijs 100.00, betaling geslaagd | "Bestelling bevestigd", gateway ontvangt 90.00 |
+| Ongeldige coupon, basisprijs 100.00, betaling geslaagd | "Bestelling bevestigd", gateway ontvangt 100.00 |
+| Geen coupon, meerdere artikelen, betaling geslaagd | "Bestelling bevestigd", gateway ontvangt correct totaal |
+| Product niet op voorraad | "Product niet beschikbaar" |
+
+**Controleer via `Verify`** welk bedrag precies naar `ProcessPayment` gaat.
+
+---
+
+## Oefening 4: de callback-techniek
+
+**Leerdoel:** je past de callback-techniek toe om een gegenereerde waarde op te vangen in een integration test.
+
+**Moeilijkheidsgraad:** uitdaging
+
+### Startcode
+
+Voeg deze klasse toe aan `ShopWave`:
+
+```csharp
+namespace ShopWave
+{
+    public class OrderConfirmationService
+    {
+        private readonly Action<string> _onConfirmationCodeGenerated;
+
+        public OrderConfirmationService()
+        {
+            _onConfirmationCodeGenerated = null;
+        }
+
+        public OrderConfirmationService(Action<string> onConfirmationCodeGenerated)
+        {
+            _onConfirmationCodeGenerated = onConfirmationCodeGenerated;
+        }
+
+        public string GenerateConfirmationCode(int orderId)
+        {
+            string code = $"ORD-{orderId:D6}-{Guid.NewGuid().ToString("N")[..4].ToUpper()}";
+
+            if (_onConfirmationCodeGenerated != null)
+            {
+                _onConfirmationCodeGenerated(code);
+            }
+
+            return code;
+        }
+
+        public bool ValidateCode(string code)
+        {
+            return code != null && code.StartsWith("ORD-") && code.Length >= 12;
+        }
+    }
+}
+```
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+Schrijf integration tests die de samenwerking tussen `OrderConfirmationService` en zijn consumers testen. Gebruik de callback-techniek om de gegenereerde code op te vangen.
+
+Test minstens:
+
+| Scenario | Wat je verifieert |
+|---------|------------------|
+| Code genereren voor orderId 1 | code start met "ORD-", heeft het juiste formaat |
+| Callback ontvangt exact dezelfde waarde als de returnwaarde | capturedCode == result |
+| Gegenereerde code doorsturen naar `ValidateCode` | `ValidateCode` geeft true terug |
+| Twee opeenvolgende codes zijn uniek | code1 != code2 |
+
+**Verwachte structuur:**
+
+```csharp
+string capturedCode = string.Empty;
+
+OrderConfirmationService service = new OrderConfirmationService(
+    onConfirmationCodeGenerated: code => { capturedCode = code; });
+
+string result = service.GenerateConfirmationCode(1);
+
+// Gebruik capturedCode en result in je assertions
+```
+
+---
+
+## Oefening 5: Reflectie
+
+Beantwoord deze vragen voor jezelf voor je de oplossingen bekijkt.
+
+1. In oefening 2 gebruik je drie echte klassen. Je hebt voor elk van die klassen ook unit tests geschreven in les 1 en les 3. Wat testen de integration tests in oefening 2 dat de unit tests niet testen?
+
+2. Wanneer is het correct om een klasse te mocken in een integration test? Geef twee concrete voorbeelden uit de oefeningen.
+
+3. In oefening 4 gebruik je een callback om de bevestigingscode op te vangen. Waarom is dit beter dan een publieke property `ConfirmationCode` toevoegen aan de klasse?
+
+4. Je schrijft een integration test en hij faalt. De unit tests voor alle betrokken klassen slagen. Wat zijn mogelijke oorzaken van de fout?
