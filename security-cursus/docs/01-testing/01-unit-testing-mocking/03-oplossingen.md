@@ -5,9 +5,7 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Unit Testing en Mocking
 
-:::warning Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt
-De waarde van oefeningen zit in het zelf denken, niet in het kopiëren. Lees de toelichting ook als je het juist had: er staat uitleg bij over veelgemaakte fouten en alternatieve aanpakken.
-:::
+**Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** De waarde van oefeningen zit in het zelf denken, niet in het kopiëren. Lees de toelichting ook als je het juist had: er staat uitleg bij over veelgemaakte fouten en alternatieve aanpakken.
 
 ---
 
@@ -112,9 +110,7 @@ De formule `originalPrice * (1 - discountPercent / 100.0)` werkt correct omdat `
 
 De `[Theory]` met `[InlineData]` vervangt vijf afzonderlijke `[Fact]`-methoden. Elke rij is een apart testgeval in de Test Explorer.
 
-:::note Veelgemaakte fout
-Sommige studenten schrijven de validatie als `discountPercent < 0 || discountPercent > 100` maar vergeten dat 0 en 100 geldige waarden zijn. Test altijd de grenzen expliciet: 0 moet slagen, -1 moet falen, 100 moet slagen, 101 moet falen.
-:::
+**Veelgemaakte fout:** sommige studenten schrijven de validatie als `discountPercent < 0 || discountPercent > 100` maar vergeten dat 0 en 100 geldige waarden zijn. Test altijd de grenzen expliciet: 0 moet slagen, -1 moet falen, 100 moet slagen, 101 moet falen.
 
 ---
 
@@ -227,9 +223,7 @@ namespace ShopWave.Tests
 
 `mockGateway.Object` geeft de daadwerkelijke mock-instantie terug. Vergeet `.Object` niet: als je `mockGateway` zelf meegeeft, krijg je een type-fout, want dat is een `Mock<IPaymentGateway>`, niet een `IPaymentGateway`.
 
-:::note Veelgemaakte fout
-Sommige studenten maken `IPaymentGateway` niet als interface maar als abstracte klasse. Moq kan wel met abstracte klassen werken, maar een interface is de juiste aanpak voor Dependency Injection: het legt vast wat een klasse kan, zonder enige implementatiedetails.
-:::
+**Veelgemaakte fout:** sommige studenten maken `IPaymentGateway` niet als interface maar als abstracte klasse. Moq kan wel met abstracte klassen werken, maar een interface is de juiste aanpak voor Dependency Injection: het legt vast wat een klasse kan, zonder enige implementatiedetails.
 
 ---
 
@@ -372,9 +366,7 @@ namespace ShopWave.Tests
 
 De test `WhenNotInStock_NeverCallsProcessPayment` controleert iets wat je niet ziet in het resultaat. Het resultaat `"Product niet beschikbaar"` zegt niets over of de gateway al dan niet aangeroepen werd. Stel dat een student de code zo schrijft dat de gateway toch aangeroepen wordt maar het resultaat genegeerd wordt. Het resultaat is dan correct, maar er is een onnodige en dure netwerkoproep. `Verify` met `Times.Never` vangt precies dat soort fouten op.
 
-:::note Alternatieve aanpak
-Je kan `It.IsAny<int>()` vervangen door de exacte waarden `1` en `1`. Beide werken. `It.IsAny<int>()` is ruimer: de test slaagt ongeacht welke waarden meegegeven worden. Gebruik `It.IsAny` als de exacte waarde niet relevant is voor het scenario dat je test.
-:::
+**Alternatieve aanpak:** je kan `It.IsAny<int>()` vervangen door de exacte waarden `1` en `1`. Beide werken. `It.IsAny<int>()` is ruimer: de test slaagt ongeacht welke waarden meegegeven worden. Gebruik `It.IsAny` als de exacte waarde niet relevant is voor het scenario dat je test.
 
 ---
 
@@ -463,14 +455,8 @@ namespace ShopWave.Tests
 
 `DiscountCalculator` heeft geen externe afhankelijkheid, dus je hoeft die niet te mocken. Een mock gebruik je alleen als de afhankelijkheid traag is (netwerk, database), niet-deterministisch is (klok, random), of het testgedrag stuurt (returns instellen). `DiscountCalculator` is puur logica, snel en deterministisch.
 
-:::note Reflectievraag 1
-Als je `DiscountCalculator` ook via een interface injecteert, kan je zijn gedrag instellen in tests. Dat is handig als je `CheckoutService` wil testen zonder afhankelijk te zijn van de correcte werking van `DiscountCalculator`. Het nadeel is extra complexiteit. Kies voor een interface zodra een klasse een externe afhankelijkheid krijgt of als je haar gedrag in tests wil sturen.
-:::
+**Reflectievraag 1:** als je `DiscountCalculator` ook via een interface injecteert, kan je zijn gedrag instellen in tests. Dat is handig als je `CheckoutService` wil testen zonder afhankelijk te zijn van de correcte werking van `DiscountCalculator`. Het nadeel is extra complexiteit. Kies voor een interface zodra een klasse een externe afhankelijkheid krijgt of als je haar gedrag in tests wil sturen.
 
-:::note Reflectievraag 2
-De `Verify`-test toont dat `GetShippingCost` precies eenmaal aangeroepen wordt. Zonder die test kan een foutieve implementatie die methode twee keer aanroepen terwijl het resultaat toevallig nog correct is.
-:::
+**Reflectievraag 2:** de `Verify`-test toont dat `GetShippingCost` precies eenmaal aangeroepen wordt. Zonder die test kan een foutieve implementatie die methode twee keer aanroepen terwijl het resultaat toevallig nog correct is.
 
-:::note Reflectievraag 3
-Zonder mock zou `GetShippingCost` een echte netwerkoproep doen. De test wordt traag, kan falen bij een storing bij de externe API en is niet meer herhaalbaar op elke machine.
-:::
+**Reflectievraag 3:** zonder mock zou `GetShippingCost` een echte netwerkoproep doen. De test wordt traag, kan falen bij een storing bij de externe API en is niet meer herhaalbaar op elke machine.
