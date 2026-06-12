@@ -7,9 +7,7 @@ sidebar_label: "Overzicht"
 
 In deze cursus bouw je stap voor stap een volledige test-suite voor **ShopWave**, een fictieve webshop. Klanten kunnen er producten bekijken, bestellen en betalen. Elke les voeg je een nieuw stukje toe of test je een bestaand onderdeel grondiger.
 
-:::note Waarom beginnen we met testen?
 Een bug die je vindt terwijl je aan het programmeren bent, kost je vijf minuten. Dezelfde bug die een klant vindt nadat de applicatie live staat, kost uren aan herstelwerk, reputatieschade en soms geld. Automatische tests zijn je eerste verdedigingslinie.
-:::
 
 ## Leerdoelen
 
@@ -24,11 +22,10 @@ Na deze les kan je:
 
 ## Wat heb je nodig?
 
-:::warning Installeer dit voor je begint
+**Installeer dit voor je begint:**
 - Visual Studio 2022 (Community of hoger)
 - .NET 8 SDK
 - NuGet-pakketten in het testproject: `xunit`, `Moq`, `FluentAssertions`
-:::
 
 De NuGet-pakketten installeer je via **Tools > NuGet Package Manager > Manage NuGet Packages for Solution**.
 
@@ -40,6 +37,4 @@ De NuGet-pakketten installeer je via **Tools > NuGet Package Manager > Manage Nu
 | [Oefeningen](oefeningen) | Zelf aan de slag met ShopWave |
 | [Oplossingen](oplossingen) | Volledige uitwerking met toelichting |
 
-:::tip Werkwijze
-Lees eerst de theorie door. Werk daarna de oefeningen zonder naar de oplossingen te kijken. Controleer achteraf je werk en lees de toelichting, ook als je het juist had.
-:::
+**Werkwijze:** lees eerst de theorie door. Werk daarna de oefeningen zonder naar de oplossingen te kijken. Controleer achteraf je werk en lees de toelichting, ook als je het juist had.
