@@ -1,123 +1,39 @@
 ---
-title: "Les 7: Security — JWT en OAuth2 — Oefeningen"
+title: "Les 7: Oefeningen - JWT en OAuth2"
 sidebar_label: "Oefeningen"
 ---
 
-# Les 7: Security — JWT en OAuth2 — Oefeningen
+# Oefeningen: JWT en OAuth2
 
-> **Code-afspraken:** geen top-level statements · altijd `{}` · max één `return` · geen `break`/`continue` · geen underscore-prefix op parameters · geen geneste klassen · geen ternary/null-conditional · geen tuples · `double` i.p.v. `decimal` · identifiers Engels · tekst Nederlands
+Werk de oefeningen in volgorde. Elke oefening bouwt verder op de vorige. Kijk niet vooraf in de oplossingen.
 
----
-
-## Oefening 1 — JWT decoderen en begrijpen
-
-**Opgave:** Kopieer het token dat de API teruggeeft en plak het op [https://jwt.io](https://jwt.io).
-
-**Antwoorden op de vragen:**
-
-1. **Welke claims staan er in de payload?** `sub` (e-mailadres), `role`, `iss` (shopwave-api), `aud` (shopwave-client), `exp` (vervaltijd als Unix timestamp), `iat` (aanmaaktijd)
-2. **Wat is de vervaltijd in leesbare datum/tijd?** Gebruik jwt.io — de `exp`-waarde wordt automatisch getoond als datum/tijd.
-3. **Waarom toont jwt.io de payload zonder de geheime sleutel?** JWT is Base64url-gecodeerd, niet versleuteld. Iedereen kan de header en payload lezen.
-4. **Waarom stop je geen wachtwoord in een JWT-payload?** Omdat iedereen met het token de payload kan lezen — encryptie is nodig om data echt verborgen te houden.
+Je werkt verder in de bestaande ShopWave-solution. Nieuwe klassen maak je aan in `ShopWave/Security/` of `ShopWave.Api/`.
 
 ---
 
-## Oefening 2 — Admin-rol toevoegen
+<h3 class="opdracht-titel">Opdracht</h3>
 
-**Opgave:** Voeg een admin-account toe. Pas `/verify` aan zodat admins `role = "admin"` krijgen. Voeg een `/admin/orders`-endpoint toe dat enkel toegankelijk is voor admins.
+## Oefening 1: /me endpoint uitbreiden
 
-**Fragment in ShopWave.Api/Program.cs**
+**Leerdoel:** je leest claims uit een JWT-token via de `HttpContext` en begrijpt dat de server de claims zelf levert na validatie.
 
-```csharp
-// Verify-endpoint met rolbepaling
-app.MapPost("/verify", HandleVerify);
+**Moeilijkheidsgraad:** basis
 
-IResult HandleVerify(VerifyRequest request)
-{
-    string verifyResult = accountRepository.VerifyTwoFactor(request.Email, request.Code);
+**Situatie:** een klant van ShopWave wil weten welke informatie de API over hem opgeslagen heeft in zijn token. Je voegt een `/me`-endpoint toe dat de claims uit het token van de ingelogde gebruiker teruggeeft.
 
-    if (verifyResult != "Inloggen geslaagd.")
-    {
-        return Results.Unauthorized();
-    }
+**Wat je doet:**
 
-    string role  = DetermineRole(request.Email);
-    string token = jwtTokenService.GenerateToken(request.Email, role);
+Voeg in `ShopWave.Api/Program.cs` een `/me`-endpoint toe dat enkel toegankelijk is voor geauthenticeerde gebruikers. Het endpoint leest het e-mailadres en de rol uit het token en geeft die terug als JSON.
 
-    return Results.Ok(new { token = token });
-}
+**Vereisten:**
 
-string DetermineRole(string email)
-{
-    string role;
+- Gebruik `context.User.FindFirst(...)` om claims op te halen. Je hebt `HttpContext context` nodig als parameter.
+- Gebruik `JwtRegisteredClaimNames.Sub` voor het e-mailadres en `ClaimTypes.Role` voor de rol.
+- Als een claim ontbreekt, geef dan een lege string terug.
+- Het endpoint vereist een geldig token via `.RequireAuthorization()`.
+- Gebruik geen `?.Value` (null-conditional). Gebruik `if`-blokken.
 
-    if (email == "admin@shopwave.be")
-    {
-        role = "admin";
-    }
-    else
-    {
-        role = "user";
-    }
-
-    return role;
-}
-
-// Admin-endpoint
-app.MapGet("/admin/orders", HandleAdminOrders)
-   .RequireAuthorization(policy => policy.RequireRole("admin"));
-
-IResult HandleAdminOrders()
-{
-    return Results.Ok(new { bericht = "Alle bestellingen — enkel voor admins" });
-}
-```
-
-**Test vanuit console:**
-- Alice (rol user) roept `/admin/orders` aan → `403 Forbidden`
-- Admin roept `/admin/orders` aan → `200 OK`
-
----
-
-## Oefening 3 — Vervaltijd testen
-
-**Opgave:** Maak een `JwtTokenService` met `expiresMinutes: 0`, genereer een token, wacht 2 seconden, stuur een request → verwacht `401 Unauthorized`.
-
-```csharp
-// In ShopWave/Program.cs
-private static void DemoVervalToken()
-{
-    JwtTokenService kortLevend = new JwtTokenService(
-        "ShopWaveGeheimeSleutel2024!!XYZ#",
-        "shopwave-api",
-        "shopwave-client",
-        expiresMinutes: 0);
-
-    string kortToken = kortLevend.GenerateToken("alice@shopwave.be", "user");
-
-    System.Threading.Thread.Sleep(2000);
-
-    HttpClient client = new HttpClient();
-    client.DefaultRequestHeaders.Authorization =
-        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", kortToken);
-
-    HttpResponseMessage response =
-        client.GetAsync("https://localhost:5001/orders/alice@shopwave.be").Result;
-
-    Console.WriteLine($"Verlopen token statuscode: {response.StatusCode}");
-    // Verwacht: Unauthorized
-
-    client.Dispose();
-}
-```
-
-**Antwoord:** Een korte vervaltijd is een veiligheidsmaatregel omdat een gestolen token snel onbruikbaar wordt. Bij een gestolen token van 15 minuten heeft de aanvaller maar 15 minuten toegang; bij een token zonder vervaldatum is toegang permanent.
-
----
-
-## Oefening 4 — /me endpoint
-
-**Opgave:** Voeg een `/me`-endpoint toe dat de claims uit het token uitleest.
+**Startcode:**
 
 ```csharp
 app.MapGet("/me", HandleMe).RequireAuthorization();
@@ -127,32 +43,297 @@ IResult HandleMe(HttpContext context)
     string email = string.Empty;
     string role  = string.Empty;
 
-    System.Security.Claims.Claim emailClaim = context.User.FindFirst(
-        System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+    // jouw code hier: haal de "sub"-claim op voor het e-mailadres
+    // jouw code hier: haal de rol-claim op
 
-    System.Security.Claims.Claim roleClaim = context.User.FindFirst(
-        System.Security.Claims.ClaimTypes.Role);
-
-    if (emailClaim != null)
-    {
-        email = emailClaim.Value;
-    }
-
-    if (roleClaim != null)
-    {
-        role = roleClaim.Value;
-    }
-
-    return Results.Ok(new { Email = email, Rol = role });
+    return Results.Ok(new { Email = email, Role = role });
 }
+```
+
+**Controleer je werk:** start de API en roep `/me` aan vanuit de console met een geldig token:
+
+```csharp
+client.DefaultRequestHeaders.Authorization =
+    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+HttpResponseMessage meResponse = client.GetAsync("/me").Result;
+Console.WriteLine(meResponse.Content.ReadAsStringAsync().Result);
+```
+
+Verwacht resultaat:
+
+```json
+{"email":"alice@shopwave.be","role":"user"}
+```
+
+Roep daarna `/me` aan zonder token. Verwacht: `401 Unauthorized`.
+
+---
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+## Oefening 2: Admin-rol en rolgebaseerde toegang
+
+**Leerdoel:** je implementeert rolgebaseerde autorisatie en begrijpt het verschil tussen `401 Unauthorized` en `403 Forbidden`.
+
+**Moeilijkheidsgraad:** gemiddeld
+
+**Situatie:** ShopWave heeft medewerkers die alle bestellingen moeten kunnen inzien. Klanten mogen enkel hun eigen bestellingen zien. Je voegt een `/admin/orders`-endpoint toe dat enkel toegankelijk is voor admins.
+
+**Wat je doet:**
+
+Breid `ShopWave.Api/Program.cs` uit:
+
+1. Zorg dat `admin@shopwave.be` de rol `"admin"` krijgt bij het genereren van het token. Andere gebruikers krijgen de rol `"user"`. Maak hiervoor een aparte methode `DetermineRole(string email)`.
+2. Voeg een `/admin/orders`-endpoint toe dat enkel toegankelijk is voor gebruikers met de rol `"admin"`. Het endpoint geeft een JSON-object terug met een gesimuleerde lijst van bestellingen.
+
+**Vereisten:**
+
+- Gebruik `.RequireAuthorization(policy => policy.RequireRole("admin"))`.
+- De `DetermineRole`-methode gebruikt een `if`-blok, geen ternary.
+- Registreer het admin-account via `accountRepository.Register("admin@shopwave.be", "admin123")`.
+
+**Startcode:**
+
+```csharp
+string DetermineRole(string email)
+{
+    string role;
+
+    // jouw code hier
+
+    return role;
+}
+
+app.MapGet("/admin/orders", HandleAdminOrders)
+   .RequireAuthorization(policy => policy.RequireRole("admin"));
+
+IResult HandleAdminOrders()
+{
+    // jouw code hier: geef een gesimuleerde lijst van bestellingen terug
+    return Results.Ok(new { });
+}
+```
+
+**Controleer je werk:** test de volgende twee scenario's vanuit de console:
+
+```csharp
+// Scenario 1: alice (user) roept /admin/orders aan
+client.DefaultRequestHeaders.Authorization =
+    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", aliceToken);
+
+HttpResponseMessage aliceResponse = client.GetAsync("/admin/orders").Result;
+Console.WriteLine($"Alice: {aliceResponse.StatusCode}");
+
+// Scenario 2: admin roept /admin/orders aan
+client.DefaultRequestHeaders.Authorization =
+    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
+
+HttpResponseMessage adminResponse = client.GetAsync("/admin/orders").Result;
+Console.WriteLine($"Admin: {adminResponse.StatusCode}");
+Console.WriteLine(adminResponse.Content.ReadAsStringAsync().Result);
+```
+
+Verwacht resultaat:
+
+```
+Alice: Forbidden
+Admin: OK
+{"orders":[...]}
 ```
 
 ---
 
-## Oefening 5 — OAuth2 analyse (schriftelijk)
+<h3 class="opdracht-titel">Opdracht</h3>
 
-1. **Authorization Code Flow in vier stappen:** (1) Gebruiker klikt op "Inloggen met Google" → (2) Browser gaat naar Google-loginpagina → (3) Gebruiker logt in en geeft toestemming → (4) Google stuurt een code terug, de app wisselt die in voor een access token (server-to-server).
-2. **Waarom ziet de fitness-app het Google-wachtwoord nooit?** De gebruiker logt in op de Google-pagina, niet op de fitness-app. Alleen Google ziet het wachtwoord.
-3. **Verschil access token vs. refresh token:** access token is kortlevend (bv. 15 min) en geeft toegang tot API's; refresh token is langlevend en wordt gebruikt om een nieuw access token aan te vragen zonder opnieuw in te loggen.
-4. **Scope voor een agenda-app:** `calendar.read` of `calendar.events.readonly` — enkel leestoegang tot agenda-items, geen schrijftoegang.
-5. **OAuth2 versus JWT:** OAuth2 is een protocol (regelt wie toegang krijgt tot wat); JWT is een tokenformaat (hoe ziet een token eruit). OAuth2-servers gebruiken vaak JWT als formaat voor hun access tokens.
+## Oefening 3: Token vervaltijd valideren
+
+**Leerdoel:** je implementeert en test de vervaltijd van een JWT en begrijpt waarom een korte levensduur een veiligheidsmaatregel is.
+
+**Moeilijkheidsgraad:** gemiddeld
+
+**Situatie:** een gestolen JWT geeft een aanvaller toegang zolang het token geldig is. Hoe korter de vervaltijd, hoe kleiner de schade. Je schrijft een methode die demonstreert wat er gebeurt met een verlopen token.
+
+**Wat je doet:**
+
+Maak in `ShopWave/Program.cs` een methode `DemoExpiredToken()` die:
+
+1. Een `JwtTokenService` aanmaakt met een vervaltijd van 0 minuten.
+2. Een token genereert voor `alice@shopwave.be` met rol `"user"`.
+3. 2 seconden wacht via `Thread.Sleep(2000)`.
+4. Het verlopen token gebruikt om `/orders/alice@shopwave.be` aan te roepen.
+5. De statuscode afdrukt.
+
+Beantwoord daarna schriftelijk: waarom is een korte vervaltijd een veiligheidsmaatregel? Wat zou er kunnen misgaan als een token nooit verloopt?
+
+**Vereisten:**
+
+- Gebruik `System.Threading.Thread.Sleep(2000)` voor de wachttijd.
+- Gebruik een `HttpClient` met `ServerCertificateCustomValidationCallback` die altijd `true` teruggeeft.
+- De methode maakt een eigen `HttpClient` aan en ruimt die op met `Dispose()`.
+
+**Startcode:**
+
+```csharp
+void DemoExpiredToken()
+{
+    JwtTokenService shortLived = new JwtTokenService(
+        "ShopWaveGeheimeSleutel2024!!XYZ#",
+        "shopwave-api",
+        "shopwave-client",
+        expiresMinutes: 0);
+
+    string expiredToken = shortLived.GenerateToken("alice@shopwave.be", "user");
+
+    // jouw code hier: wacht 2 seconden
+
+    HttpClientHandler handler = new HttpClientHandler();
+    handler.ServerCertificateCustomValidationCallback =
+        (message, certificate, chain, errors) => true;
+
+    HttpClient client = new HttpClient(handler);
+    client.BaseAddress = new Uri("https://localhost:5001");
+
+    // jouw code hier: stuur een request met het verlopen token en druk de statuscode af
+
+    client.Dispose();
+    handler.Dispose();
+}
+```
+
+**Controleer je werk:** verwacht resultaat:
+
+```
+Verlopen token statuscode: Unauthorized
+```
+
+---
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+## Oefening 4: TokenBlacklist implementeren
+
+**Leerdoel:** je implementeert een uitlogmechanisme voor JWT en begrijpt waarom dat extra infrastructuur vereist tegenover de stateless aard van tokens.
+
+**Moeilijkheidsgraad:** uitdaging
+
+**Situatie:** JWT-tokens zijn geldig tot ze verlopen. Er is geen ingebouwd mechanisme om een token te annuleren. Als een klant uitlogt of als een token gestolen wordt, blijft het token bruikbaar tot de vervaltijd. ShopWave wil een uitlogendpoint toevoegen dat tokens onmiddellijk invalideert.
+
+**Wat je doet:**
+
+Maak `ShopWave.Api/TokenBlacklist.cs` aan. Deze klasse slaat tokens op die uitgelogd zijn en biedt twee methoden:
+
+- `Revoke(string token)`: voegt het token toe aan de blacklist.
+- `IsRevoked(string token)`: geeft `true` terug als het token op de blacklist staat.
+
+Voeg daarna in `ShopWave.Api/Program.cs` een `/logout`-endpoint toe dat:
+
+1. Het token uit de `Authorization`-header leest.
+2. Het token toevoegt aan de `TokenBlacklist`.
+3. `200 OK` teruggeeft.
+
+Voeg ten slotte middleware toe die bij elke request controleert of het token op de blacklist staat. Als het token gerevoked is, geeft de middleware `401 Unauthorized` terug zonder de rest van de pipeline uit te voeren.
+
+**Vereisten:**
+
+- `TokenBlacklist` gebruikt een `HashSet<string>` intern.
+- De blacklist-middleware staat na `app.UseAuthentication()` maar voor `app.UseAuthorization()`.
+- Lees de `Authorization`-header via `context.Request.Headers["Authorization"].ToString()`. Verwijder het `"Bearer "`-prefix via `.Replace("Bearer ", string.Empty)`.
+
+**Startcode:**
+
+```csharp
+namespace ShopWave.Api
+{
+    public class TokenBlacklist
+    {
+        private readonly HashSet<string> _revokedTokens;
+
+        public TokenBlacklist()
+        {
+            _revokedTokens = new HashSet<string>();
+        }
+
+        public void Revoke(string token)
+        {
+            // jouw code hier
+        }
+
+        public bool IsRevoked(string token)
+        {
+            // jouw code hier
+            return false;
+        }
+    }
+}
+```
+
+Middleware in `Program.cs`:
+
+```csharp
+TokenBlacklist tokenBlacklist = new TokenBlacklist();
+
+app.UseAuthentication();
+
+app.Use(async (context, next) =>
+{
+    string authHeader = context.Request.Headers["Authorization"].ToString();
+    string token      = authHeader.Replace("Bearer ", string.Empty);
+
+    // jouw code hier: controleer of het token gerevoked is
+    // als ja: zet statuscode op 401 en return
+
+    await next();
+});
+
+app.UseAuthorization();
+```
+
+**Controleer je werk:**
+
+```csharp
+// Voor uitloggen: verwacht 200 OK
+client.DefaultRequestHeaders.Authorization =
+    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+HttpResponseMessage beforeLogout = client.GetAsync("/orders/alice@shopwave.be").Result;
+Console.WriteLine($"Voor uitloggen: {beforeLogout.StatusCode}");
+
+// Uitloggen
+HttpResponseMessage logoutResponse = client.PostAsync("/logout", null).Result;
+Console.WriteLine($"Uitloggen: {logoutResponse.StatusCode}");
+
+// Na uitloggen: verwacht 401 Unauthorized
+HttpResponseMessage afterLogout = client.GetAsync("/orders/alice@shopwave.be").Result;
+Console.WriteLine($"Na uitloggen: {afterLogout.StatusCode}");
+```
+
+Verwacht resultaat:
+
+```
+Voor uitloggen: OK
+Uitloggen: OK
+Na uitloggen: Unauthorized
+```
+
+---
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+## Oefening 5: JWT en OAuth 2.0 koppelen aan CIA
+
+**Leerdoel:** je verbindt de technische keuzes uit de vorige oefeningen met het CIA-model en het OAuth 2.0-protocol.
+
+**Moeilijkheidsgraad:** basis (reflectie)
+
+Beantwoord de volgende vragen op papier of in een tekstbestand.
+
+1. Een JWT-signature garandeert dat de payload niet gewijzigd is. Welke CIA-pijler beschermt de signature? Kan de signature ook confidentiality garanderen? Leg uit.
+
+2. In oefening 3 bouw je een verlopen token dat `401 Unauthorized` geeft. Welke CIA-pijler staat centraal bij het instellen van een vervaltijd? Wat zou er misgaan als tokens nooit verlopen?
+
+3. In oefening 4 implementeer je een `TokenBlacklist`. JWT-tokens zijn van nature stateless: de server slaat niets op. De blacklist doorbreekt dat principe. Leg uit wat het nadeel is van een blacklist op het vlak van schaalbaarheid. Hoe lost een korte vervaltijd dat probleem deels op?
+
+4. OAuth 2.0 gebruikt scopes om toegang te beperken. Een fitness-app vraagt `calendar.events.write`. Welke CIA-pijler staat hier centraal? Hoe helpt het principe van least privilege bij het ontwerpen van scopes?
+
+5. In de JWT-flow stuurt de client het token mee in de `Authorization`-header. Als de verbinding niet via HTTPS loopt, is die header zichtbaar voor iedereen op het netwerk. Leg de rol uit van HTTPS (les 6) en JWT (les 7) samen. Wat beschermt elk van de twee?
