@@ -157,16 +157,44 @@
   background-color: rgba(231, 76, 60, 0.11) !important;
 }
 
-/* ── Caret: laat Docusaurus z'n eigen SVG doen, alleen kleur aanpassen ── */
+/* ── Caret-knop: geen zichtbare knop, enkel een subtiel pijltje ── */
+.menu__caret {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  opacity: 0.45;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.menu__caret:hover {
+  background: var(--ifm-color-emphasis-100) !important;
+  opacity: 0.75;
+}
+
 .menu__caret::before,
 .menu__link--sublist-caret::after {
-  background-color: var(--ifm-color-emphasis-350, #aaa) !important;
-  opacity: 0.55;
+  background-color: var(--ifm-color-emphasis-600) !important;
 }
 
 /* Geen rode dots */
 .menu__list-item-collapsible > .menu__link::before {
   display: none;
+}
+
+/* Zorg dat niveau-3 items (Theorie/Oefeningen/Oplossingen) nooit uppercase zijn */
+.menu__list .menu__list .menu__list .menu__link {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-size: 0.815rem;
 }
 
 
