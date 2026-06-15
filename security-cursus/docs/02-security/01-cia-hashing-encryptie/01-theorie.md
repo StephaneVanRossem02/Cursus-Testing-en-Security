@@ -423,7 +423,13 @@ Build succeeded.
 
 ### Stap 6: AesEncryptor aanmaken
 
-ShopWave wil gevoelige ordergegevens versleuteld opslaan. Maak `ShopWave/Security/AesEncryptor.cs` aan:
+ShopWave wil gevoelige ordergegevens versleuteld opslaan. We bouwen de `AesEncryptor` in vier substappen zodat je elke keuze begrijpt.
+
+---
+
+#### Stap 6a: klasse aanmaken en de sleutel klaarzetten
+
+Maak `ShopWave/Security/AesEncryptor.cs` aan met de constructor:
 
 ```csharp
 using System.Security.Cryptography;
@@ -440,19 +446,49 @@ namespace ShopWave.Security
             string paddedKey = key.PadRight(32).Substring(0, 32);
             _key = Encoding.UTF8.GetBytes(paddedKey);
         }
+    }
+}
+```
 
+AES-256 vereist een sleutel van exact 32 bytes. `PadRight(32)` vult een kortere sleutel aan met spaties. `Substring(0, 32)` kapt een langere sleutel af. Zo werkt de klasse altijd, ongeacht hoe lang de meegegeven sleutel is.
+
+`Encoding.UTF8.GetBytes` zet de string om naar een byte-array, want AES werkt intern op bytes, niet op tekst.
+
+Bouw de solution.
+
+Wat je ziet:
+
+```
+Build succeeded.
+```
+
+---
+
+#### Stap 6b: de Encrypt-methode
+
+Voeg de `Encrypt`-methode toe aan `AesEncryptor`:
+
+```csharp
         public string Encrypt(string plainText)
         {
             using (Aes aes = Aes.Create())
             {
                 aes.Key = _key;
                 aes.GenerateIV();
+```
 
+`Aes.Create()` maakt een nieuw AES-object aan. `aes.Key` krijgt de sleutel die je in de constructor klaargezet hebt. `GenerateIV()` genereert een willekeurige IV (Initialization Vector) van 16 bytes. Die IV verschilt elke keer, ook als je dezelfde tekst versleutelt.
+
+```csharp
                 ICryptoTransform encryptor = aes.CreateEncryptor();
                 byte[] inputBytes     = Encoding.UTF8.GetBytes(plainText);
                 byte[] encryptedBytes = encryptor.TransformFinalBlock(
                     inputBytes, 0, inputBytes.Length);
+```
 
+`CreateEncryptor()` maakt de encryptie-operatie aan op basis van de sleutel en de IV. `TransformFinalBlock` voert de encryptie uit en geeft de versleutelde bytes terug.
+
+```csharp
                 byte[] result = new byte[aes.IV.Length + encryptedBytes.Length];
                 Array.Copy(aes.IV,         0, result, 0,             aes.IV.Length);
                 Array.Copy(encryptedBytes, 0, result, aes.IV.Length, encryptedBytes.Length);
@@ -460,7 +496,25 @@ namespace ShopWave.Security
                 return Convert.ToBase64String(result);
             }
         }
+```
 
+De IV wordt vooraan de ciphertext geplakt. Zo heeft `Decrypt` later alles wat hij nodig heeft in één string: de eerste 16 bytes zijn de IV, de rest is de ciphertext. `Convert.ToBase64String` zet de byte-array om naar een leesbare string die je veilig in een database kan opslaan.
+
+Bouw de solution.
+
+Wat je ziet:
+
+```
+Build succeeded.
+```
+
+---
+
+#### Stap 6c: de Decrypt-methode
+
+Voeg de `Decrypt`-methode toe:
+
+```csharp
         public string Decrypt(string cipherText)
         {
             using (Aes aes = Aes.Create())
@@ -475,17 +529,33 @@ namespace ShopWave.Security
                 Array.Copy(inputBytes, 16, encryptedBytes, 0, encryptedBytes.Length);
 
                 aes.IV = iv;
+```
 
-                ICryptoTransform decryptor    = aes.CreateDecryptor();
+`Convert.FromBase64String` zet de opgeslagen string terug naar bytes. Daarna splitsen we de byte-array: de eerste 16 bytes zijn de IV die `Encrypt` vooraan geplakt heeft, de rest zijn de versleutelde bytes.
+
+```csharp
+                ICryptoTransform decryptor     = aes.CreateDecryptor();
                 byte[]           decryptedBytes = decryptor.TransformFinalBlock(
                     encryptedBytes, 0, encryptedBytes.Length);
 
                 return Encoding.UTF8.GetString(decryptedBytes);
             }
         }
-    }
-}
 ```
+
+`CreateDecryptor()` maakt de omgekeerde operatie aan met dezelfde sleutel en de herstelde IV. `TransformFinalBlock` ontsleutelt de bytes. `Encoding.UTF8.GetString` zet de bytes terug naar tekst.
+
+Bouw de solution.
+
+Wat je ziet:
+
+```
+Build succeeded.
+```
+
+---
+
+#### Stap 6d: uitproberen in Program.cs
 
 Voeg toe aan `Program.cs`:
 
@@ -518,7 +588,7 @@ Gelijk:        False
 Ontsleuteld:   ORD-2024-00042
 ```
 
-Dezelfde orderreferentie geeft elke keer een andere ciphertext, door de willekeurige IV. Ontsleutelen geeft altijd het origineel terug.
+Dezelfde orderreferentie geeft elke keer een andere ciphertext, omdat de IV elke keer willekeurig is. Toch geeft `Decrypt` altijd het origineel terug, want de IV zit ingebakken in de ciphertext zelf.
 
 ---
 
