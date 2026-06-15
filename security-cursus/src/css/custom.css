@@ -76,14 +76,16 @@
   border-right: 1px solid var(--ifm-color-emphasis-100) !important;
 }
 
-/* Reset alle links naar dezelfde basis */
+/* ── Alle menu-links: schone basis zonder uppercase of spacing ── */
 .menu__link {
   font-size: 0.85rem;
   font-weight: 400;
   border-radius: 6px;
-  padding: 0.4rem 0.8rem;
-  line-height: 1.4;
+  padding: 0.38rem 0.8rem;
+  line-height: 1.45;
   color: var(--ifm-color-emphasis-800);
+  text-transform: none;
+  letter-spacing: 0;
   transition: background 0.1s, color 0.1s;
 }
 
@@ -92,56 +94,10 @@
   color: var(--ifm-font-color-base);
 }
 
-/* ── Niveau 1: TESTING / SECURITY sectielabels ── */
-.menu__list > .menu__list-item > .menu__list-item-collapsible {
-  margin-top: 1.1rem;
-  margin-bottom: 0.2rem;
-}
-
-.menu__list > .menu__list-item > .menu__list-item-collapsible > .menu__link {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ifm-color-emphasis-400);
-  padding: 0.25rem 0.8rem;
-  background: none !important;
-}
-
-.menu__list > .menu__list-item > .menu__list-item-collapsible > .menu__link:hover {
-  background: none !important;
-  color: var(--ifm-color-emphasis-600);
-}
-
-/* ── Niveau 2: Les-items (Les 1, Les 3...) ── */
-.menu__list > .menu__list-item > .menu__list
-  > .menu__list-item > .menu__list-item-collapsible > .menu__link {
-  font-size: 0.845rem;
+/* ── Les-items (niveau 2): medium gewicht ── */
+.menu__link--sublist {
   font-weight: 500;
   color: var(--ifm-color-emphasis-800);
-  padding: 0.4rem 0.8rem;
-}
-
-.menu__list > .menu__list-item > .menu__list
-  > .menu__list-item > .menu__list-item-collapsible > .menu__link:hover {
-  background: var(--ifm-color-emphasis-100);
-  color: var(--ifm-font-color-base);
-}
-
-/* ── Niveau 3: Theorie / Oefeningen / Oplossingen ── */
-.menu__list > .menu__list-item > .menu__list
-  > .menu__list-item > .menu__list > .menu__list-item > .menu__link {
-  font-size: 0.815rem;
-  font-weight: 400;
-  color: var(--ifm-color-emphasis-600);
-  padding: 0.28rem 0.8rem 0.28rem 1.6rem;
-  border-radius: 5px;
-}
-
-.menu__list > .menu__list-item > .menu__list
-  > .menu__list-item > .menu__list > .menu__list-item > .menu__link:hover {
-  background: var(--ifm-color-emphasis-100);
-  color: var(--ifm-color-emphasis-900);
 }
 
 /* ── Actief leaf item ── */
@@ -155,44 +111,40 @@
   background-color: rgba(231, 76, 60, 0.11) !important;
 }
 
-/* ── Caret-knop: geen zichtbare knop, enkel een subtiel pijltje ── */
-.menu__caret {
-  background: none !important;
+/* ── Caret-knop: button-reset met hoge specificiteit ── */
+button.menu__caret {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  width: 28px;
-  min-width: 28px;
-  height: 28px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  outline: none !important;
+  padding: 4px !important;
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   border-radius: 4px;
-  opacity: 0.45;
-  transition: opacity 0.15s;
+  cursor: pointer;
+  opacity: 0.4;
   flex-shrink: 0;
+  transition: opacity 0.15s, background 0.1s;
 }
 
-.menu__caret:hover {
-  background: var(--ifm-color-emphasis-100) !important;
-  opacity: 0.75;
+button.menu__caret:hover {
+  background: var(--ifm-color-emphasis-200) !important;
+  opacity: 0.8;
 }
 
-.menu__caret::before,
-.menu__link--sublist-caret::after {
-  background-color: var(--ifm-color-emphasis-600) !important;
+button.menu__caret::before {
+  background-color: var(--ifm-color-emphasis-700) !important;
 }
 
-/* Geen rode dots */
+/* Geen rode dots via ::before op links */
 .menu__list-item-collapsible > .menu__link::before {
-  display: none;
-}
-
-/* Zorg dat niveau-3 items (Theorie/Oefeningen/Oplossingen) nooit uppercase zijn */
-.menu__list .menu__list .menu__list .menu__link {
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font-size: 0.815rem;
+  display: none !important;
 }
 
 
