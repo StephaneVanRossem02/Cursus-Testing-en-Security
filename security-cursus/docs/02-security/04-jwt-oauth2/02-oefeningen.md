@@ -177,8 +177,11 @@ Beantwoord daarna schriftelijk: waarom is een korte vervaltijd een veiligheidsma
 ```csharp
 void DemoExpiredToken()
 {
+    string secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+        ?? throw new InvalidOperationException("Omgevingsvariabele JWT_SECRET_KEY ontbreekt.");
+
     JwtTokenService shortLived = new JwtTokenService(
-        "ShopWaveGeheimeSleutel2024!!XYZ#",
+        secretKey,
         "shopwave-api",
         "shopwave-client",
         expiresMinutes: 0);

@@ -333,7 +333,7 @@ Vervang de tijdelijke `return string.Empty;` door de volgende code:
 
 ---
 
-### Stap 8e: Program.cs - usings en User Secrets
+### Stap 8e: Program.cs - usings en de geheime sleutel via een omgevingsvariabele
 
 Open `ShopWave.Api/Program.cs`. Voeg bovenaan de nodige usings toe:
 
@@ -346,28 +346,31 @@ using ShopWave.Security;
 using System.Security.Cryptography.X509Certificates;
 ```
 
-Sla de JWT-sleutel op via .NET User Secrets. Voer dit uit in de terminal in de map van `ShopWave.Api`:
+De JWT-sleutel mag nooit hardcoded in de broncode staan. Een sleutel in de repository kan door iedereen met toegang tot de code gebruikt worden om geldige tokens te maken. Zelfs als je de sleutel later verwijdert, blijft hij zichtbaar in de git-geschiedenis.
 
-```
-dotnet user-secrets init
-dotnet user-secrets set "Jwt:SecretKey" "ShopWaveGeheimeSleutel2024!!XYZ#"
+De eenvoudigste oplossing is een **omgevingsvariabele**. Stel die in voor je de applicatie opstart. In PowerShell:
+
+```powershell
+$env:JWT_SECRET_KEY = "ShopWaveGeheimeSleutel2024!!XYZ#"
 ```
 
-Een sleutel die in de repository staat, kan door iedereen met toegang tot de code gebruikt worden om geldige tokens te maken. User Secrets slaan de waarde lokaal op buiten de repository.
+Deze variabele bestaat enkel in de huidige terminalsessie. Ze staat nooit in een bestand, dus ze kan ook nooit per ongeluk ingecheckt worden.
+
+In productie stel je omgevingsvariabelen in op de server zelf, of je gebruikt een geheimenbeheerder zoals **Azure Key Vault**. De applicatiecode verandert niet: die leest altijd `JWT_SECRET_KEY` op, ongeacht waar de waarde vandaan komt.
 
 Lees de sleutel op en definieer de constanten bovenaan `Program.cs`:
 
 ```csharp
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-string secretKey = builder.Configuration["Jwt:SecretKey"]
-    ?? throw new InvalidOperationException("JWT SecretKey ontbreekt in configuratie.");
+string secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+    ?? throw new InvalidOperationException("Omgevingsvariabele JWT_SECRET_KEY ontbreekt.");
 
 const string Issuer   = "shopwave-api";
 const string Audience = "shopwave-client";
 ```
 
-**Wat je ziet:** het project compileert. Als de User Secret ontbreekt, gooit de applicatie meteen een fout bij het opstarten.
+**Wat je ziet:** het project compileert. Start je de applicatie zonder de omgevingsvariabele in te stellen, dan gooit ze meteen een `InvalidOperationException`. Zo kan de applicatie nooit per ongeluk draaien zonder geldige configuratie.
 
 ---
 
@@ -715,7 +718,8 @@ Verloopt: 15/05/2024 14:30:00
 | `RequireRole("admin")` | Rolgebaseerde toegangscontrole |
 | 401 vs 403 | 401: geen geldig token. 403: geldig token, onvoldoende rechten |
 | Bearer token | Meegestuurd via `Authorization: Bearer token` |
-| User Secrets | Sla geheimen lokaal op. Nooit hardcoden in broncode |
+| Omgevingsvariabele | Sla geheimen op buiten de code. Nooit hardcoden in broncode |
+| Azure Key Vault | Beheer geheimen op productieschaal. Applicatiecode verandert niet |
 | OAuth 2.0 | Protocol voor toegangsdelegatie zonder wachtwoord te delen |
 | Scopes | Beperken welke toegang een app krijgt |
 | Access token | Kortlevend token voor API-toegang (bv. 15 minuten) |
