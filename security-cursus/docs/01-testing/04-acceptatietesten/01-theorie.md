@@ -87,66 +87,92 @@ Feature: Inloggen bij ShopWave
 
 ---
 
-## 4. De drie lagen van een Reqnroll-project
+## 4. Reqnroll: het framework
 
 **SpecFlow** was het populaire BDD-framework voor .NET. Het is intussen gestopt met actieve ontwikkeling. **Reqnroll** is de open-source opvolger, gebouwd op dezelfde codebase. De syntax is nagenoeg identiek.
 
-Een Reqnroll-project bestaat uit drie lagen:
+Een Reqnroll-project werkt met drie lagen:
 
-```
-Feature file (.feature)      Gherkin-scenario's
-                             Leesbaar voor iedereen
-                                     |
-                                     v
-Step definitions (.cs)       C#-methoden die elke Gherkin-stap uitvoeren
-                             Koppeling tussen taal en code
-                                     |
-                                     v
-Productieklassen             De echte code die getest wordt
-                             CartService, OrderService, AccountRepository...
-```
+**Feature file (.feature)** - beschrijft wat het systeem moet doen. Geschreven in Gherkin. Leesbaar voor iedereen.
 
-De feature file beschrijft **wat** het systeem moet doen. De step definitions beschrijven **hoe** dat getest wordt. De productieklassen zijn de **echte code** die draait.
+**Step definitions (.cs)** - koppelt elke Gherkin-stap aan een C#-methode. Dit is de brug tussen taal en code.
 
-### Setup
+**Productieklassen** - de echte code die getest wordt. `AccountRepository`, `CartService`, enzovoort.
 
-**Stap 1: Reqnroll-extensie installeren**
+De feature file beschrijft het scenario. De step definitions voeren het uit. De productieklassen bevatten de logica.
+
+---
+
+## 5. Demo: de loginfeature stap voor stap
+
+We bouwen de acceptatietest voor de loginflow van ShopWave. We doen dit in kleine stappen. Na elke stap is er iets nieuws om te zien in Visual Studio.
+
+### Stap 1: project opzetten
+
+**Reqnroll-extensie installeren**
 
 Ga in Visual Studio naar `Extensions` > `Manage Extensions` > zoek op `Reqnroll` > installeer `Reqnroll for Visual Studio 2022 and 2026` > herstart Visual Studio.
 
-**Stap 2: Reqnroll-project aanmaken**
+Deze extensie voegt de juiste projecttemplates en bestandstypes toe.
+
+**Reqnroll-project aanmaken**
 
 Rechtsklik op de solution > `Add` > `New Project` > zoek op `Reqnroll` > kies `Reqnroll Project` > naam: `ShopWave.Specs` > kies `xUnit` als testframework.
 
 De solution ziet er nu zo uit:
 
 ```
-ShopWave           Productieklassen
+ShopWave           productieklassen
 ShopWave.Tests     xUnit unit tests en integration tests
 ShopWave.Specs     Reqnroll acceptatietests (nieuw)
 ```
 
-**Stap 3: Project reference toevoegen**
+**Project reference toevoegen**
 
 Rechtsklik op `ShopWave.Specs` > `Add` > `Project Reference` > vink `ShopWave` aan.
 
-**Stap 4: Voorbeeldbestanden verwijderen**
+Zonder deze reference kan `ShopWave.Specs` de klassen van ShopWave niet aanroepen.
+
+**Voorbeeldbestanden verwijderen**
 
 Reqnroll maakt automatisch een voorbeeldfeature en een voorbeeldstepfile aan. Verwijder die. We schrijven alles zelf.
 
-**Stap 5: Feature file aanmaken**
+---
+
+### Stap 2: de feature file schrijven
 
 Rechtsklik op `ShopWave.Specs` > `Add` > `New Item` > `Reqnroll Feature File` > naam: `Login.feature`.
 
-**Mini-controle:** je hebt Reqnroll geïnstalleerd maar ziet geen `Reqnroll Feature File` in het "Add New Item"-menu. Wat heb je vergeten? De Visual Studio-extensie installeren en herstarten.
+Je ziet een leeg `.feature`-bestand. Schrijf de volgende inhoud:
+
+```gherkin
+Feature: Inloggen bij ShopWave
+
+  Scenario: Succesvol inloggen met correct wachtwoord
+    Given er is een account voor "alice@shopwave.be" met wachtwoord "wachtwoord123"
+    When de gebruiker inlogt met "alice@shopwave.be" en "wachtwoord123"
+    Then ontvangt de gebruiker de melding "Voer uw 2FA-code in."
+```
+
+Wat staat er hier?
+
+- `Feature: Inloggen bij ShopWave` is de naam van het onderdeel dat we beschrijven. Er is er één per bestand.
+- `Scenario:` beschrijft één specifieke situatie. Een feature file kan meerdere scenario's bevatten.
+- `Given` beschrijft de beginsituatie. Wat is er al vóór de actie?
+- `When` beschrijft de actie. Wat doet de gebruiker of het systeem?
+- `Then` beschrijft het verwachte resultaat. Wat moet er gebeuren?
+
+De teksten tussen aanhalingstekens (`"alice@shopwave.be"`, `"wachtwoord123"`) zijn parameters. Die waarden worden straks automatisch doorgegeven aan de C#-methode.
+
+Bouw de solution. Open de Test Explorer. Je ziet het scenario verschijnen als één test, maar de test staat op **"Not run"**. Dat is normaal: we hebben nog geen C#-code geschreven die de stappen uitvoert.
 
 ---
 
-## 5. Step definitions: Gherkin koppelen aan C#
+### Stap 3: de Given-stap implementeren
 
-Een step definition is een C#-methode die aan één Gherkin-stap gekoppeld is via een attribuut.
+Maak een map `StepDefinitions` aan in `ShopWave.Specs`. Maak daarin `LoginSteps.cs` aan.
 
-Maak `ShopWave.Specs/StepDefinitions/LoginSteps.cs` aan:
+Schrijf eerst alleen de basisstructuur:
 
 ```csharp
 using Reqnroll;
@@ -160,62 +186,121 @@ namespace ShopWave.Specs.StepDefinitions
     {
         private AccountRepository _accountRepository = null!;
         private string            _result            = string.Empty;
+    }
+}
+```
 
+`[Binding]` vertelt Reqnroll dat deze klasse step definitions bevat. Zonder dit attribuut worden de methoden genegeerd.
+
+Voeg nu de `Given`-stap toe:
+
+```csharp
         [Given("er is een account voor {string} met wachtwoord {string}")]
         public void GivenErIsEenAccount(string email, string wachtwoord)
         {
             _accountRepository = new AccountRepository(new TwoFactorService());
             _accountRepository.Register(email, wachtwoord);
         }
+```
 
+Het attribuut `[Given("...")]` bevat de tekst uit de feature file. Die tekst moet exact overeenkomen.
+
+`{string}` is een Reqnroll-placeholder: de waarde tussen aanhalingstekens in de feature file (`"alice@shopwave.be"`) wordt automatisch doorgegeven als parameter `email`. De tweede `{string}` wordt doorgegeven als `wachtwoord`. Andere placeholders zijn `{int}`, `{double}` en `{decimal}`.
+
+Bouw de solution en voer de test uit. De test staat op **"Skipped"** of **"Pending"**. Reqnroll heeft de `Given`-stap gevonden, maar de `When`- en `Then`-stappen zijn nog niet gedefinieerd.
+
+---
+
+### Stap 4: When en Then toevoegen
+
+Voeg de `When`-stap toe in `LoginSteps.cs`:
+
+```csharp
         [When("de gebruiker inlogt met {string} en {string}")]
         public void WhenDeGebruikerInlogt(string email, string wachtwoord)
         {
             _result = _accountRepository.Login(email, wachtwoord);
         }
+```
 
+De `When`-stap roept `Login` aan en bewaart het resultaat in `_result`. Die waarde is beschikbaar voor de `Then`-stap in dezelfde klasse.
+
+Voeg de `Then`-stap toe:
+
+```csharp
         [Then("ontvangt de gebruiker de melding {string}")]
         public void ThenOntvangtDeGebruikerDeMelding(string verwachteMelding)
         {
             Assert.Equal(verwachteMelding, _result);
         }
-    }
-}
 ```
 
-**`[Binding]`** vertelt Reqnroll dat deze klasse step definitions bevat. Zonder dit attribuut worden de methoden genegeerd.
+`Assert.Equal` is de xUnit-assert die we al kennen. De verwachte waarde (`verwachteMelding`) komt uit de feature file. De echte waarde is `_result`, het antwoord van `Login`.
 
-**`{string}`** is een Reqnroll-placeholder. De waarde tussen aanhalingstekens in de feature file ("alice@shopwave.be") wordt automatisch doorgegeven als parameter. Andere placeholders zijn `{int}`, `{double}` en `{decimal}`.
+Bouw de solution en voer de test uit. De test slaagt nu.
 
-**`Assert.Equal`** is de xUnit-assert die we al kennen. De verwachte waarde komt uit de feature file. De echte waarde komt van de methode die we aanroepen in de `When`-stap.
+Wat ziet de Test Explorer?
 
-Feature file voor de demo:
+```
+✓ Succesvol inloggen met correct wachtwoord
+```
+
+De testname komt rechtstreeks uit de feature file. Geen technische naam zoals `ShouldReturnMessageWhenLoginSucceeds`. Gewone mensentaal.
+
+---
+
+### Stap 5: tweede scenario toevoegen
+
+Voeg een tweede scenario toe aan `Login.feature`:
 
 ```gherkin
-Feature: Inloggen bij ShopWave
-
-  Scenario: Succesvol inloggen met correct wachtwoord
-    Given er is een account voor "alice@shopwave.be" met wachtwoord "wachtwoord123"
-    When de gebruiker inlogt met "alice@shopwave.be" en "wachtwoord123"
-    Then ontvangt de gebruiker de melding "Voer uw 2FA-code in."
-
   Scenario: Inloggen met fout wachtwoord
     Given er is een account voor "alice@shopwave.be" met wachtwoord "wachtwoord123"
     When de gebruiker inlogt met "alice@shopwave.be" en "foutWachtwoord"
     Then ontvangt de gebruiker de melding "Ongeldig wachtwoord."
 ```
 
-Build de solution en open de Test Explorer. Je ziet twee tests onder `ShopWave.Specs`, een per scenario. De namen komen rechtstreeks uit de feature file.
+Bouw en voer de tests uit. Je ziet nu twee tests:
 
-**Mini-controle:** je voegt een derde scenario toe aan de feature file maar de test verschijnt niet in de Test Explorer. Je hebt de step definition al geschreven. Wat is de meest waarschijnlijke oorzaak? De solution is niet opnieuw gebuild na het toevoegen van het scenario.
+```
+✓ Succesvol inloggen met correct wachtwoord
+✓ Inloggen met fout wachtwoord
+```
+
+Je hoefde geen nieuwe step definitions te schrijven. De stap-patronen (`Given`, `When`, `Then`) waren al gedefinieerd. Reqnroll herkent ze en vult automatisch de juiste parameterwaarden in.
+
+**Dit is de kracht van BDD:** je voegt scenario's toe door tekst te schrijven. De C#-code voor elke stap schrijf je één keer.
 
 ---
 
-## 6. De context-klasse: gedeelde toestand via DI
+### Stap 6: een tweede feature en het probleem van gedeelde stappen
 
-Stel dat je een tweede feature wil toevoegen voor lockout. Je maakt `LockoutSteps.cs` aan en wil de `Given`-stap hergebruiken die het account aanmaakt. Maar als je dezelfde `[Given("er is een account voor...")]` in zowel `LoginSteps.cs` als `LockoutSteps.cs` definieert, gooit Reqnroll een **"Ambiguous step definition"**-fout. Reqnroll zoekt over alle `[Binding]`-klassen naar stap-patronen. Als hetzelfde patroon twee keer voorkomt, weet het niet welke methode het moet aanroepen.
+Stel dat we nu een lockout-feature willen toevoegen. We maken `Lockout.feature` aan:
 
-De oplossing is een **context-klasse** als gedeelde toestand, gecombineerd met **Reqnroll Dependency Injection**.
+```gherkin
+Feature: Account lockout bij ShopWave
+
+  Scenario: Account vergrendeld na drie foute pogingen
+    Given er is een account voor "bob@shopwave.be" met wachtwoord "veiligPw"
+    When de gebruiker drie keer inlogt met een fout wachtwoord
+    Then is het account van "bob@shopwave.be" geblokkeerd
+```
+
+We willen de `Given`-stap hergebruiken uit `LoginSteps.cs`. Maar als we `[Given("er is een account voor...")]` ook in een nieuwe `LockoutSteps.cs` definiëren, gooit Reqnroll een fout:
+
+```
+Ambiguous step definition.
+```
+
+Reqnroll zoekt over **alle** `[Binding]`-klassen in het project naar stap-patronen. Als hetzelfde patroon twee keer voorkomt, weet het niet welke methode het moet aanroepen.
+
+Er is ook een tweede probleem. De `_result`-field staat nu als private field in `LoginSteps`. Als de lockout-test een `Then`-stap in een andere klasse gebruikt, heeft die geen toegang tot `_result`.
+
+De oplossing voor beide problemen: een **context-klasse** als gedeelde toestand.
+
+---
+
+### Stap 7: de context-klasse aanmaken
 
 Maak `ShopWave.Specs/LoginContext.cs` aan:
 
@@ -234,17 +319,19 @@ namespace ShopWave.Specs
 }
 ```
 
-Reqnroll injecteert automatisch dezelfde `LoginContext`-instantie in elke `[Binding]`-klasse die die context als constructor-parameter accepteert. Geen handmatige registratie vereist.
+Dit is een gewone C#-klasse zonder attributen. Ze bevat alles wat stappen met elkaar moeten delen:
+- `AccountRepository`: aangemaakt in `Given`, gebruikt in `When` en `Then`
+- `TwoFactorService`: aangemaakt in `Given`, nodig voor de 2FA-stappen
+- `LastCode`: de gegenereerde 2FA-code, opgeslagen via de callback-techniek uit les 5
+- `Result`: het antwoord van `Login`, doorgegeven van `When` naar `Then`
 
-**Mini-controle:** waarom bewaren we `Result` in de context-klasse en niet als private field in de step definition-klasse? Omdat `Then`-stappen in een andere klasse kunnen staan dan `When`-stappen. Als `Result` in `LoginSteps` staat en de `Then`-stap staat in `LockoutSteps`, heeft die geen toegang tot de waarde. De context-klasse is gedeeld tussen alle step definition-klassen binnen hetzelfde scenario.
+Reqnroll injecteert automatisch dezelfde `LoginContext`-instantie in elke `[Binding]`-klasse die die context als constructor-parameter accepteert. Je hoeft niets te registreren. Reqnroll regelt dit zelf.
 
 ---
 
-## 7. CommonSteps: dubbele definities voorkomen
+### Stap 8: CommonSteps aanmaken en LoginSteps aanpassen
 
-Zet gedeelde stappen die door meerdere features gebruikt worden in één aparte klasse `CommonSteps.cs`. Die klasse krijgt de context-klasse via de constructor.
-
-Maak `ShopWave.Specs/StepDefinitions/CommonSteps.cs` aan:
+Maak `ShopWave.Specs/StepDefinitions/CommonSteps.cs` aan. Zet hier de `Given`-stap in die door alle features gedeeld wordt:
 
 ```csharp
 using Reqnroll;
@@ -275,9 +362,9 @@ namespace ShopWave.Specs.StepDefinitions
 }
 ```
 
-De `TwoFactorService` wordt aangemaakt met de callback-techniek uit les 5. De gegenereerde 2FA-code wordt opgeslagen in `_ctx.LastCode`. Andere step definition-klassen kunnen die waarde dan ophalen zonder dat ze de `Given`-stap hoeven te dupliceren.
+De constructor ontvangt een `LoginContext`. Reqnroll injecteert die automatisch. De `TwoFactorService` wordt aangemaakt met de callback-techniek uit les 5: elke gegenereerde 2FA-code wordt opgeslagen in `_ctx.LastCode`, zodat andere stappen er bij kunnen.
 
-Pas daarna `LoginSteps.cs` aan zodat die de context gebruikt:
+Pas nu `LoginSteps.cs` aan: verwijder de eigen fields en de `Given`-stap, en gebruik de context:
 
 ```csharp
 using Reqnroll;
@@ -310,13 +397,15 @@ namespace ShopWave.Specs.StepDefinitions
 }
 ```
 
-De `Given`-stap is verdwenen uit `LoginSteps.cs`. Die staat nu alleen in `CommonSteps.cs` en is beschikbaar voor elke feature.
+De `Given`-stap is verdwenen uit `LoginSteps.cs`. Die staat nu alleen in `CommonSteps.cs` en is beschikbaar voor zowel de loginfeature als de lockoutfeature. `_result` is ook verdwenen: die staat nu als `Result` in de context, toegankelijk voor elke step definition-klasse.
+
+Bouw en voer de tests uit. Beide loginscenario's slagen nog steeds.
 
 **Mini-controle:** je hebt `CommonSteps.cs` aangemaakt maar je krijgt nog steeds een "Ambiguous step definition"-fout. Wat is de oorzaak? De oude `[Given]`-methode staat nog in `LoginSteps.cs`. Je moet die verwijderen.
 
 ---
 
-## 8. Scenario Outline: meerdere gevallen in één sjabloon
+## 6. Scenario Outline: meerdere gevallen in één sjabloon
 
 Als je dezelfde stappen wil herhalen met verschillende invoerwaarden, gebruik je een `Scenario Outline`. In plaats van drie identieke scenario's schrijf je één sjabloon en een `Examples`-tabel.
 
@@ -341,7 +430,7 @@ Scenario Outline: Inloggen met verschillende wachtwoorden
 
 ---
 
-## 9. Acceptatietesten en security
+## 7. Acceptatietesten en security
 
 Beveiligde flows zijn bij uitstek geschikt voor acceptatietesten. Een loginflow heeft meerdere scenario's die elk een specifieke beveiligingsvereiste uitdrukken. Die vereisten zijn gemakkelijk te beschrijven in Gherkin en moeilijk te vergeten als ze als scenario zijn vastgelegd.
 
@@ -364,7 +453,7 @@ Deze scenario's beschrijven beveiligingsvereisten in taal die ook een niet-techn
 
 ---
 
-## 10. Samenvatting
+## 8. Samenvatting
 
 | Concept | Wat je moet onthouden |
 |--------|-----------------------|
