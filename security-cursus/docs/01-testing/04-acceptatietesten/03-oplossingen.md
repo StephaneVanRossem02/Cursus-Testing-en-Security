@@ -197,7 +197,7 @@ De `Given`-stappen "er bestaat nog geen account voor..." en "er is al een accoun
 
 **Veelgemaakte fout:** studenten bewaren `_registratieResultaat` in `LoginContext.Result`. Dat werkt technisch, maar mengt de toestand van de registratieflow met die van de loginflow. Als je daarna een scenario combineert dat eerst registreert en daarna inlogt, overschrijft `_ctx.Result` de registratiestatus. Gebruik een lokale field in `RegistratieSteps` voor het registratieresultaat.
 
-**Veelgemaakte fout:** studenten hergebruiken de `Then`-stap "ontvangt de gebruiker de melding {string}" uit `LoginSteps.cs` voor de registratiefout. Dat werkt, maar het is verwarrend: de stap-tekst suggereert een loginmelding. Schrijf een aparte `Then`-stap met een duidelijke naam voor de registratiecontext.
+**Veelgemaakte fout:** studenten hergebruiken de `Then`-stap voor loginmeldingen uit `LoginSteps.cs` ook voor de registratiefout. Dat werkt technisch, maar het is verwarrend: de stap-tekst suggereert een loginmelding. Schrijf een aparte `Then`-stap met een duidelijke naam voor de registratiecontext.
 
 **Reflectievraag 1:** unit tests voor `AccountRepository.Login` en Gherkin-scenario's testen beide de loginflow, maar vanuit een ander perspectief. De unit test test de technische correctheid van de methode in isolatie. Het Gherkin-scenario beschrijft de vereiste vanuit gebruikersperspectief en legt vast wat het systeem belooft. Als de unit test slaagt maar het scenario faalt, is er een discrepantie tussen de technische implementatie en de gespecificeerde vereiste.
 
@@ -294,9 +294,9 @@ namespace ShopWave.Specs.StepDefinitions
 
 ### Toelichting
 
-De uitdaging bij de `Scenario Outline` is dat de twee scenario's verschillende `Then`-stappen hebben. De oplossing is een gecombineerde stap "ontvangt de gebruiker het resultaat {string}" die voor beide gevallen werkt. In de `Examples`-tabel staan dan de verwachte resultaten per rij.
+De uitdaging bij de `Scenario Outline` is dat de twee scenario's verschillende `Then`-stappen hebben. De oplossing is een gecombineerde stap met een string-placeholder, hier "ontvangt de gebruiker het resultaat", die voor beide gevallen werkt. In de `Examples`-tabel staan dan de verwachte resultaten per rij.
 
-De `When`-stap "de gebruiker voert de 2FA-code {string} in voor {string}" vertaalt het type ("correct" of "fout") naar de echte code. Als het type "correct" is, gebruiken we `_ctx.LastCode`. Als het type "fout" is, gebruiken we een bekende foute code.
+De `When`-stap voor de 2FA-code vertaalt het type ("correct" of "fout") naar de echte code. Als het type "correct" is, gebruiken we `_ctx.LastCode`. Als het type "fout" is, gebruiken we een bekende foute code.
 
 **Veelgemaakte fout:** studenten proberen de `Then`-stap "is de gebruiker ingelogd" en "ontvangt de gebruiker de melding" te combineren in één `Scenario Outline`. Dat kan niet rechtstreeks als de stap-teksten fundamenteel verschillen. De oplossing is altijd een nieuwe, abstractere stap schrijven die beide gevallen dekt.
 

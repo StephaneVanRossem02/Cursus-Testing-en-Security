@@ -162,7 +162,7 @@ Schrijf daarna `TwoFactorSteps.cs` met de step definitions voor de `When`- en `T
 
 **Uitdaging:** herschrijf de twee scenario's daarna als één `Scenario Outline`. De uitdaging is dat de `Then`-stap verschilt per geval ("is de gebruiker ingelogd" versus "ontvangt de gebruiker de melding"). Hoe pak je dat aan?
 
-**Hint:** je kan de twee `Then`-stappen samenvoegen tot één stap "ontvangt de gebruiker het resultaat {string}" en in de `Examples`-tabel zowel "Inloggen geslaagd." als "Ongeldige 2FA-code." opnemen.
+**Hint:** je kan de twee `Then`-stappen samenvoegen tot één stap met een string-placeholder, bijvoorbeeld "ontvangt de gebruiker het resultaat" gevolgd door de verwachte tekst. Zet die verwachte teksten dan in de `Examples`-tabel: "Inloggen geslaagd." en "Ongeldige 2FA-code.".
 
 ---
 
