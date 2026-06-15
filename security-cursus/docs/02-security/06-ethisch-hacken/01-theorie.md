@@ -257,12 +257,11 @@ Write-Output $decoded
 
 ---
 
-### Stap 8d: Rolmanipulatie proberen
+### Stap 8d: Rolmanipulatie - methode aanmaken
 
-Maak in `ShopWave/Program.cs` een methode `TryRoleManipulation()` die een token aanpast en test:
+Voeg bovenaan `ShopWave/Program.cs` de using toe en maak de methode aan:
 
 ```csharp
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 void TryRoleManipulation(string validToken)
@@ -271,49 +270,99 @@ void TryRoleManipulation(string validToken)
 
     string[] parts   = validToken.Split('.');
     string   payload = parts[1];
-
-    // Padding herstellen voor Base64-decodering
-    int padLength = 4 - (payload.Length % 4);
-    if (padLength != 4)
-    {
-        payload += new string('=', padLength);
-    }
-
-    payload = payload.Replace('-', '+').Replace('_', '/');
-
-    string decodedPayload = Encoding.UTF8.GetString(Convert.FromBase64String(payload));
-    Console.WriteLine($"Originele payload: {decodedPayload}");
-
-    // Payload aanpassen: user -> admin
-    string manipulatedPayload = decodedPayload.Replace("\"role\":\"user\"", "\"role\":\"admin\"");
-    Console.WriteLine($"Aangepaste payload: {manipulatedPayload}");
-
-    // Hercoderen naar Base64url
-    byte[] manipulatedBytes   = Encoding.UTF8.GetBytes(manipulatedPayload);
-    string reEncodedPayload   = Convert.ToBase64String(manipulatedBytes)
-        .Replace('+', '-').Replace('/', '_').TrimEnd('=');
-
-    // Token samenstelleen met originele header en signature maar aangepaste payload
-    string manipulatedToken = $"{parts[0]}.{reEncodedPayload}.{parts[2]}";
-    Console.WriteLine($"Gemanipuleerd token (gedeeltelijk): {manipulatedToken[..80]}...");
-
-    // Testen via HttpClient
-    HttpClientHandler handler = new HttpClientHandler();
-    handler.ServerCertificateCustomValidationCallback =
-        (message, certificate, chain, errors) => true;
-
-    HttpClient client = new HttpClient(handler);
-    client.BaseAddress = new Uri("https://localhost:5001");
-    client.DefaultRequestHeaders.Authorization =
-        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", manipulatedToken);
-
-    HttpResponseMessage response = client.GetAsync("/admin/orders").Result;
-    Console.WriteLine($"Resultaat met gemanipuleerd token: {response.StatusCode}");
-    Console.WriteLine("Verwacht: Unauthorized (signature klopt niet meer)");
-
-    client.Dispose();
-    handler.Dispose();
 }
+```
+
+**Wat je ziet:** nog niets. De methode bestaat maar doet nog niets. Je bouwt hem stap voor stap op.
+
+---
+
+### Stap 8e: Rolmanipulatie - payload decoderen
+
+Voeg de decodering toe aan `TryRoleManipulation`:
+
+```csharp
+// Padding herstellen voor Base64-decodering
+int padLength = 4 - (payload.Length % 4);
+if (padLength != 4)
+{
+    payload += new string('=', padLength);
+}
+
+// Base64url -> Base64
+payload = payload.Replace('-', '+').Replace('_', '/');
+
+string decodedPayload = Encoding.UTF8.GetString(Convert.FromBase64String(payload));
+Console.WriteLine($"Originele payload: {decodedPayload}");
+```
+
+**Wat je ziet:**
+
+```
+Originele payload: {"sub":"alice@shopwave.be","role":"user","iat":1715996400}
+```
+
+De payload is leesbaar. Je ziet de role-claim staat op `"user"`.
+
+---
+
+### Stap 8f: Rolmanipulatie - payload aanpassen en hercoderen
+
+Verander de rol en codeer de payload terug naar Base64url:
+
+```csharp
+// Payload aanpassen: user -> admin
+string manipulatedPayload = decodedPayload.Replace("\"role\":\"user\"", "\"role\":\"admin\"");
+Console.WriteLine($"Aangepaste payload: {manipulatedPayload}");
+
+// Hercoderen naar Base64url
+byte[] manipulatedBytes = Encoding.UTF8.GetBytes(manipulatedPayload);
+string reEncodedPayload = Convert.ToBase64String(manipulatedBytes)
+    .Replace('+', '-').Replace('/', '_').TrimEnd('=');
+
+// Token samenstellen met originele header en signature maar aangepaste payload
+string manipulatedToken = $"{parts[0]}.{reEncodedPayload}.{parts[2]}";
+Console.WriteLine($"Gemanipuleerd token (begin): {manipulatedToken[..60]}...");
+```
+
+**Wat je ziet:**
+
+```
+Aangepaste payload: {"sub":"alice@shopwave.be","role":"admin","iat":1715996400}
+Gemanipuleerd token (begin): eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOi...
+```
+
+Je hebt nu een token met een aangepaste payload maar de originele signature.
+
+---
+
+### Stap 8g: Rolmanipulatie - token sturen en resultaat zien
+
+Stuur het gemanipuleerde token naar het admin-endpoint:
+
+```csharp
+HttpClientHandler handler = new HttpClientHandler();
+handler.ServerCertificateCustomValidationCallback =
+    (message, certificate, chain, errors) => true;
+
+HttpClient client = new HttpClient(handler);
+client.BaseAddress = new Uri("https://localhost:5001");
+client.DefaultRequestHeaders.Authorization =
+    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", manipulatedToken);
+
+HttpResponseMessage response = client.GetAsync("/admin/orders").Result;
+Console.WriteLine($"Resultaat met gemanipuleerd token: {response.StatusCode}");
+Console.WriteLine("Verwacht: Unauthorized (signature klopt niet meer)");
+
+client.Dispose();
+handler.Dispose();
+```
+
+Roep de methode aan in `Main`:
+
+```csharp
+// Haal eerst een geldig token op via het verify-endpoint
+TryRoleManipulation(aliceToken);
 ```
 
 **Wat je ziet:**
@@ -322,65 +371,90 @@ void TryRoleManipulation(string validToken)
 === JWT-rolmanipulatie poging ===
 Originele payload: {"sub":"alice@shopwave.be","role":"user","iat":1715996400}
 Aangepaste payload: {"sub":"alice@shopwave.be","role":"admin","iat":1715996400}
+Gemanipuleerd token (begin): eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOi...
 Resultaat met gemanipuleerd token: Unauthorized
 Verwacht: Unauthorized (signature klopt niet meer)
 ```
 
-De aanval mislukt. De signature is berekend over de originele payload. Na de aanpassing klopt de signature niet meer en weigert de server het token.
+De aanval mislukt. De server berekent de signature opnieuw over de aangepaste payload. Die komt niet overeen met de originele signature. Het token wordt geweigerd.
 
 ---
 
-### Stap 8e: `alg:none`-aanval testen
+### Stap 8h: `alg:none` - header en payload coderen
 
-Construeer een token zonder signature en met `alg:none` in de header:
+Voeg een nieuwe methode `TryAlgNoneAttack()` toe. Begin met de header en payload:
 
 ```csharp
 void TryAlgNoneAttack()
 {
     Console.WriteLine("=== alg:none aanval ===");
 
-    // Header met alg:none
-    string header  = Convert.ToBase64String(
+    // Header met alg:none coderen naar Base64url
+    string header = Convert.ToBase64String(
         Encoding.UTF8.GetBytes("{\"alg\":\"none\",\"typ\":\"JWT\"}"))
         .Replace('+', '-').Replace('/', '_').TrimEnd('=');
 
-    // Payload met admin-rol
+    // Payload met admin-rol coderen naar Base64url
     string payload = Convert.ToBase64String(
         Encoding.UTF8.GetBytes("{\"sub\":\"admin@shopwave.be\",\"role\":\"admin\"}"))
         .Replace('+', '-').Replace('/', '_').TrimEnd('=');
 
-    // Geen signature
-    string noneToken = $"{header}.{payload}.";
-
-    HttpClientHandler handler = new HttpClientHandler();
-    handler.ServerCertificateCustomValidationCallback =
-        (message, certificate, chain, errors) => true;
-
-    HttpClient client = new HttpClient(handler);
-    client.BaseAddress = new Uri("https://localhost:5001");
-    client.DefaultRequestHeaders.Authorization =
-        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", noneToken);
-
-    HttpResponseMessage response = client.GetAsync("/admin/orders").Result;
-    Console.WriteLine($"Resultaat alg:none token: {response.StatusCode}");
-    Console.WriteLine("Verwacht: Unauthorized (.NET weigert alg:none standaard)");
-
-    client.Dispose();
-    handler.Dispose();
+    Console.WriteLine($"Header:  {header}");
+    Console.WriteLine($"Payload: {payload}");
 }
 ```
 
 **Wat je ziet:**
 
 ```
+Header:  eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0
+Payload: eyJzdWIiOiJhZG1pbkBzaG9wd2F2ZS5iZSIsInJvbGUiOiJhZG1pbiJ9
+```
+
+Twee Base64url-blokken. Er is nog geen signature.
+
+---
+
+### Stap 8i: `alg:none` - token sturen zonder signature
+
+Bouw het token met een lege signature-sectie en stuur het:
+
+```csharp
+// Geen signature: de derde sectie is leeg, maar de punt blijft
+string noneToken = $"{header}.{payload}.";
+
+HttpClientHandler handler = new HttpClientHandler();
+handler.ServerCertificateCustomValidationCallback =
+    (message, certificate, chain, errors) => true;
+
+HttpClient client = new HttpClient(handler);
+client.BaseAddress = new Uri("https://localhost:5001");
+client.DefaultRequestHeaders.Authorization =
+    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", noneToken);
+
+HttpResponseMessage response = client.GetAsync("/admin/orders").Result;
+Console.WriteLine($"Resultaat alg:none token: {response.StatusCode}");
+Console.WriteLine("Verwacht: Unauthorized (.NET weigert alg:none standaard)");
+
+client.Dispose();
+handler.Dispose();
+```
+
+**Wat je ziet:**
+
+```
 === alg:none aanval ===
+Header:  eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0
+Payload: eyJzdWIiOiJhZG1pbkBzaG9wd2F2ZS5iZSIsInJvbGUiOiJhZG1pbiJ9
 Resultaat alg:none token: Unauthorized
 Verwacht: Unauthorized (.NET weigert alg:none standaard)
 ```
 
+De .NET-middleware vergelijkt het algoritme in de header met de geconfigureerde lijst. `none` staat daar niet in. Het token wordt onmiddellijk geweigerd.
+
 ---
 
-### Stap 8f: Brute-force test op het login-endpoint
+### Stap 8j: Brute-force test op het login-endpoint
 
 Test of rate limiting werkt door zes loginpogingen na elkaar te sturen:
 
@@ -410,7 +484,7 @@ Als poging 6 ook `200` of `401` geeft, is rate limiting niet geactiveerd. Noteer
 
 ---
 
-### Stap 8g: SQL Injection verificatie
+### Stap 8k: SQL Injection verificatie
 
 Verifieer dat de SQL Injection-fix uit les 8 effectief werkt:
 
@@ -429,7 +503,7 @@ curl.exe -k "https://localhost:5001/orders/zoek?email='; DROP TABLE orders --"
 
 ---
 
-### Stap 8h: CORS-headers inspecteren
+### Stap 8l: CORS-headers inspecteren
 
 Stuur een request met een kwaadaardige `Origin`-header en inspecteer de response:
 
@@ -441,7 +515,7 @@ curl.exe -k -v -H "Origin: https://aanvaller.be" https://localhost:5001/ 2>&1 | 
 
 ---
 
-### Stap 8i: Informatielekkage testen
+### Stap 8m: Informatielekkage testen
 
 Test of foutmeldingen interne informatie lekken:
 
