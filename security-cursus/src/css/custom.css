@@ -29,7 +29,6 @@
   /* Typography */
   --ifm-code-font-size:    93%;
   --ifm-line-height-base:  1.25;
-  --sw-content-max-width:  72ch;
 
   /* UI */
   --ifm-navbar-shadow:       0 1px 0 0 var(--ifm-color-emphasis-200);
@@ -123,9 +122,6 @@
 /* ══════════════════════════════════════════════════════════════
    CONTENT — max readable width
    ══════════════════════════════════════════════════════════════ */
-.theme-doc-markdown {
-  max-width: var(--sw-content-max-width);
-}
 
 /* Tables are often wider — let them breathe */
 .theme-doc-markdown table {
