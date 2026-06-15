@@ -55,7 +55,7 @@ export default function Home() {
           <p className={styles.heroBadge}>AP Hogeschool — Graduaat Programmeren</p>
           <Heading as="h1" className={styles.heroTitle}>{siteConfig.title}</Heading>
           <p className={styles.heroSub}>
-            12 lessen · ShopWave als doorlopend thema · C# / ASP.NET Core
+            12 lessen · C# / ASP.NET Core
           </p>
           <div className={styles.heroButtons}>
             <Link className={clsx('button button--lg', styles.btnPrimary)} to="/docs/testing/unit-testing-mocking">
