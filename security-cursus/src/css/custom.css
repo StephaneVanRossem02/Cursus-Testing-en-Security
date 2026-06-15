@@ -106,13 +106,11 @@
   color: var(--ifm-color-emphasis-400);
   padding: 0.25rem 0.8rem;
   background: none !important;
-  cursor: default;
-  pointer-events: none;
 }
 
-/* Verberg de caret bij top-level secties */
-.menu__list > .menu__list-item > .menu__list-item-collapsible > .menu__caret {
-  display: none;
+.menu__list > .menu__list-item > .menu__list-item-collapsible > .menu__link:hover {
+  background: none !important;
+  color: var(--ifm-color-emphasis-600);
 }
 
 /* ── Niveau 2: Les-items (Les 1, Les 3...) ── */
