@@ -28,7 +28,7 @@
 
   /* Typography */
   --ifm-code-font-size:    93%;
-  --ifm-line-height-base:  1.78;
+  --ifm-line-height-base:  1.25;
   --sw-content-max-width:  72ch;
 
   /* UI */
@@ -312,7 +312,7 @@ div[class*='codeBlockContent'] pre {
   padding: 0.75rem 1rem 0.75rem 1.1rem;
   margin: 1.5rem 0;
   font-size: 0.9rem;
-  line-height: 1.7;
+  line-height: 1.2;
 }
 
 .minicontrole::before {
@@ -358,7 +358,7 @@ div[class*='codeBlockContent'] pre {
   padding: 0.75rem 1.1rem;
   margin: 1.25rem 0;
   font-size: 0.9rem;
-  line-height: 1.7;
+  line-height: 1.2;
 }
 
 [data-theme='dark'] .theme-doc-markdown blockquote {
@@ -415,7 +415,7 @@ div[class*='codeBlockContent'] pre {
   padding: 0.55rem 0.9rem;
   border-bottom: 1px solid var(--ifm-color-emphasis-100);
   vertical-align: top;
-  line-height: 1.6;
+  line-height: 1.1;
 }
 
 .theme-doc-markdown tr:last-child td {
