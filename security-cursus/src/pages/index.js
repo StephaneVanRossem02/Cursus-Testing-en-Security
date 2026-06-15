@@ -69,16 +69,6 @@ export default function Home() {
       </header>
 
       <main className={clsx('container', styles.main)}>
-        <div className={styles.stats}>
-          <div className={styles.stat}><strong>12</strong><span>lessen</span></div>
-          <div className={styles.statDivider} />
-          <div className={styles.stat}><strong>5</strong><span>testing</span></div>
-          <div className={styles.statDivider} />
-          <div className={styles.stat}><strong>7</strong><span>security</span></div>
-          <div className={styles.statDivider} />
-          <div className={styles.stat}><strong>1</strong><span>ShopWave</span></div>
-        </div>
-
         <div className={styles.grid}>
           <Section title="Testing" accent="var(--sw-testing-color)" lessons={testing} />
           <Section title="Security" accent="var(--sw-security-color)" lessons={security} />
