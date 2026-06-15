@@ -121,7 +121,7 @@ Rechtsklik op de solution > `Add` > `New Project` > zoek op `Reqnroll` > kies `R
 
 De solution ziet er nu zo uit:
 
-```
+```csharp
 ShopWave           productieklassen
 ShopWave.Tests     xUnit unit tests en integration tests
 ShopWave.Specs     Reqnroll acceptatietests (nieuw)
@@ -241,7 +241,7 @@ Bouw de solution en voer de test uit. De test slaagt nu.
 
 Wat ziet de Test Explorer?
 
-```
+```csharp
 ✓ Succesvol inloggen met correct wachtwoord
 ```
 
@@ -262,7 +262,7 @@ Voeg een tweede scenario toe aan `Login.feature`:
 
 Bouw en voer de tests uit. Je ziet nu twee tests:
 
-```
+```csharp
 ✓ Succesvol inloggen met correct wachtwoord
 ✓ Inloggen met fout wachtwoord
 ```
@@ -288,7 +288,7 @@ Feature: Account lockout bij ShopWave
 
 We willen de `Given`-stap hergebruiken uit `LoginSteps.cs`. Maar als we `[Given("er is een account voor...")]` ook in een nieuwe `LockoutSteps.cs` definiëren, gooit Reqnroll een fout:
 
-```
+```csharp
 Ambiguous step definition.
 ```
 

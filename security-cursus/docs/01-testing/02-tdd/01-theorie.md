@@ -53,7 +53,7 @@ Wet 3 heeft een belangrijk gevolg dat studenten moeilijk vinden: als de eenvoudi
 
 Het TDD-proces wordt samengevat als **Red-Green-Refactor**. Dit is een iteratieve cyclus die je telkens opnieuw doorloopt.
 
-```
+```csharp
 Red      Schrijf een test die faalt.
          De productiecode bestaat nog niet of is onvolledig.
          De test beschrijft wat de code moet doen.
@@ -85,7 +85,7 @@ Je hoeft de testlijst niet volledig te maken voor je begint. Voeg gevallen toe n
 
 Voorbeeld voor een `CartService`:
 
-```
+```csharp
 [ ] Nieuw mandje heeft totaal 0
 [ ] Eén artikel toevoegen verhoogt het totaal
 [ ] Meerdere artikelen tellen correct op
@@ -124,7 +124,7 @@ We weten vooraf nog niet hoe de klasse er precies uitziet. We laten de tests het
 
 Voor je begint, noteer je de gevallen die je verwacht:
 
-```
+```csharp
 [ ] Een geldige couponcode geeft true terug bij validatie
 [ ] Een onbekende couponcode geeft false terug
 [ ] De juiste kortingswaarde wordt teruggegeven voor een geldige code
@@ -195,7 +195,7 @@ Bouw de solution. Voer de test uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ IsValid_WithValidCouponCode_ReturnsTrue
 ```
 
@@ -226,7 +226,7 @@ Voer alle tests uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ IsValid_WithValidCouponCode_ReturnsTrue
 ✗ IsValid_WithUnknownCouponCode_ReturnsFalse
 ```
@@ -264,7 +264,7 @@ Voer alle tests opnieuw uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ IsValid_WithValidCouponCode_ReturnsTrue
 ✓ IsValid_WithUnknownCouponCode_ReturnsFalse
 ```
@@ -366,7 +366,7 @@ Voer alle tests uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ IsValid_WithValidCouponCode_ReturnsTrue
 ✓ IsValid_WithUnknownCouponCode_ReturnsFalse
 ✓ GetDiscount_WithValidCouponCode_ReturnsCorrectDiscount
@@ -439,7 +439,7 @@ Voer alle tests uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ IsValid_WithValidCouponCode_ReturnsTrue
 ✓ IsValid_WithUnknownCouponCode_ReturnsFalse
 ✓ GetDiscount_WithValidCouponCode_ReturnsCorrectDiscount
@@ -451,7 +451,7 @@ Groene fase. Alle vijf de testgevallen uit de testlijst zijn gedekt.
 
 Vink de testlijst af:
 
-```
+```csharp
 [x] Een geldige couponcode geeft true terug bij validatie
 [x] Een onbekende couponcode geeft false terug
 [x] De juiste kortingswaarde wordt teruggegeven voor een geldige code

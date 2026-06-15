@@ -63,7 +63,7 @@ Schrijf de volgende twee scenario's voor de lockout-feature en de bijbehorende `
 
 **Scenario 1:** account geblokkeerd na drie foute pogingen
 
-```
+```csharp
 Given er is een account voor "bob@shopwave.be" met wachtwoord "veiligPw"
 When de gebruiker drie keer inlogt met een fout wachtwoord
 Then is het account van "bob@shopwave.be" geblokkeerd
@@ -71,7 +71,7 @@ Then is het account van "bob@shopwave.be" geblokkeerd
 
 **Scenario 2:** na blokkering werkt ook het correcte wachtwoord niet meer
 
-```
+```csharp
 Given er is een account voor "bob@shopwave.be" met wachtwoord "veiligPw"
 When de gebruiker drie keer inlogt met een fout wachtwoord
 And de gebruiker inlogt met het correcte wachtwoord "veiligPw"
@@ -142,7 +142,7 @@ Schrijf een `TwoFactor.feature` met twee afzonderlijke scenario's en daarna een 
 
 **Scenario 1:** succesvol inloggen inclusief correcte 2FA-code
 
-```
+```csharp
 Given er is een account voor "charlie@shopwave.be" met wachtwoord "pw123"
 When de gebruiker inlogt met het correcte wachtwoord voor "charlie@shopwave.be"
 And de gebruiker voert de correcte 2FA-code in voor "charlie@shopwave.be"
@@ -151,7 +151,7 @@ Then is de gebruiker "charlie@shopwave.be" ingelogd
 
 **Scenario 2:** 2FA-code is fout
 
-```
+```csharp
 Given er is een account voor "charlie@shopwave.be" met wachtwoord "pw123"
 When de gebruiker inlogt met het correcte wachtwoord voor "charlie@shopwave.be"
 And de gebruiker voert een foute 2FA-code in voor "charlie@shopwave.be"

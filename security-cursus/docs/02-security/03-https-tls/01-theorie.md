@@ -11,7 +11,7 @@ In les 2 leerde je dat een gestolen database minder gevaarlijk is als wachtwoord
 
 Stel dat een klant van ShopWave inlogt op een open wifi-netwerk in een café. Een aanvaller op hetzelfde netwerk kan met een tool zoals Wireshark alle netwerkpakketjes onderscheppen. Als ShopWave op HTTP draait, ziet de aanvaller dit:
 
-```
+```csharp
 POST /login HTTP/1.1
 Host: shopwave.be
 Content-Type: application/json
@@ -51,7 +51,7 @@ Authenticatie valt buiten het CIA-model maar is minstens even belangrijk. Zonder
 
 Voordat er één byte applicatiedata verstuurd wordt, voeren client en server de **TLS-handshake** uit. Die handshake regelt drie dingen: de server bewijst zijn identiteit, ze spreken af welke algoritmen ze gebruiken, en ze wisselen een gedeelde sessiesleutel uit.
 
-```
+```csharp
 Client                                         Server
   |                                               |
   |--- 1. ClientHello --------------------------> |
@@ -126,7 +126,7 @@ In productie werkt dat anders. Een **Certificate Authority (CA)** is een organis
 
 Die vertrouwensketen heet de **trust chain**:
 
-```
+```csharp
 Root CA
   (ingebouwd in Windows, macOS, Android, iOS)
     |
@@ -178,7 +178,7 @@ We breiden de ShopWave-solution uit met een ASP.NET Core Minimal API die op HTTP
 
 Voeg een nieuw project toe aan de bestaande solution:
 
-```
+```csharp
 ShopWave          (Console App, bestaand)
 ShopWave.Tests    (xUnit, bestaand)
 ShopWave.Api      (ASP.NET Core Web API, nieuw)
@@ -192,7 +192,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -232,7 +232,7 @@ Start de API via "Run" in Visual Studio of via `dotnet run` in de terminal.
 
 Wat je ziet:
 
-```
+```csharp
 info: Microsoft.Hosting.Lifetime[14]
       Now listening on: https://localhost:5001
 ```
@@ -241,7 +241,7 @@ Open een browser en ga naar `https://localhost:5001`. Je ziet een beveiligingswa
 
 Wat je ziet in de browser:
 
-```
+```csharp
 ShopWave API actief op HTTPS
 ```
 
@@ -319,7 +319,7 @@ Start eerst de API, daarna de console-app.
 
 Wat je ziet:
 
-```
+```csharp
 Subject:    CN=localhost
 Issuer:     CN=localhost
 Geldig tot: 2027-06-15
@@ -383,7 +383,7 @@ serverRsa.Dispose();
 
 Wat je ziet:
 
-```
+```csharp
 Sessiesleutel (origineel):  A3F9C2E1B7D4...
 Verstuurd (versleuteld):    8F2K9XPQR1LM...
 Sessiesleutel (ontvangen):  A3F9C2E1B7D4...
@@ -424,7 +424,7 @@ Ga naar `https://localhost:5001/` en open de developer tools (F12). Kijk onder h
 
 Wat je ziet:
 
-```
+```csharp
 x-content-type-options: nosniff
 x-frame-options: DENY
 x-xss-protection: 1; mode=block
@@ -458,7 +458,7 @@ HSTS beschermt tegen een specifieke aanval: een aanvaller die probeert de client
 
 Wat je ziet in de response headers:
 
-```
+```csharp
 strict-transport-security: max-age=31536000; includeSubDomains
 ```
 

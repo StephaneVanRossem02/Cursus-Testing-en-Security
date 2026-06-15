@@ -111,7 +111,7 @@ Als de database gestolen wordt, zijn alle wachtwoorden onmiddellijk leesbaar.
 
 **De oplossing:** hash het wachtwoord bij registratie en vergelijk hashes bij login.
 
-```
+```csharp
 Bij registratie:  hash(wachtwoord)           →  sla de hash op in de database
 Bij login:        hash(ingegeven wachtwoord)  →  vergelijk met de opgeslagen hash
 ```
@@ -130,7 +130,7 @@ Bovendien bestaat er een techniek genaamd de **rainbow table**: een vooraf berek
 
 De oplossing is een **salt**: een willekeurige waarde die je toevoegt aan het wachtwoord vóór het hashen.
 
-```
+```csharp
 hash("wachtwoord")              →  altijd dezelfde hash
 hash("wachtwoord" + zout1234)   →  unieke hash voor deze gebruiker
 hash("wachtwoord" + koffie789)  →  andere unieke hash voor een andere gebruiker
@@ -169,7 +169,7 @@ bool ok = BCrypt.Net.BCrypt.Verify(password, storedHash);
 
 De string die `HashPassword` teruggeeft, ziet er zo uit:
 
-```
+```csharp
 $2b$11$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW
 ```
 
@@ -201,7 +201,7 @@ Dit is het fundamentele verschil met hashing: encryptie is **tweerichtingsverkee
 
 Bij **symmetrische encryptie** gebruik je dezelfde sleutel om te versleutelen én te ontsleutelen.
 
-```
+```csharp
 Plaintext  +  sleutel  →  Ciphertext
 Ciphertext +  sleutel  →  Plaintext
 ```
@@ -214,7 +214,7 @@ In .NET gebruik je **AES** (Advanced Encryption Standard) voor symmetrische encr
 
 Bij **asymmetrische encryptie** gebruik je een sleutelpaar: een publieke sleutel om te versleutelen, een private sleutel om te ontsleutelen.
 
-```
+```csharp
 Plaintext  +  publieke sleutel  →  Ciphertext
 Ciphertext +  private sleutel   →  Plaintext
 ```
@@ -289,7 +289,7 @@ Dit werkt, maar als de database uitlekt, ziet een aanvaller alle wachtwoorden on
 
 Wat je ziet als je de solution bouwt:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -299,7 +299,7 @@ Build succeeded.
 
 Installeer `BCrypt.Net-Next` via de Package Manager Console:
 
-```
+```csharp
 Install-Package BCrypt.Net-Next
 ```
 
@@ -344,7 +344,7 @@ Voer uit.
 
 Wat je ziet:
 
-```
+```csharp
 Hash 1: $2b$11$R9h/cIPz0gi.URNNX3kh2O...
 Hash 2: $2b$11$Kq8OUx7A9bY3dRv2mNpZ1e...
 Gelijk: False
@@ -370,7 +370,7 @@ Console.WriteLine($"Gelijk: {hashAlice == hashBob}");
 
 Wat je ziet:
 
-```
+```csharp
 Alice: $2b$11$...een waarde...
 Bob:   $2b$11$...andere waarde...
 Gelijk: False
@@ -415,7 +415,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -458,7 +458,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -504,7 +504,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -549,7 +549,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -580,7 +580,7 @@ Voer uit.
 
 Wat je ziet:
 
-```
+```csharp
 Origineel:     ORD-2024-00042
 Versleuteld 1: Xy7mNpQ2r...
 Versleuteld 2: Bk3aLvM8s...

@@ -52,7 +52,7 @@ Een bijkomend voordeel: een goed geschreven test werkt als **levende documentati
 
 Elke unit test volgt hetzelfde drieledige patroon, het **Arrange-Act-Assert patroon**, afgekort **AAA**.
 
-```
+```csharp
 Arrange   Zet alles klaar: maak objecten aan, stel invoerwaarden in.
 Act       Roep de methode aan die je wil testen.
 Assert    Controleer of het resultaat overeenkomt met wat je verwacht.
@@ -195,7 +195,7 @@ xUnit voert deze test drie keer uit, één keer per rij met `[InlineData]`. In d
 
 Het verschil zit niet alleen in leesbaarheid. Bij een falende test geeft FluentAssertions ook een duidelijkere foutmelding:
 
-```
+```csharp
 xUnit:           Expected: 90.0  Actual: 9.0
 FluentAssertions: Expected result to be 90.0, but found 9.0.
 ```
@@ -457,7 +457,7 @@ Bouw de solution. Open de Test Explorer (`Test` > `Test Explorer`). Voer de test
 
 Wat je ziet:
 
-```
+```csharp
 ✓ ApplyDiscount_WithTenPercent_ReturnsCorrectPrice
 ```
 
@@ -499,7 +499,7 @@ Voer alle tests uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ ApplyDiscount_WithTenPercent_ReturnsCorrectPrice
 ✓ ApplyDiscount_WithZeroPercent_ReturnsOriginalPrice
 ✓ ApplyDiscount_WithHundredPercent_ReturnsZero
@@ -652,7 +652,7 @@ Voer de test uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ PlaceOrder_WhenPaymentSucceeds_ReturnsBevestigd
 ```
 
@@ -689,7 +689,7 @@ Voer alle tests uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ ApplyDiscount_WithValidInputs_ReturnsCorrectPrice (4 cases)
 ✓ ApplyDiscount_WithNegativePercent_ThrowsArgumentOutOfRangeException
 ✓ PlaceOrder_WhenPaymentSucceeds_ReturnsBevestigd

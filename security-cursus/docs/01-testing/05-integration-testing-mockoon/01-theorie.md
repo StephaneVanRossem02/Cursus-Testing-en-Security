@@ -41,7 +41,7 @@ De oplossing is een **mock server**: een lokale HTTP-server die je zelf configur
 
 Een **mock server** is een lokale HTTP-server die jij configureert: "als je een GET-request krijgt op `/api/tarief`, geef dan dit JSON-antwoord terug."
 
-```
+```csharp
 Moq:         IPaymentGateway (interface)  →  nep-object in geheugen
 Mock server: https://verzendservice.be   →  nep-server op localhost
 ```
@@ -254,7 +254,7 @@ Maak de twee bestanden aan zoals beschreven in sectie 4. Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -310,7 +310,7 @@ Voer de test uit. Zorg dat Mockoon draait.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ GetShippingRateAsync_WithValidRequest_ReturnsTarief
 ```
 
@@ -355,7 +355,7 @@ Voer alle tests uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ GetShippingRateAsync_WithValidRequest_ReturnsTarief
 ✓ GetShippingRateAsync_WhenServerReturns500_ThrowsHttpRequestException
 ```
@@ -396,7 +396,7 @@ Voer de test uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ GetShippingRateAsync_WhenRequestTimesOut_ThrowsTaskCanceledException
 ```
 
@@ -410,7 +410,7 @@ Voer alle tests uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ GetShippingRateAsync_WithValidRequest_ReturnsTarief
 ✓ GetShippingRateAsync_WhenServerReturns500_ThrowsHttpRequestException
 ✓ GetShippingRateAsync_WhenRequestTimesOut_ThrowsTaskCanceledException

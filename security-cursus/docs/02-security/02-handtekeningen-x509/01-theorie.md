@@ -58,7 +58,7 @@ Bij de activatie van 2FA deelt de server een **geheime sleutel** met de authenti
 
 De app berekent een 6-cijferige code op basis van twee dingen: de geheime sleutel en de huidige tijd, afgerond op 30 seconden. Die berekening gebruikt **HMAC-SHA1**.
 
-```
+```csharp
 Geheime sleutel + Huidige tijd  →  HMAC-SHA1  →  6-cijferige code
 ```
 
@@ -114,7 +114,7 @@ Digitale handtekeningen gebruiken **asymmetrische cryptografie**: een sleutelpaa
 
 **Bij de verzender (ShopWave):**
 
-```
+```csharp
 Orderdata  →  SHA-256  →  Hash  →  RSA (private sleutel)  →  Handtekening
 ```
 
@@ -124,7 +124,7 @@ Orderdata  →  SHA-256  →  Hash  →  RSA (private sleutel)  →  Handtekenin
 
 **Bij de ontvanger (klant of systeem):**
 
-```
+```csharp
 Ontvangen orderdata  →  SHA-256  →  Hash A
 Handtekening  →  RSA (publieke sleutel)  →  Hash B
 
@@ -235,7 +235,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -270,7 +270,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -303,7 +303,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -345,7 +345,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -398,7 +398,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -468,7 +468,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -503,7 +503,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -536,7 +536,7 @@ Voer uit en voer de getoonde code in.
 
 Wat je ziet:
 
-```
+```csharp
 [2FA] Code voor alice@shopwave.be: 482917
 2FA vereist.
 Voer de 2FA-code in: 482917
@@ -579,7 +579,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -616,7 +616,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -669,7 +669,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -707,7 +707,7 @@ Bouw de solution.
 
 Wat je ziet:
 
-```
+```csharp
 Build succeeded.
 ```
 
@@ -743,7 +743,7 @@ Voer uit.
 
 Wat je ziet:
 
-```
+```csharp
 Orderdata:    ORD-2024-00042 | alice@shopwave.be | Laptop | 999.99 EUR
 Handtekening: Xy7mNpQ2rBk3aLvM8sRt1wJc9dFe6hGi...
 Geldig (origineel):     True

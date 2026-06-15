@@ -65,7 +65,7 @@ public async Task GetShippingRateAsync_WithKnownDestination_ReturnsCorrectTarief
 
 **Verwacht resultaat:**
 
-```
+```csharp
 ✓ GetShippingRateAsync_WithKnownDestination_ReturnsCorrectTarief(destination: "Antwerpen", ...)
 ✓ GetShippingRateAsync_WithKnownDestination_ReturnsCorrectTarief(destination: "Brussel", ...)
 ```
@@ -94,7 +94,7 @@ public async Task GetShippingRateAsync_WithKnownDestination_ReturnsCorrectTarief
 
 **Verwacht resultaat:**
 
-```
+```csharp
 ✓ GetShippingRateAsync_WithErrorDestination_ThrowsHttpRequestException(destination: "FOUT")
 ✓ GetShippingRateAsync_WithErrorDestination_ThrowsHttpRequestException(destination: "ONBEKEND")
 ✓ GetShippingRateAsync_WithErrorDestination_ThrowsHttpRequestException(destination: "OFFLINE")
@@ -225,7 +225,7 @@ namespace ShopWave.Tests
 
 **Verwacht resultaat:**
 
-```
+```csharp
 ✓ GetShippingRateAsync_WithWireMock_ReturnsTarief
 ✓ GetShippingRateAsync_WithWireMock_WhenServerReturns500_ThrowsHttpRequestException
 ```

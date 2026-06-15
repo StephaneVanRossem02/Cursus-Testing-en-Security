@@ -42,7 +42,7 @@ Een server die het token ontvangt, controleert de geldigheid volledig lokaal. Ge
 
 Een **JSON Web Token** bestaat uit drie delen, gescheiden door punten:
 
-```
+```csharp
 header.payload.signature
 ```
 
@@ -87,7 +87,7 @@ De payload bevat de claims: gegevens over de gebruiker en het token zelf.
 
 De signature wordt berekend als:
 
-```
+```csharp
 HMACSHA256(
   base64url(header) + "." + base64url(payload),
   secretKey
@@ -104,7 +104,7 @@ De server berekent de signature opnieuw bij elke inkomende request en vergelijkt
 
 JWT ziet er onleesbaar uit, maar is **niet versleuteld**. De header en payload zijn Base64url-gecodeerd. Codering is geen versleuteling: iedereen kan het decoderen zonder sleutel.
 
-```
+```csharp
 eyJzdWIiOiJhbGljZUBzaG9wd2F2ZS5iZSIsInJvbGUiOiJ1c2VyIn0
 ```
 
@@ -124,7 +124,7 @@ Stop nooit gevoelige informatie in een JWT-payload: geen wachtwoorden, geen cred
 
 ## 5. De JWT-flow in ShopWave
 
-```
+```csharp
 ShopWave console          ShopWave.Api
        |                       |
        |-- POST /login ------> |  stap 1: login met e-mail en wachtwoord
@@ -591,7 +591,7 @@ string twoFactorCode = Console.ReadLine() ?? string.Empty;
 
 **Wat je ziet:**
 
-```
+```csharp
 === Stap 1: Login ===
 {"status":"2FA-code verstuurd."}
 Voer de 2FA-code in (staat in de API-console):
@@ -623,7 +623,7 @@ string token = verifyDoc.RootElement.GetProperty("token").GetString() ?? string.
 
 **Wat je ziet:**
 
-```
+```csharp
 === Stap 2: Verify + Token ophalen ===
 {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGljZ..."}
 ```
@@ -653,7 +653,7 @@ Console.WriteLine($"Status: {noTokenResponse.StatusCode}");
 
 **Wat je ziet:**
 
-```
+```csharp
 === Stap 3: Met token (verwacht 200 OK) ===
 Status: OK
 {"order":"alice@shopwave.be | Laptop | 999.99 EUR","signature":"..."}
@@ -693,7 +693,7 @@ client.Dispose();
 
 **Wat je ziet:**
 
-```
+```csharp
 === Stap 5: JWT-payload leesbaar zonder sleutel ===
 Subject:  alice@shopwave.be
 Verloopt: 15/05/2024 14:30:00

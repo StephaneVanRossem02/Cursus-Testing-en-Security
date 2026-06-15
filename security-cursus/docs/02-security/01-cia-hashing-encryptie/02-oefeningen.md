@@ -88,7 +88,7 @@ Console.WriteLine(repository.Login("alice@shopwave.be", "wachtwoord123"));
 
 Verwacht resultaat:
 
-```
+```csharp
 Inloggen mislukt.
 Inloggen mislukt.
 Account geblokkeerd.
@@ -156,7 +156,7 @@ Console.WriteLine(repository.Register("alice@shopwave.be", "Wachtwoord1!"));
 
 Verwacht resultaat:
 
-```
+```csharp
 Wachtwoord moet minstens 8 tekens lang zijn.
 Wachtwoord moet minstens één hoofdletter bevatten.
 Registratie geslaagd.
@@ -235,7 +235,7 @@ Console.WriteLine(orders.GetOrder("ORD-002"));
 
 Verwacht resultaat:
 
-```
+```csharp
 alice@shopwave.be | Laptop | 999.99 EUR
 bob@shopwave.be   | Muis   |  29.99 EUR
 ```
@@ -303,7 +303,7 @@ foreach (var entry in notes.ExportEncryptedNotes())
 
 Verwacht resultaat:
 
-```
+```csharp
 Alice heeft notitie: True
 Notitie Alice: VIP-klant. Altijd prioriteit geven.
 

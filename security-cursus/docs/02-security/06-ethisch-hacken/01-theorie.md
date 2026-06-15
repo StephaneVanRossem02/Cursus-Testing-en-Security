@@ -149,7 +149,7 @@ Een professioneel rapport bevat per bevinding:
 
 **Risicoclassificatie** combineert twee factoren:
 
-```
+```csharp
               | Lage impact | Hoge impact
 Waarschijnlijk|   Medium    |    High
 Onwaarschijnlijk|  Low      |   Medium
@@ -165,7 +165,7 @@ Een SQL Injection op een publiek zoekendpoint scoort hoog op beide assen: het is
 
 **DevSecOps** integreert security in elk stadium van het softwareontwikkelingsproces. In plaats van security te controleren als laatste stap voor een release, bouw je het in van bij het eerste commit.
 
-```
+```csharp
 Commit --> Build --> Test --> Security Scan --> Package --> Deploy
                       |            |
                Unit tests     SAST: code-analyse
@@ -298,7 +298,7 @@ Console.WriteLine($"Originele payload: {decodedPayload}");
 
 **Wat je ziet:**
 
-```
+```csharp
 Originele payload: {"sub":"alice@shopwave.be","role":"user","iat":1715996400}
 ```
 
@@ -327,7 +327,7 @@ Console.WriteLine($"Gemanipuleerd token (begin): {manipulatedToken[..60]}...");
 
 **Wat je ziet:**
 
-```
+```csharp
 Aangepaste payload: {"sub":"alice@shopwave.be","role":"admin","iat":1715996400}
 Gemanipuleerd token (begin): eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOi...
 ```
@@ -367,7 +367,7 @@ TryRoleManipulation(aliceToken);
 
 **Wat je ziet:**
 
-```
+```csharp
 === JWT-rolmanipulatie poging ===
 Originele payload: {"sub":"alice@shopwave.be","role":"user","iat":1715996400}
 Aangepaste payload: {"sub":"alice@shopwave.be","role":"admin","iat":1715996400}
@@ -406,7 +406,7 @@ void TryAlgNoneAttack()
 
 **Wat je ziet:**
 
-```
+```csharp
 Header:  eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0
 Payload: eyJzdWIiOiJhZG1pbkBzaG9wd2F2ZS5iZSIsInJvbGUiOiJhZG1pbiJ9
 ```
@@ -442,7 +442,7 @@ handler.Dispose();
 
 **Wat je ziet:**
 
-```
+```csharp
 === alg:none aanval ===
 Header:  eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0
 Payload: eyJzdWIiOiJhZG1pbkBzaG9wd2F2ZS5iZSIsInJvbGUiOiJhZG1pbiJ9
@@ -471,7 +471,7 @@ for ($i = 1; $i -le 6; $i++) {
 
 **Wat je ziet als rate limiting actief is:**
 
-```
+```csharp
 Poging 1 : 200
 Poging 2 : 200
 Poging 3 : 200

@@ -81,7 +81,7 @@ void TryRoleManipulation(string validToken)
 
 **Controleer je werk:** verwacht resultaat:
 
-```
+```csharp
 === JWT-rolmanipulatie poging ===
 Originele payload: {"sub":"alice@shopwave.be","role":"user","iat":...}
 Aangepaste payload: {"sub":"alice@shopwave.be","role":"admin","iat":...}
@@ -148,7 +148,7 @@ void TryAlgNoneAttack()
 
 **Controleer je werk:** verwacht resultaat:
 
-```
+```csharp
 === alg:none aanval ===
 Resultaat alg:none token: Unauthorized
 Verwacht: Unauthorized (.NET weigert alg:none standaard)
@@ -344,7 +344,7 @@ foreach (Finding f in report.GetByRisk("High"))
 
 Verwacht resultaat:
 
-```
+```csharp
 === Alle bevindingen ===
 [FINDING-01] High (8,2) - SQL Injection op zoekendpoint [Open]
 [FINDING-02] Medium (5,3) - Developer Exception Page actief in productie [Closed]

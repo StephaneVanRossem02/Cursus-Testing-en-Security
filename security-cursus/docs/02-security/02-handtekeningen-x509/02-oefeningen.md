@@ -100,7 +100,7 @@ Console.WriteLine(result);
 
 Verwacht resultaat:
 
-```
+```csharp
 [RESET] Code voor alice@shopwave.be: 739201
 Voer de resetcode in: 739201
 Wachtwoord gewijzigd.
@@ -152,7 +152,7 @@ Console.WriteLine($"Geldig na blokkering: {result}");
 
 Verwacht resultaat:
 
-```
+```csharp
 Pogingen resterend: 3
 Pogingen resterend: 2
 Pogingen resterend: 1
@@ -178,7 +178,7 @@ Maak `ShopWave/Security/InvoiceSigner.cs` aan. Deze klasse werkt hetzelfde als `
 
 Een factuurstring heeft het formaat:
 
-```
+```csharp
 FACT-{nummer} | {datum} | {klant} | {bedrag} EUR
 ```
 
@@ -217,7 +217,7 @@ Console.WriteLine($"Gemanipuleerd: {signer.Verify(gemanipuleerd, signature)}");
 
 Verwacht resultaat:
 
-```
+```csharp
 Factuur:      FACT-2024-0042 | 2024-11-15 | alice@shopwave.be | 1249.99 EUR
 Geldig:       True
 Gemanipuleerd: False
@@ -292,7 +292,7 @@ catch (InvalidOperationException ex)
 
 Verwacht resultaat:
 
-```
+```csharp
 Versleuteld: a3Fk9mNpQ2rBk3aLvM8sRt1wJc9dFe6h...
 Hersteld:    ORD-001 | alice@shopwave.be | Laptop | 999.99 EUR
 Fout: Handtekening ongeldig. Data mogelijk gemanipuleerd.

@@ -182,7 +182,7 @@ public async Task GetShippingRateAsync_WhenRequestTimesOut_ThrowsTaskCanceledExc
 
 ### Installatie
 
-```
+```csharp
 dotnet add package WireMock.Net
 ```
 

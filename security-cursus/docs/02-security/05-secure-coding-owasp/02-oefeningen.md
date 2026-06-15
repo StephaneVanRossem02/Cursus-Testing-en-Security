@@ -153,7 +153,7 @@ Console.WriteLine($"Niet-numeriek: {r3.StatusCode}");
 
 Verwacht resultaat:
 
-```
+```csharp
 Leeg e-mail: BadRequest
 Korte code: BadRequest
 Niet-numeriek: BadRequest
@@ -210,7 +210,7 @@ void DemoBruteForce()
 
 **Controleer je werk:** verwacht resultaat:
 
-```
+```csharp
 === Brute-force simulatie ===
 Poging 1: OK
 Poging 2: OK
@@ -284,7 +284,7 @@ Console.WriteLine($"localhost:3000:{validator.SimulateRequest("https://localhost
 
 Verwacht resultaat:
 
-```
+```csharp
 shopwave.be:   True
 aanvaller.be:  False
 localhost:3000:True

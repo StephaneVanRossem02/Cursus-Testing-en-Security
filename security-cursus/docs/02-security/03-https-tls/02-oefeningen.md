@@ -123,7 +123,7 @@ serverRsa.Dispose();
 
 **Verwacht resultaat:**
 
-```
+```csharp
 Sessiesleutel (origineel):  A3F9C2E1B7D408F2...
 Verstuurd (versleuteld):    8F2K9XPQR1LM3T7Y...
 Sessiesleutel (ontvangen):  A3F9C2E1B7D408F2...
@@ -167,7 +167,7 @@ Schrijf daarna in `ShopWave/Program.cs` twee console-methoden:
 
 **Controleer je werk:** verwacht resultaat in de console:
 
-```
+```csharp
 === Onveilig scenario ===
 Wat een aanvaller op HTTP zou zien: email=alice@shopwave.be&password=wachtwoord123
 

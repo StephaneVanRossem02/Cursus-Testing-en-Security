@@ -65,7 +65,7 @@ Voor professionele productieomgevingen is een secrets manager de betere keuze. A
 
 De flow voor ShopWave met Azure Key Vault:
 
-```
+```csharp
 ShopWave API (op Azure) --> Key Vault --> JWT_SECRET_KEY ophalen bij opstart
                        --> Key Vault --> AES_KEY ophalen bij opstart
 ```
@@ -142,7 +142,7 @@ In `appsettings.Production.json` verwijs je naar het certificaat:
 
 ASP.NET Core laadt configuratie in een vaste volgorde. Elke stap overschrijft de vorige:
 
-```
+```csharp
 appsettings.json
     + appsettings.{Environment}.json
         + omgevingsvariabelen
@@ -274,7 +274,7 @@ Na tien lessen heeft ShopWave alle behandelde OWASP-kwetsbaarheden aangepakt:
 
 **DevSecOps** integreert security in elk stadium van het ontwikkelproces. In plaats van security als laatste stap te controleren voor een release, bouw je het in van bij het eerste commit.
 
-```
+```csharp
 Commit --> Build --> Test --> Security Scan --> Package --> Deploy
                       |            |
                Unit tests     SAST: dotnet list --vulnerable
@@ -454,7 +454,7 @@ dotnet run --project ShopWave.Api
 
 **Wat je ziet:** de applicatie start niet op. Je ziet de foutmelding:
 
-```
+```csharp
 InvalidOperationException: Omgevingsvariabele JWT_SECRET_KEY ontbreekt.
 ```
 
@@ -489,7 +489,7 @@ curl.exe -k -v https://localhost:5001/ 2>&1 | Select-String "Strict-Transport"
 
 **Wat je ziet:**
 
-```
+```csharp
 < strict-transport-security: max-age=2592000
 ```
 
@@ -539,7 +539,7 @@ checklist.PrintReport();
 
 **Wat je ziet:**
 
-```
+```csharp
 === ShopWave Security Checklist ===
 
 [Auth]

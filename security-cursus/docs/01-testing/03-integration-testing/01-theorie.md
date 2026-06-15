@@ -28,7 +28,7 @@ Concrete problemen die unit tests missen:
 
 Een **integration test** test de samenwerking van twee of meer echte klassen, zonder mocks voor eigen code.
 
-```
+```csharp
 Unit test van OrderService:
   IPaymentGateway   mock (nep)
   IStockService     mock (nep)
@@ -58,7 +58,7 @@ De klassen werken samen zoals in productie. Als er een integratieprobleem is, ee
 
 Een goede teststrategie combineert drie niveaus. Die worden gevisualiseerd als een piramide.
 
-```
+```csharp
         /\
        /  \
       / E2E \         weinig, traag, fragiel
@@ -237,7 +237,7 @@ Bouw de solution. Voer de test uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ CheckoutFlow_WithValidCoupon_ProcessesCorrectAmount
 ```
 
@@ -286,7 +286,7 @@ Voer alle tests uit.
 
 Wat je ziet:
 
-```
+```csharp
 ✓ CheckoutFlow_WithValidCoupon_ProcessesCorrectAmount
 ✓ CheckoutFlow_WithInvalidCoupon_ProcessesFullAmount
 ```

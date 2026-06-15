@@ -42,7 +42,7 @@ namespace ShopWave
 
 Noteer alle testgevallen die je verwacht nodig te hebben voor `CartService`. Schrijf ze op voor je ook maar één lijn code aanraakt. De lijst hieronder is een vertrekpunt, maar je mag gevallen toevoegen als je ze ontdekt tijdens het implementeren.
 
-```
+```csharp
 [ ] Nieuw aangemaakt mandje heeft een totaal van 0
 [ ] Eén artikel toevoegen verhoogt het totaal met de prijs van dat artikel
 [ ] Meerdere artikelen optellen geeft het correcte totaal

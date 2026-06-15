@@ -33,7 +33,7 @@ Na deze les kan je:
 
 Je hebt twee extra packages nodig in het project `ShopWave.Api`:
 
-```
+```csharp
 Microsoft.AspNetCore.Authentication.JwtBearer
 System.IdentityModel.Tokens.Jwt
 ```

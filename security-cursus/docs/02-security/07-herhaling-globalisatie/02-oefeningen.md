@@ -180,7 +180,7 @@ foreach (ChecklistItem item in checklist.GetByStatus("NotImplemented"))
 
 Verwacht resultaat:
 
-```
+```csharp
 === ShopWave Security Checklist ===
 
 [Auth]
@@ -287,7 +287,7 @@ analyse.PrintAnalysis();
 
 Verwacht resultaat:
 
-```
+```csharp
 === CIA-pijleranalyse ShopWave ===
 
 Confidentiality (4 voorbeelden)
@@ -393,7 +393,7 @@ audit.PrintAuditReport(codeLines);
 
 Verwacht resultaat:
 
-```
+```csharp
 === Secrets Audit ===
 
 Mogelijke hardcoded secrets gevonden: 2

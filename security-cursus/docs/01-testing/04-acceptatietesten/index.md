@@ -53,7 +53,7 @@ Dat is de rol van **acceptatietesten**.
 
 ### 1. De testpiramide en acceptatietesten
 
-```
+```csharp
         /\
        /  \   Acceptatietesten
       /    \  (weinig, traag, hoog niveau)
@@ -114,7 +114,7 @@ De syntax is nagenoeg identiek — alles wat je over SpecFlow leest, geldt ook v
 
 ### 4. De drie lagen van een Reqnroll-project
 
-```
+```csharp
 Feature file (.feature)     → Gherkin-scenario's, leesbaar voor iedereen
 Step definitions (.cs)      → C#-code die elke Gherkin-stap uitvoert
 ShopWave-klassen            → De code die getest wordt
@@ -140,7 +140,7 @@ Rechtsklik op de solution → `Add` → `New Project` → zoek op `Reqnroll` →
 
 De solution ziet er nu zo uit:
 
-```
+```csharp
 ShopWave           ← Console App (bestaand)
 ShopWave.Tests     ← xUnit (bestaand)
 ShopWave.Api       ← Minimal API (bestaand)
@@ -270,7 +270,7 @@ Implementeer de `Then`-stap — het resultaat controleren:
 
 Build de solution en open de Test Explorer. Je ziet nu twee tests onder `ShopWave.Specs`:
 
-```
+```csharp
 ✓ Succesvol inloggen met correct wachtwoord
 ✓ Inloggen met fout wachtwoord
 ```
@@ -450,7 +450,7 @@ Reqnroll injecteert automatisch dezelfde `LoginContext`-instantie in `CommonStep
 Schrijf een feature file `TwoFactor.feature` en bijbehorende step definitions voor de volgende scenario's:
 
 **Scenario 1:** succesvol inloggen inclusief 2FA
-```
+```csharp
 Given er is een account voor "charlie@shopwave.be" met wachtwoord "pw123"
 When de gebruiker inlogt met het correcte wachtwoord
 And de gebruiker voert de correcte 2FA-code in
@@ -458,7 +458,7 @@ Then is de gebruiker ingelogd
 ```
 
 **Scenario 2:** 2FA-code is fout
-```
+```csharp
 Given er is een account voor "charlie@shopwave.be" met wachtwoord "pw123"
 When de gebruiker inlogt met het correcte wachtwoord
 And de gebruiker voert een foute 2FA-code in

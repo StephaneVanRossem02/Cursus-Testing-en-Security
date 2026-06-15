@@ -39,7 +39,7 @@ SELECT * FROM orders WHERE email = 'alice@shopwave.be'
 
 Maar wat als een aanvaller dit invoert?
 
-```
+```csharp
 ' OR '1'='1
 ```
 
@@ -53,7 +53,7 @@ SELECT * FROM orders WHERE email = '' OR '1'='1'
 
 Gevaarlijker nog:
 
-```
+```csharp
 '; DROP TABLE orders --
 ```
 
@@ -392,13 +392,13 @@ IResult HandleZoek(string email)
 
 Ga nu naar:
 
-```
+```csharp
 https://localhost:5001/orders/zoek?email=' OR '1'='1
 ```
 
 **Wat je ziet in de console:**
 
-```
+```csharp
 [KWETSBAAR] Query: SELECT * FROM orders WHERE email = '' OR '1'='1'
 ```
 
@@ -590,7 +590,7 @@ app.MapPost("/login", HandleLogin)
 
 Voer dit uit in de terminal in de map van de solution:
 
-```
+```csharp
 dotnet list package --vulnerable
 ```
 
@@ -652,7 +652,7 @@ client.Dispose();
 
 **Wat je ziet:**
 
-```
+```csharp
 === Test 1: Normale zoekopdracht ===
 {"results":["alice@shopwave.be|Laptop|999.99","alice@shopwave.be|Toetsenbord|79.99"]}
 === Test 2: SQL Injection poging ===

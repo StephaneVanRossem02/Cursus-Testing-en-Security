@@ -136,7 +136,7 @@ Console.WriteLine(adminResponse.Content.ReadAsStringAsync().Result);
 
 Verwacht resultaat:
 
-```
+```csharp
 Alice: Forbidden
 Admin: OK
 {"orders":[...]}
@@ -206,7 +206,7 @@ void DemoExpiredToken()
 
 **Controleer je werk:** verwacht resultaat:
 
-```
+```csharp
 Verlopen token statuscode: Unauthorized
 ```
 
@@ -313,7 +313,7 @@ Console.WriteLine($"Na uitloggen: {afterLogout.StatusCode}");
 
 Verwacht resultaat:
 
-```
+```csharp
 Voor uitloggen: OK
 Uitloggen: OK
 Na uitloggen: Unauthorized
