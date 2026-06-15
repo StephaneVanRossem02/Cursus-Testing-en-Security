@@ -1,7 +1,43 @@
 ---
-title: "Les 8: Acceptatietesten — BDD met Gherkin en Reqnroll"
-sidebar_label: "Acceptatietesten (BDD)"
+title: "Les 8: Acceptatietesten"
+sidebar_label: "Overzicht"
 ---
+
+# Les 8: Acceptatietesten
+
+In les 1 testten we klassen in isolatie. In les 3 bouwden we klassen via TDD. In les 5 testten we of klassen correct samenwerken. Maar geen van die tests beantwoordt de vraag die de klant stelt: doet het systeem wat ik gevraagd heb?
+
+In deze les schrijven we tests vanuit gebruikersperspectief. We beschrijven scenario's in gewone taal. Die scenario's worden tegelijk de specificatie en de automatische test.
+
+## Leerdoelen
+
+Na deze les kan je:
+
+- uitleggen wat acceptatietesten zijn en hoe ze verschillen van unit tests en integration tests
+- scenario's schrijven in Gherkin met de keywords `Feature`, `Scenario`, `Given`, `When` en `Then`
+- een Reqnroll-project opzetten en koppelen aan bestaande ShopWave-klassen
+- step definitions schrijven die Gherkin-stappen koppelen aan C#-code
+- gedeelde toestand beheren via een context-klasse en Reqnroll Dependency Injection
+- meerdere testvarianten samenvatten in een `Scenario Outline` met een `Examples`-tabel
+
+## Wat heb je nodig?
+
+**Installeer dit voor je begint:**
+- Visual Studio 2022 (Community of hoger) met de Reqnroll-extensie
+  - Ga naar `Extensions` > `Manage Extensions` > zoek op `Reqnroll` > installeer `Reqnroll for Visual Studio 2022 and 2026`
+- .NET 8 SDK
+- De ShopWave-klassen uit les 1, les 3 en les 5 (`AccountRepository`, `TwoFactorService`, `CartService`, `CouponService`)
+- NuGet-pakketten in het Reqnroll-project: `Reqnroll.xUnit`
+
+## Opbouw van deze les
+
+| Pagina | Wat staat er? |
+|--------|--------------|
+| [Theorie](theorie) | Gherkin, Reqnroll, step definitions, context-klasse en Scenario Outline |
+| [Oefeningen](oefeningen) | Zelf scenario's schrijven voor ShopWave |
+| [Oplossingen](oplossingen) | Volledige uitwerking met toelichting |
+
+**Werkwijze:** lees eerst de theorie inclusief de demo volledig door. Werk daarna de oefeningen zonder naar de oplossingen te kijken.
 
 # Les 8: Acceptatietesten — BDD met Gherkin en Reqnroll
 

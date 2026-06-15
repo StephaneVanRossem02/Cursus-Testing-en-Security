@@ -1,223 +1,179 @@
 ---
-title: "Les 8: BDD / Acceptatietesten met Reqnroll — Oefeningen"
+title: "Les 8: Oefeningen - Acceptatietesten"
 sidebar_label: "Oefeningen"
 ---
 
-# Les 8: BDD / Acceptatietesten met Reqnroll — Oefeningen
+# Oefeningen: Acceptatietesten
 
-> **Code-afspraken:** geen top-level statements · altijd `{}` · max één `return` · geen `break`/`continue` · geen underscore-prefix op parameters · geen geneste klassen · geen ternary/null-conditional · geen tuples · `double` i.p.v. `decimal` · identifiers Engels · tekst Nederlands
+Werk de oefeningen in volgorde. Schrijf bij elke oefening eerst de feature file, dan de step definitions. Gebruik de demo uit de theorie als referentie.
 
 ---
 
-## Oefening 1 — 2FA-scenario
+## Oefening 1: Scenario Outline voor de loginflow
 
-**Opgave:** Schrijf `TwoFactor.feature` en `TwoFactorSteps.cs` voor twee scenario's: succesvol inloggen inclusief 2FA, en 2FA-code is fout.
+**Leerdoel:** je vervangt meerdere identieke scenario's door één `Scenario Outline` met een `Examples`-tabel.
 
-**ShopWave.Specs/Features/TwoFactor.feature**
+**Moeilijkheidsgraad:** basis
+
+### Startcode
+
+Je hebt de loginfeature uit de theorie als vertrekpunt. Die bevat twee afzonderlijke scenario's:
 
 ```gherkin
-Feature: Twee-factor authenticatie bij ShopWave
+Feature: Inloggen bij ShopWave
 
-  Scenario: Succesvol inloggen met correcte 2FA-code
-    Given er is een account voor "charlie@shopwave.be" met wachtwoord "pw123"
-    When de gebruiker inlogt met het correcte wachtwoord voor "charlie@shopwave.be"
-    And de gebruiker voert de correcte 2FA-code in voor "charlie@shopwave.be"
-    Then is de gebruiker "charlie@shopwave.be" ingelogd
+  Scenario: Succesvol inloggen met correct wachtwoord
+    Given er is een account voor "alice@shopwave.be" met wachtwoord "wachtwoord123"
+    When de gebruiker inlogt met "alice@shopwave.be" en "wachtwoord123"
+    Then ontvangt de gebruiker de melding "Voer uw 2FA-code in."
 
-  Scenario: Inloggen met foute 2FA-code
-    Given er is een account voor "charlie@shopwave.be" met wachtwoord "pw123"
-    When de gebruiker inlogt met het correcte wachtwoord voor "charlie@shopwave.be"
-    And de gebruiker voert een foute 2FA-code in voor "charlie@shopwave.be"
-    Then ontvangt de gebruiker de melding "Ongeldige 2FA-code."
+  Scenario: Inloggen met fout wachtwoord
+    Given er is een account voor "alice@shopwave.be" met wachtwoord "wachtwoord123"
+    When de gebruiker inlogt met "alice@shopwave.be" en "foutWachtwoord"
+    Then ontvangt de gebruiker de melding "Ongeldig wachtwoord."
 ```
 
-**ShopWave.Specs/LoginContext.cs**
+Je hebt ook de step definitions uit de theorie (`LoginSteps.cs`, `CommonSteps.cs`, `LoginContext.cs`).
 
-```csharp
-namespace ShopWave.Specs
-{
-    public class LoginContext
-    {
-        public AccountRepository AccountRepository { get; set; } = null!;
-        public TwoFactorService  TwoFactorService  { get; set; } = null!;
-        public string            LastCode          { get; set; } = string.Empty;
-        public string            Result            { get; set; } = string.Empty;
-    }
-}
-```
+<h3 class="opdracht-titel">Opdracht</h3>
 
-**ShopWave.Specs/StepDefinitions/CommonSteps.cs**
+Vervang de twee afzonderlijke scenario's door één `Scenario Outline`. Voeg daarna een derde geval toe aan de `Examples`-tabel: een leeg wachtwoord (`""`) geeft ook de melding `"Ongeldig wachtwoord."`.
 
-```csharp
-using Reqnroll;
-using ShopWave.Security;
-using ShopWave.Specs;
+Verwacht resultaat in de Test Explorer: drie tests, elk met een andere naam die het invoerwaarden-paar bevat.
 
-namespace ShopWave.Specs.StepDefinitions
-{
-    [Binding]
-    public class CommonSteps
-    {
-        private readonly LoginContext context;
-
-        public CommonSteps(LoginContext context)
-        {
-            this.context = context;
-        }
-
-        [Given("er is een account voor {string} met wachtwoord {string}")]
-        public void GivenErIsEenAccount(string email, string wachtwoord)
-        {
-            this.context.TwoFactorService = new TwoFactorService(
-                onCodeGenerated: this.CaptureCode);
-
-            this.context.AccountRepository = new AccountRepository(this.context.TwoFactorService);
-            this.context.AccountRepository.Register(email, wachtwoord);
-        }
-
-        private void CaptureCode(string email, string code)
-        {
-            this.context.LastCode = code;
-        }
-    }
-}
-```
-
-**ShopWave.Specs/StepDefinitions/TwoFactorSteps.cs**
-
-```csharp
-using Reqnroll;
-using ShopWave.Specs;
-using Xunit;
-
-namespace ShopWave.Specs.StepDefinitions
-{
-    [Binding]
-    public class TwoFactorSteps
-    {
-        private readonly LoginContext context;
-
-        public TwoFactorSteps(LoginContext context)
-        {
-            this.context = context;
-        }
-
-        [When("de gebruiker inlogt met het correcte wachtwoord voor {string}")]
-        public void WhenInloggenMetCorrecteWachtwoord(string email)
-        {
-            this.context.AccountRepository.Login(email, "pw123");
-        }
-
-        [When("de gebruiker voert de correcte 2FA-code in voor {string}")]
-        public void WhenCorrecteTwoFactorCode(string email)
-        {
-            this.context.Result = this.context.AccountRepository
-                .VerifyTwoFactor(email, this.context.LastCode);
-        }
-
-        [When("de gebruiker voert een foute 2FA-code in voor {string}")]
-        public void WhenFouteTwoFactorCode(string email)
-        {
-            this.context.Result = this.context.AccountRepository
-                .VerifyTwoFactor(email, "000000");
-        }
-
-        [Then("is de gebruiker {string} ingelogd")]
-        public void ThenIsDeGebruikerIngelogd(string email)
-        {
-            Assert.Equal("Inloggen geslaagd.", this.context.Result);
-        }
-
-        [Then("ontvangt de gebruiker de melding {string}")]
-        public void ThenOntvangtDeGebruikerMelding(string verwachteMelding)
-        {
-            Assert.Equal(verwachteMelding, this.context.Result);
-        }
-    }
-}
-```
+De bestaande step definitions mogen niet aangepast worden. Een `Scenario Outline` vereist geen nieuwe step definitions als de stap-patronen al bestaan.
 
 ---
 
-## Oefening 3 — Registratie-feature
+## Oefening 2: Lockout-feature
 
-**Opgave:** `Registratie.feature` voor twee scenario's: registratie van nieuw account lukt, registratie van bestaand account geeft foutmelding.
+**Leerdoel:** je schrijft een volledige feature file en bijbehorende step definitions voor een nieuw scenario.
 
-**ShopWave.Specs/Features/Registratie.feature**
+**Moeilijkheidsgraad:** basis
+
+### Startcode
+
+Maak `ShopWave.Specs/Features/Lockout.feature` aan.
+
+De `CommonSteps.cs` uit de theorie bevat al de `Given`-stap voor het aanmaken van een account. Die mag je hergebruiken. Je hoeft die niet te dupliceren in een nieuwe step definitions-klasse.
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+Schrijf de volgende twee scenario's voor de lockout-feature en de bijbehorende `LockoutSteps.cs`.
+
+**Scenario 1:** account geblokkeerd na drie foute pogingen
+
+```
+Given er is een account voor "bob@shopwave.be" met wachtwoord "veiligPw"
+When de gebruiker drie keer inlogt met een fout wachtwoord
+Then is het account van "bob@shopwave.be" geblokkeerd
+```
+
+**Scenario 2:** na blokkering werkt ook het correcte wachtwoord niet meer
+
+```
+Given er is een account voor "bob@shopwave.be" met wachtwoord "veiligPw"
+When de gebruiker drie keer inlogt met een fout wachtwoord
+And de gebruiker inlogt met het correcte wachtwoord "veiligPw"
+Then ontvangt de gebruiker de melding "Account geblokkeerd."
+```
+
+**Aandachtspunt:** de `When`-stap "de gebruiker drie keer inlogt met een fout wachtwoord" roept `Login` drie keer aan met een fout wachtwoord. Je hoeft geen loop te schrijven in Gherkin. De herhaling zit in de C#-implementatie van die stap.
+
+**Aandachtspunt:** gebruik de gedeelde `LoginContext` voor de `AccountRepository`. Maak geen tweede `AccountRepository`-instantie aan in `LockoutSteps.cs`.
+
+---
+
+## Oefening 3: Registratie-feature
+
+**Leerdoel:** je schrijft zelfstandig een feature file en step definitions voor een nieuw domein-scenario zonder startcode.
+
+**Moeilijkheidsgraad:** gemiddeld
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+Maak `ShopWave.Specs/Features/Registratie.feature` aan en schrijf de bijbehorende `RegistratieSteps.cs`.
+
+Test de volgende scenario's:
+
+| Scenario | Verwacht resultaat |
+|---------|-------------------|
+| Registratie van een nieuw e-mailadres met een geldig wachtwoord | "Registratie geslaagd." |
+| Registratie van een e-mailadres dat al bestaat | "Account bestaat al." |
+
+**Structuur van de feature file:**
 
 ```gherkin
 Feature: Registratie bij ShopWave
 
   Scenario: Registratie van een nieuw account
     Given er bestaat nog geen account voor "david@shopwave.be"
-    When de gebruiker zich registreert met e-mailadres "david@shopwave.be" en wachtwoord "veiligPw99"
-    Then is het account aangemaakt
+    When ...
+    Then ...
 
   Scenario: Registratie van een bestaand account
     Given er is al een account voor "david@shopwave.be"
-    When de gebruiker zich opnieuw registreert met hetzelfde e-mailadres "david@shopwave.be"
-    Then ontvangt de gebruiker de registratiefout "Account bestaat al."
+    When ...
+    Then ...
 ```
 
-**ShopWave.Specs/StepDefinitions/RegistratieSteps.cs**
+**Aandachtspunten:**
+- De `Given`-stap "er bestaat nog geen account voor..." is anders dan "er is een account voor..." uit de theorie. Dit is een nieuwe stap die je zelf moet definiëren in `RegistratieSteps.cs`
+- Bewaar het resultaat van `Register(...)` in een lokale field in `RegistratieSteps.cs`, niet in `LoginContext`. Dit scenario heeft geen relatie met de loginflow
+- De `Then`-stap "ontvangt de gebruiker de melding" bestaat al in `LoginSteps.cs`. Gebruik die niet voor registratiemeldingen: de stap-tekst moet duidelijk maken dat het om een registratiemelding gaat, anders verwar je de twee flows
 
-```csharp
-using Reqnroll;
-using ShopWave.Security;
-using ShopWave.Specs;
-using Xunit;
+---
 
-namespace ShopWave.Specs.StepDefinitions
-{
-    [Binding]
-    public class RegistratieSteps
-    {
-        private readonly LoginContext context;
-        private          string       registratieResultaat = string.Empty;
+## Oefening 4: 2FA-flow als Scenario Outline
 
-        public RegistratieSteps(LoginContext context)
-        {
-            this.context = context;
-        }
+**Leerdoel:** je combineert de callback-techniek met een `Scenario Outline` om de volledige 2FA-flow te testen voor meerdere gevallen.
 
-        [Given("er bestaat nog geen account voor {string}")]
-        public void GivenGeenAccountVoor(string email)
-        {
-            this.context.TwoFactorService  = new TwoFactorService();
-            this.context.AccountRepository = new AccountRepository(this.context.TwoFactorService);
-        }
+**Moeilijkheidsgraad:** uitdaging
 
-        [Given("er is al een account voor {string}")]
-        public void GivenAccountBestaatAl(string email)
-        {
-            this.context.TwoFactorService  = new TwoFactorService();
-            this.context.AccountRepository = new AccountRepository(this.context.TwoFactorService);
-            this.context.AccountRepository.Register(email, "bestaandWachtwoord");
-        }
+### Startcode
 
-        [When("de gebruiker zich registreert met e-mailadres {string} en wachtwoord {string}")]
-        public void WhenRegistreer(string email, string wachtwoord)
-        {
-            this.registratieResultaat = this.context.AccountRepository.Register(email, wachtwoord);
-        }
+Maak `ShopWave.Specs/Features/TwoFactor.feature` aan.
 
-        [When("de gebruiker zich opnieuw registreert met hetzelfde e-mailadres {string}")]
-        public void WhenHerregistreer(string email)
-        {
-            this.registratieResultaat = this.context.AccountRepository.Register(email, "nieuwPw");
-        }
+De `CommonSteps.cs` installeert al de callback op `TwoFactorService` en slaat de gegenereerde code op in `_ctx.LastCode`.
 
-        [Then("is het account aangemaakt")]
-        public void ThenAccountAangemaakt()
-        {
-            Assert.Equal("Registratie geslaagd.", this.registratieResultaat);
-        }
+<h3 class="opdracht-titel">Opdracht</h3>
 
-        [Then("ontvangt de gebruiker de registratiefout {string}")]
-        public void ThenRegistratieFout(string verwachteFout)
-        {
-            Assert.Equal(verwachteFout, this.registratieResultaat);
-        }
-    }
-}
+Schrijf een `TwoFactor.feature` met twee afzonderlijke scenario's en daarna een `Scenario Outline` die beide gevallen dekt.
+
+**Scenario 1:** succesvol inloggen inclusief correcte 2FA-code
+
 ```
+Given er is een account voor "charlie@shopwave.be" met wachtwoord "pw123"
+When de gebruiker inlogt met het correcte wachtwoord voor "charlie@shopwave.be"
+And de gebruiker voert de correcte 2FA-code in voor "charlie@shopwave.be"
+Then is de gebruiker "charlie@shopwave.be" ingelogd
+```
+
+**Scenario 2:** 2FA-code is fout
+
+```
+Given er is een account voor "charlie@shopwave.be" met wachtwoord "pw123"
+When de gebruiker inlogt met het correcte wachtwoord voor "charlie@shopwave.be"
+And de gebruiker voert een foute 2FA-code in voor "charlie@shopwave.be"
+Then ontvangt de gebruiker de melding "Ongeldige 2FA-code."
+```
+
+Schrijf daarna `TwoFactorSteps.cs` met de step definitions voor de `When`- en `Then`-stappen. De `Given`-stap staat al in `CommonSteps.cs`.
+
+**Uitdaging:** herschrijf de twee scenario's daarna als één `Scenario Outline`. De uitdaging is dat de `Then`-stap verschilt per geval ("is de gebruiker ingelogd" versus "ontvangt de gebruiker de melding"). Hoe pak je dat aan?
+
+**Hint:** je kan de twee `Then`-stappen samenvoegen tot één stap "ontvangt de gebruiker het resultaat {string}" en in de `Examples`-tabel zowel "Inloggen geslaagd." als "Ongeldige 2FA-code." opnemen.
+
+---
+
+## Oefening 5: Reflectie
+
+Beantwoord deze vragen voor jezelf voor je de oplossingen bekijkt.
+
+1. Je hebt unit tests voor `AccountRepository.Login` die alle gevallen dekken. Waarom schrijf je dan nog een Gherkin-scenario voor hetzelfde gedrag?
+
+2. De `CommonSteps.cs` bevat de `Given`-stap voor het aanmaken van een account. Wat zou er fout gaan als je die stap in zowel `LoginSteps.cs` als `LockoutSteps.cs` zou definiëren?
+
+3. In oefening 4 gebruik je `_ctx.LastCode` om de 2FA-code op te vangen. Waarom kan je de returnwaarde van `Login(...)` niet gebruiken om de code te achterhalen?
+
+4. Wanneer is een `Scenario Outline` beter dan meerdere afzonderlijke scenario's? En wanneer schrijf je liever afzonderlijke scenario's?
