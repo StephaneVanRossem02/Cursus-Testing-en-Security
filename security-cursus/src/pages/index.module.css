@@ -155,14 +155,17 @@
   padding: 0.55rem 0.75rem;
   border-radius: 7px;
   border: 1px solid transparent;
+  border-left: 3px solid transparent;
   text-decoration: none;
   color: var(--ifm-font-color-base);
-  transition: background 0.12s, border-color 0.12s;
+  transition: background 0.14s, border-color 0.14s, box-shadow 0.14s;
 }
 
 .lessonCard:hover {
   background: var(--ifm-color-emphasis-100);
   border-color: var(--ifm-color-emphasis-200);
+  border-left-color: var(--accent);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   text-decoration: none;
   color: var(--ifm-font-color-base);
 }
@@ -190,10 +193,12 @@
 }
 
 .tag {
-  font-size: 0.68rem;
-  background: var(--ifm-color-emphasis-100);
-  color: var(--ifm-color-emphasis-700);
+  font-size: 0.67rem;
+  background: var(--ifm-color-emphasis-150, var(--ifm-color-emphasis-200));
+  color: var(--ifm-color-emphasis-800);
+  border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 4px;
-  padding: 1px 6px;
+  padding: 1px 7px;
   font-family: var(--ifm-font-family-monospace);
+  letter-spacing: 0.01em;
 }

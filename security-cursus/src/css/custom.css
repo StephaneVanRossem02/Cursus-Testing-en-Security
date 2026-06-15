@@ -1,116 +1,177 @@
-/* AP Hogeschool — Testing & Security */
+/* ═══════════════════════════════════════════════════════════════
+   AP Hogeschool — Testing & Security
+   Custom theme — clean security-tool aesthetic
+   ═══════════════════════════════════════════════════════════════ */
 
+/* ── Design tokens ───────────────────────────────────────────── */
 :root {
-  --ifm-color-primary: #c0392b;
-  --ifm-color-primary-dark: #ac3326;
-  --ifm-color-primary-darker: #a23022;
-  --ifm-color-primary-darkest: #87271b;
-  --ifm-color-primary-light: #c94e43;
-  --ifm-color-primary-lighter: #ce5649;
+  /* Brand */
+  --ifm-color-primary:          #c0392b;
+  --ifm-color-primary-dark:     #ac3326;
+  --ifm-color-primary-darker:   #a23022;
+  --ifm-color-primary-darkest:  #87271b;
+  --ifm-color-primary-light:    #c94e43;
+  --ifm-color-primary-lighter:  #ce5649;
   --ifm-color-primary-lightest: #d96f66;
-  --ifm-code-font-size: 93%;
-  --ifm-line-height-base: 1.75;
-  --ifm-navbar-shadow: 0 1px 0 0 var(--ifm-color-primary);
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-  --sw-testing-color: #1a5276;
+
+  /* Section accents */
+  --sw-testing-color:  #1a5276;
   --sw-security-color: #c0392b;
+
+  /* Safe / unsafe code block accents */
+  --sw-safe-color:    #1a7a4a;
+  --sw-safe-bg:       rgba(26, 122, 74, 0.06);
+  --sw-safe-border:   rgba(26, 122, 74, 0.30);
+  --sw-unsafe-color:  #c0392b;
+  --sw-unsafe-bg:     rgba(192, 57, 43, 0.06);
+  --sw-unsafe-border: rgba(192, 57, 43, 0.30);
+
+  /* Typography */
+  --ifm-code-font-size:    93%;
+  --ifm-line-height-base:  1.78;
+  --sw-content-max-width:  72ch;
+
+  /* UI */
+  --ifm-navbar-shadow:       0 1px 0 0 var(--ifm-color-emphasis-200);
+  --ifm-global-border-width: 1px;
+  --sw-radius:               6px;
+  --sw-radius-lg:            10px;
+
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
 }
 
 [data-theme='dark'] {
-  --ifm-color-primary: #e74c3c;
-  --ifm-color-primary-dark: #e33527;
-  --ifm-color-primary-darker: #d93323;
-  --ifm-color-primary-darkest: #b32b1d;
-  --ifm-color-primary-light: #e9665a;
-  --ifm-color-primary-lighter: #eb7068;
+  --ifm-color-primary:          #e74c3c;
+  --ifm-color-primary-dark:     #e33527;
+  --ifm-color-primary-darker:   #d93323;
+  --ifm-color-primary-darkest:  #b32b1d;
+  --ifm-color-primary-light:    #e9665a;
+  --ifm-color-primary-lighter:  #eb7068;
   --ifm-color-primary-lightest: #ef9089;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-  --sw-testing-color: #5dade2;
-  --sw-security-color: #e74c3c;
+
+  --sw-safe-bg:       rgba(26, 122, 74, 0.10);
+  --sw-safe-border:   rgba(26, 200, 100, 0.30);
+  --sw-unsafe-bg:     rgba(231, 76, 60, 0.10);
+  --sw-unsafe-border: rgba(231, 76, 60, 0.35);
+
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.06);
 }
 
-/* ── Navbar ── */
+
+/* ══════════════════════════════════════════════════════════════
+   NAVBAR
+   ══════════════════════════════════════════════════════════════ */
 .navbar {
-  border-bottom: 2px solid var(--ifm-color-primary);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
   box-shadow: none;
+  backdrop-filter: blur(6px);
 }
 
-/* ── Sidebar ── */
+
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR
+   ══════════════════════════════════════════════════════════════ */
+
+/* Active leaf item */
 .menu__link--active:not(.menu__link--sublist) {
-  background-color: rgba(192, 57, 43, 0.08);
+  background-color: rgba(192, 57, 43, 0.07);
   border-right: 3px solid var(--ifm-color-primary);
+  font-weight: 600;
 }
 
 [data-theme='dark'] .menu__link--active:not(.menu__link--sublist) {
-  background-color: rgba(231, 76, 60, 0.12);
+  background-color: rgba(231, 76, 60, 0.10);
 }
 
+/* Expand/collapse arrows: neutral, not red */
 .menu__caret::before,
 .menu__link--sublist-caret::after {
-  background-color: var(--ifm-color-emphasis-500) !important;
+  background-color: var(--ifm-color-emphasis-400) !important;
+  opacity: 0.7;
 }
 
-/* ── Headings in docs ── */
-.theme-doc-markdown h1 {
-  font-size: 1.8rem;
+/* Category label: small colored dot as accent */
+.menu__list-item-collapsible > .menu__link {
+  font-size: 0.78rem;
   font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.menu__list-item-collapsible > .menu__link::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ifm-color-primary);
+  margin-right: 7px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   CONTENT — max readable width
+   ══════════════════════════════════════════════════════════════ */
+.theme-doc-markdown {
+  max-width: var(--sw-content-max-width);
+}
+
+/* Tables are often wider — let them breathe */
+.theme-doc-markdown table {
+  max-width: 100%;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   HEADINGS
+   ══════════════════════════════════════════════════════════════ */
+.theme-doc-markdown h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
   border-bottom: 3px solid var(--ifm-color-primary);
   padding-bottom: 0.5rem;
   margin-bottom: 1.25rem;
+  letter-spacing: -0.01em;
 }
 
 .theme-doc-markdown h2 {
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--ifm-color-primary);
   border-left: 4px solid var(--ifm-color-primary);
   padding-left: 0.7rem;
-  margin-top: 2.25rem;
+  margin-top: 2.5rem;
+  margin-bottom: 0.9rem;
 }
 
 .theme-doc-markdown h3 {
-  font-size: 1rem;
+  font-size: 0.97rem;
   font-weight: 600;
   color: var(--ifm-color-text-base);
-  opacity: 0.85;
-  margin-top: 1.5rem;
+  margin-top: 1.6rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.88;
 }
 
-/* ── Blockquotes (code-afspraken, notities) ── */
-.theme-doc-markdown blockquote {
-  border-left: 4px solid var(--ifm-color-primary);
-  background-color: rgba(192, 57, 43, 0.05);
-  border-radius: 0 8px 8px 0;
-  padding: 0.8rem 1.1rem;
-  margin: 1.25rem 0;
+.theme-doc-markdown h4 {
   font-size: 0.9rem;
-  line-height: 1.7;
+  font-weight: 600;
+  margin-top: 1.25rem;
 }
 
-[data-theme='dark'] .theme-doc-markdown blockquote {
-  background-color: rgba(231, 76, 60, 0.09);
-}
 
-/* ── Horizontal rules — oefening-dividers ── */
-.theme-doc-markdown hr {
-  border: none;
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    var(--ifm-color-primary-lightest),
-    var(--ifm-color-primary-lightest) 30%,
-    transparent 80%
-  );
-  margin: 2.5rem 0;
-}
-
-/* ── Inline code ── */
+/* ══════════════════════════════════════════════════════════════
+   INLINE CODE
+   ══════════════════════════════════════════════════════════════ */
 .theme-doc-markdown code {
   background-color: rgba(192, 57, 43, 0.07);
   border: 1px solid rgba(192, 57, 43, 0.18);
-  border-radius: 4px;
+  border-radius: var(--sw-radius);
   padding: 1px 5px;
-  font-size: 0.88em;
+  font-size: 0.875em;
 }
 
 [data-theme='dark'] .theme-doc-markdown code {
@@ -118,7 +179,7 @@
   border-color: rgba(231, 76, 60, 0.25);
 }
 
-/* Code inside code-blocks: reset the custom styling */
+/* Reset for code inside pre-blocks */
 .theme-doc-markdown pre code {
   background: none;
   border: none;
@@ -126,39 +187,317 @@
   font-size: inherit;
 }
 
-/* ── Opdracht-titel in oefeningen ── */
-.opdracht-titel {
-  font-size: 1.05rem;
+
+/* ══════════════════════════════════════════════════════════════
+   CODE BLOCKS — upgraded
+   ══════════════════════════════════════════════════════════════ */
+.theme-doc-markdown pre {
+  border-radius: var(--sw-radius-lg);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  /* Subtle shadow so the block lifts off the page */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  margin: 1.25rem 0;
+}
+
+[data-theme='dark'] .theme-doc-markdown pre {
+  background-color: #161b22 !important;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Language label boven het code-block */
+.theme-doc-markdown div[class*='codeBlockContainer'] {
+  border-radius: var(--sw-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  margin: 1.25rem 0;
+}
+
+[data-theme='dark'] div[class*='codeBlockContainer'] {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.30);
+}
+
+/* Taal-header strip */
+div[class*='codeBlockTitle'] {
+  background: var(--ifm-color-emphasis-100);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.35rem 1rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+[data-theme='dark'] div[class*='codeBlockTitle'] {
+  background: #1c2128;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Code-block content: iets meer padding */
+div[class*='codeBlockContent'] pre {
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  margin: 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   VEILIG / ONVEILIG code-blocks
+   Gebruik: omsluit een pre-blok met een div.code-safe of .code-unsafe
+   ══════════════════════════════════════════════════════════════ */
+.code-safe > div[class*='codeBlockContainer'],
+.code-safe pre {
+  border-color: var(--sw-safe-border) !important;
+  background-color: var(--sw-safe-bg);
+}
+
+.code-safe > div[class*='codeBlockContainer']::before,
+.code-safe pre::before {
+  content: 'VEILIG';
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  color: var(--sw-safe-color);
+  padding: 0.3rem 1rem;
+  background: rgba(26, 122, 74, 0.06);
+  border-bottom: 1px solid var(--sw-safe-border);
+}
+
+.code-unsafe > div[class*='codeBlockContainer'],
+.code-unsafe pre {
+  border-color: var(--sw-unsafe-border) !important;
+  background-color: var(--sw-unsafe-bg);
+}
+
+.code-unsafe > div[class*='codeBlockContainer']::before,
+.code-unsafe pre::before {
+  content: 'KWETSBAAR';
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  color: var(--sw-unsafe-color);
+  padding: 0.3rem 1rem;
+  background: rgba(192, 57, 43, 0.06);
+  border-bottom: 1px solid var(--sw-unsafe-border);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   MINICONTROLE — styled question box
+   Gebruik: **Minicontrole:** tekst  (bold prefix wordt gestyled)
+   De laatste <p> vóór een <hr> die begint met "Minicontrole"
+   krijgt automatisch stijl via CSS-attribuut-selector trick.
+   We stylen de .minicontrole klasse voor expliciete markup.
+   ══════════════════════════════════════════════════════════════ */
+.minicontrole {
+  background: rgba(26, 82, 118, 0.05);
+  border: 1px solid rgba(26, 82, 118, 0.20);
+  border-left: 4px solid #1a5276;
+  border-radius: 0 var(--sw-radius) var(--sw-radius) 0;
+  padding: 0.75rem 1rem 0.75rem 1.1rem;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.minicontrole::before {
+  content: '? ';
+  font-weight: 800;
+  color: #1a5276;
+  margin-right: 2px;
+}
+
+[data-theme='dark'] .minicontrole {
+  background: rgba(93, 173, 226, 0.07);
+  border-color: rgba(93, 173, 226, 0.25);
+  border-left-color: #5dade2;
+}
+
+[data-theme='dark'] .minicontrole::before {
+  color: #5dade2;
+}
+
+/* Fallback: bold "Minicontrole:" in een <p> krijgt achtergrond
+   via de aangrenzende selector. Werkt niet in alle browsers maar
+   geeft wel een visuele cue via de strong-kleur. */
+.theme-doc-markdown strong:first-child {
+  /* Alleen minicontrole-strong accentueren als de tekst matched */
+}
+
+/* Eenvoudiger: elke <p> die begint met **Minicontrole:** in de
+   Markdown wordt een <p><strong>Minicontrole:</strong>...</p>.
+   We stylen die strong subtiel. */
+.theme-doc-markdown p > strong:only-child + br,
+.theme-doc-markdown p > strong:first-child {
+  /* Laat de strong z'n eigen kleur houden */
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   BLOCKQUOTES
+   ══════════════════════════════════════════════════════════════ */
+.theme-doc-markdown blockquote {
+  border-left: 4px solid var(--ifm-color-primary);
+  background-color: rgba(192, 57, 43, 0.04);
+  border-radius: 0 var(--sw-radius) var(--sw-radius) 0;
+  padding: 0.75rem 1.1rem;
+  margin: 1.25rem 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+[data-theme='dark'] .theme-doc-markdown blockquote {
+  background-color: rgba(231, 76, 60, 0.08);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   HORIZONTAL RULES — oefening-dividers
+   ══════════════════════════════════════════════════════════════ */
+.theme-doc-markdown hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--ifm-color-emphasis-200) 0%,
+    var(--ifm-color-emphasis-200) 40%,
+    transparent 100%
+  );
+  margin: 2.75rem 0;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   TABLES
+   ══════════════════════════════════════════════════════════════ */
+.theme-doc-markdown table {
+  border-collapse: collapse;
+  border-radius: var(--sw-radius-lg);
+  overflow: hidden;
+  font-size: 0.88rem;
+  width: 100%;
+  margin: 1.25rem 0;
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.theme-doc-markdown th {
+  background: var(--ifm-color-emphasis-100);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-700);
+  padding: 0.6rem 0.9rem;
+  border-bottom: 2px solid var(--ifm-color-emphasis-200);
+}
+
+[data-theme='dark'] .theme-doc-markdown th {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+.theme-doc-markdown td {
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-100);
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+.theme-doc-markdown tr:last-child td {
+  border-bottom: none;
+}
+
+.theme-doc-markdown tr:hover td {
+  background: var(--ifm-color-emphasis-50);
+}
+
+[data-theme='dark'] .theme-doc-markdown tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   OPDRACHT-TITEL (oefeningen)
+   ══════════════════════════════════════════════════════════════ */
+.opdracht-titel {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: #ffffff !important;
-  background-color: #c0392b;
-  padding: 0.45rem 0.9rem;
-  border-radius: 4px;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
+  background: linear-gradient(90deg, #c0392b, #922b21);
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--sw-radius);
+  margin-top: 1.75rem;
+  margin-bottom: 0.6rem;
+  display: inline-block;
 }
 
 [data-theme='dark'] .opdracht-titel {
-  background-color: #e74c3c;
-  color: #ffffff;
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
 }
 
-/* ── Pagination ── */
+
+/* ══════════════════════════════════════════════════════════════
+   PAGINATION
+   ══════════════════════════════════════════════════════════════ */
 .pagination-nav__link {
-  border-color: var(--ifm-color-primary-lightest);
+  border-color: var(--ifm-color-emphasis-200);
+  border-radius: var(--sw-radius-lg);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .pagination-nav__link:hover {
   border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 1px var(--ifm-color-primary);
 }
 
-/* ── Table of contents ── */
+
+/* ══════════════════════════════════════════════════════════════
+   TABLE OF CONTENTS (rechter kolom)
+   ══════════════════════════════════════════════════════════════ */
 .table-of-contents__link--active {
   color: var(--ifm-color-primary);
   font-weight: 600;
 }
 
-/* ── Breadcrumbs ── */
+.table-of-contents__link {
+  font-size: 0.82rem;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   BREADCRUMBS
+   ══════════════════════════════════════════════════════════════ */
 .breadcrumbs__item--active .breadcrumbs__link {
   color: var(--ifm-color-primary);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   "WAT JE ZIET:" blokken in demo-stappen
+   Gebruik: **Wat je ziet:** als bold prefix in een <p>
+   Subtiele groene achtergrond voor verwachte output.
+   ══════════════════════════════════════════════════════════════ */
+.wat-je-ziet {
+  background: rgba(26, 122, 74, 0.05);
+  border: 1px solid rgba(26, 122, 74, 0.18);
+  border-left: 4px solid var(--sw-safe-color);
+  border-radius: 0 var(--sw-radius) var(--sw-radius) 0;
+  padding: 0.65rem 1rem;
+  margin: 0.75rem 0 1.25rem;
+  font-size: 0.88rem;
+}
+
+[data-theme='dark'] .wat-je-ziet {
+  background: rgba(26, 122, 74, 0.08);
+  border-color: rgba(26, 200, 100, 0.20);
+  border-left-color: #2ecc71;
 }
