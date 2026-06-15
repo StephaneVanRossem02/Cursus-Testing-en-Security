@@ -126,21 +126,32 @@ Dit maakt integration tests robuuster bij refactoring. Als je de interne structu
 
 ## 6. Demo: de bestelflow als integration test
 
-We testen de volledige bestelflow van ShopWave met echte klassen. De flow die we testen:
+We testen de volledige bestelflow van ShopWave. De klassen die we gebruiken ken je al uit les 1 en les 3: `CartService`, `CouponService` en `OrderService`.
 
-1. Gebruiker vult een winkelmandje
-2. Een coupon wordt toegepast
-3. Een bestelling wordt geplaatst via `OrderService`
+---
 
-We gebruiken de klassen die je al kent uit les 1 en les 3: `CartService`, `CouponService`, `DiscountCalculator` en `OrderService`. De betaalgateway is de enige mock, want die is een externe dienst.
+### Stap 1: herinner je de unit test
 
-### Wat we niet doen
+In les 1 schreven we een unit test voor `OrderService`. Die zag er zo uit:
 
-We mocken `CouponService`, `CartService` en `DiscountCalculator` niet. Dat is het verschil met de unit tests uit les 1.
+```csharp
+Mock<ICouponService> mockCoupon = new Mock<ICouponService>();
+mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(true);
+mockCoupon.Setup(c => c.GetDiscount("ZOMER10")).Returns(10);
 
-### De integration test
+OrderService service = new OrderService(mockGateway.Object, mockStock.Object, mockCoupon.Object);
+string result = service.PlaceOrder(1, 1, 100.0, "ZOMER10");
+```
 
-Maak `CheckoutFlowIntegrationTests.cs` aan in `ShopWave.Tests`:
+De mock van `CouponService` geeft terug wat wij hem vertellen. Als wij zeggen dat de korting 10% is, geeft hij 10% terug. Maar de echte `CouponService` kan anders reageren in randgevallen. Die koppeling tussen `CartService.ApplyCoupon` en `CouponService.GetDiscount` test de unit test nooit.
+
+In een integration test vervangen we alle eigen klassen door de echte versie.
+
+---
+
+### Stap 2: testbestand aanmaken
+
+Maak `ShopWave.Tests/CheckoutFlowIntegrationTests.cs` aan met de klasse-structuur:
 
 ```csharp
 using FluentAssertions;
@@ -151,30 +162,68 @@ namespace ShopWave.Tests
 {
     public class CheckoutFlowIntegrationTests
     {
+    }
+}
+```
+
+Bouw de solution. Geen tests nog, maar de klasse compileert.
+
+---
+
+### Stap 3: eerste integration test schrijven
+
+Voeg de eerste test toe. We schrijven hem regel voor regel, met uitleg:
+
+```csharp
         [Fact]
         public void CheckoutFlow_WithValidCoupon_ProcessesCorrectAmount()
         {
             // Arrange
-            // Eigen klassen zijn echt, externe dienst is een mock
+```
+
+De externe betaaldienst is de enige mock. Eigen klassen zijn altijd echt:
+
+```csharp
             Mock<IPaymentGateway> mockGateway = new Mock<IPaymentGateway>();
             mockGateway.Setup(g => g.ProcessPayment(It.IsAny<double>())).Returns(true);
 
             Mock<IStockService> mockStock = new Mock<IStockService>();
             mockStock.Setup(s => s.IsInStock(It.IsAny<int>(), It.IsAny<int>())).Returns(true);
+```
 
-            CouponService  couponService  = new CouponService();
-            OrderService   orderService   = new OrderService(
+Eigen klassen: echt, niet gemockt:
+
+```csharp
+            CouponService couponService = new CouponService();
+            OrderService  orderService  = new OrderService(
                 mockGateway.Object,
                 mockStock.Object,
                 couponService);
 
             CartService cartService = new CartService(couponService);
+```
+
+Let op: `couponService` is één instantie die zowel aan `OrderService` als aan `CartService` meegegeven wordt. Als `CartService` de coupon markeert als gebruikt, weet `OrderService` dat ook.
+
+Vul het mandje en pas een coupon toe:
+
+```csharp
             cartService.AddItem("Laptop", 100.0);
             cartService.ApplyCoupon("ZOMER10");
+```
 
+Roep de methode aan:
+
+```csharp
             // Act
             string result = orderService.PlaceOrder(1, 1, cartService.Total);
+```
 
+We geven `cartService.Total` mee, niet `90.0`. Als we `90.0` hard coderen, testen we de samenwerking niet.
+
+Controleer het resultaat en het bedrag dat naar de gateway ging:
+
+```csharp
             // Assert
             result.Should().Be("Bestelling bevestigd");
             mockGateway.Verify(
@@ -182,7 +231,25 @@ namespace ShopWave.Tests
                 Times.Once,
                 "de betaling moet het bedrag na korting bevatten");
         }
+```
 
+Bouw de solution. Voer de test uit.
+
+Wat je ziet:
+
+```
+✓ CheckoutFlow_WithValidCoupon_ProcessesCorrectAmount
+```
+
+De `Verify`-aanroep bewijst dat het gecombineerde resultaat van `CartService.ApplyCoupon` via `CouponService.GetDiscount` correct doorgegeven is aan `OrderService.PlaceOrder` en vandaar naar de gateway.
+
+---
+
+### Stap 4: tweede scenario toevoegen
+
+Voeg een tweede test toe voor een ongeldige coupon:
+
+```csharp
         [Fact]
         public void CheckoutFlow_WithInvalidCoupon_ProcessesFullAmount()
         {
@@ -213,20 +280,24 @@ namespace ShopWave.Tests
                 Times.Once,
                 "een ongeldige coupon mag het bedrag niet verlagen");
         }
-    }
-}
 ```
 
-**Wat maakt dit een integration test?**
-- `CouponService` is echt: echte couponlogica, echte validatie
-- `CartService` is echt: echte totaalberekening, echte coupontoepassing
-- `OrderService` is echt: echte logica, echte samenwerking met de andere klassen
-- Alleen de betaalgateway en stockservice zijn mocks, want die zijn externe diensten
+Voer alle tests uit.
 
-**Wat testen we hier dat unit tests niet testen?**
-- Of `CartService.Total` na `ApplyCoupon` het juiste bedrag geeft dat `OrderService` doorstuurt naar de gateway
-- Of `CouponService.IsValid` en `GetDiscount` correct werken in combinatie met `CartService.ApplyCoupon`
-- Of de volledige flow van mandje tot betaling het juiste bedrag berekent
+Wat je ziet:
+
+```
+✓ CheckoutFlow_WithValidCoupon_ProcessesCorrectAmount
+✓ CheckoutFlow_WithInvalidCoupon_ProcessesFullAmount
+```
+
+---
+
+### Wat testen we hier dat unit tests niet testen?
+
+**De unit test van `OrderService`** controleert of `OrderService` de gateway aanroept met het bedrag dat de mock van `CouponService` teruggeeft. De mock geeft terug wat wij instellen.
+
+**De integration test** controleert of de echte `CouponService` de juiste korting teruggeeft, of `CartService.Total` die korting correct verwerkt, en of `OrderService` dat gecorrigeerde totaal doorstuurt naar de gateway. Dat is de samenwerking die unit tests nooit zien.
 
 ---
 

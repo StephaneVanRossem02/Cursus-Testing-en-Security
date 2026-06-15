@@ -378,7 +378,329 @@ public void PlaceOrder_WhenPaymentSucceeds_ReturnsBevestigd()
 
 ---
 
-## 10. Testing en security: de link
+## 10. Demo: de eerste tests schrijven voor ShopWave
+
+We bouwen de tests stap voor stap. Na elke stap voer je de tests uit en bekijk je het resultaat in de Test Explorer.
+
+### Stap 1: solution opzetten
+
+Maak in Visual Studio een nieuwe solution aan met twee projecten:
+
+- **`ShopWave`**: Console App (.NET 8). De productiecode staat hier.
+- **`ShopWave.Tests`**: xUnit Test Project (.NET 8). De tests staan hier.
+
+Voeg een project reference toe: rechtsklik op `ShopWave.Tests` > `Add` > `Project Reference` > vink `ShopWave` aan.
+
+Installeer in `ShopWave.Tests` de volgende NuGet-pakketten via `Tools` > `NuGet Package Manager` > `Manage NuGet Packages for Solution`:
+- `FluentAssertions`
+- `Moq`
+
+---
+
+### Stap 2: DiscountCalculator aanmaken
+
+Maak `ShopWave/DiscountCalculator.cs` aan:
+
+```csharp
+namespace ShopWave
+{
+    public class DiscountCalculator
+    {
+        public double ApplyDiscount(double price, int discountPercent)
+        {
+            if (discountPercent < 0 || discountPercent > 100)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(discountPercent),
+                    "Kortingspercentage moet tussen 0 en 100 liggen.");
+            }
+
+            return price * (1 - discountPercent / 100.0);
+        }
+    }
+}
+```
+
+`DiscountCalculator` heeft geen externe afhankelijkheden. Ze maakt geen verbinding met een database of netwerk. Die klasse is direct testbaar.
+
+---
+
+### Stap 3: eerste test schrijven
+
+Maak `ShopWave.Tests/DiscountCalculatorTests.cs` aan:
+
+```csharp
+using FluentAssertions;
+using ShopWave;
+
+namespace ShopWave.Tests
+{
+    public class DiscountCalculatorTests
+    {
+        [Fact]
+        public void ApplyDiscount_WithTenPercent_ReturnsCorrectPrice()
+        {
+            // Arrange
+            DiscountCalculator calculator = new DiscountCalculator();
+
+            // Act
+            double result = calculator.ApplyDiscount(100.0, 10);
+
+            // Assert
+            result.Should().Be(90.0);
+        }
+    }
+}
+```
+
+Bouw de solution. Open de Test Explorer (`Test` > `Test Explorer`). Voer de test uit.
+
+Wat je ziet:
+
+```
+✓ ApplyDiscount_WithTenPercent_ReturnsCorrectPrice
+```
+
+De test slaagt. Je hebt net je eerste automatische test geschreven.
+
+---
+
+### Stap 4: meer testgevallen toevoegen
+
+Voeg drie extra tests toe aan `DiscountCalculatorTests.cs`:
+
+```csharp
+        [Fact]
+        public void ApplyDiscount_WithZeroPercent_ReturnsOriginalPrice()
+        {
+            DiscountCalculator calculator = new DiscountCalculator();
+            double result = calculator.ApplyDiscount(100.0, 0);
+            result.Should().Be(100.0);
+        }
+
+        [Fact]
+        public void ApplyDiscount_WithHundredPercent_ReturnsZero()
+        {
+            DiscountCalculator calculator = new DiscountCalculator();
+            double result = calculator.ApplyDiscount(100.0, 100);
+            result.Should().Be(0.0);
+        }
+
+        [Fact]
+        public void ApplyDiscount_WithNegativePercent_ThrowsArgumentOutOfRangeException()
+        {
+            DiscountCalculator calculator = new DiscountCalculator();
+            Action act = () => calculator.ApplyDiscount(100.0, -1);
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+```
+
+Voer alle tests uit.
+
+Wat je ziet:
+
+```
+✓ ApplyDiscount_WithTenPercent_ReturnsCorrectPrice
+✓ ApplyDiscount_WithZeroPercent_ReturnsOriginalPrice
+✓ ApplyDiscount_WithHundredPercent_ReturnsZero
+✓ ApplyDiscount_WithNegativePercent_ThrowsArgumentOutOfRangeException
+```
+
+Vier tests, vier groene vinkjes. ZOMBIES in actie: Zero (0%), Boundary (100%), Exception (negatief).
+
+---
+
+### Stap 5: [Theory] gebruiken voor varianten
+
+De drie eerste tests testen dezelfde methode met andere getallen. Die kan je samenvoegen:
+
+```csharp
+        [Theory]
+        [InlineData(100.0, 10,   90.0)]
+        [InlineData(100.0,  0,  100.0)]
+        [InlineData(200.0, 25,  150.0)]
+        [InlineData( 50.0, 50,   25.0)]
+        public void ApplyDiscount_WithValidInputs_ReturnsCorrectPrice(
+            double price, int percent, double expected)
+        {
+            DiscountCalculator calculator = new DiscountCalculator();
+            double result = calculator.ApplyDiscount(price, percent);
+            result.Should().Be(expected);
+        }
+```
+
+Verwijder de drie afzonderlijke tests en houd deze `[Theory]` over. Voer de tests uit.
+
+Wat je ziet: vier afzonderlijke regels in de Test Explorer, één per rij met `[InlineData]`.
+
+---
+
+### Stap 6: OrderService en het probleem van strakke koppeling
+
+Maak `ShopWave/OrderService.cs` aan:
+
+```csharp
+namespace ShopWave
+{
+    public class OrderService
+    {
+        public string PlaceOrder(double amount)
+        {
+            PaymentGateway gateway = new PaymentGateway();
+            bool success = gateway.ProcessPayment(amount);
+            return success ? "Bestelling bevestigd" : "Betaling mislukt";
+        }
+    }
+}
+```
+
+Probeer nu een test te schrijven voor `PlaceOrder`. Je stoot meteen op het probleem: `PaymentGateway` maakt een echte verbinding met een extern betaalsysteem. Je kan het gedrag van de gateway niet instellen in je test. Je kan niet controleren wat er gebeurt als de gateway `false` teruggeeft. En als de gateway tijdelijk offline is, falen je tests ook al is jouw code correct.
+
+---
+
+### Stap 7: interface en Dependency Injection toepassen
+
+Maak `ShopWave/IPaymentGateway.cs` aan:
+
+```csharp
+namespace ShopWave
+{
+    public interface IPaymentGateway
+    {
+        bool ProcessPayment(double amount);
+    }
+}
+```
+
+Pas `OrderService.cs` aan zodat die de interface ontvangt:
+
+```csharp
+namespace ShopWave
+{
+    public class OrderService
+    {
+        private readonly IPaymentGateway _gateway;
+
+        public OrderService(IPaymentGateway gateway)
+        {
+            _gateway = gateway;
+        }
+
+        public string PlaceOrder(double amount)
+        {
+            string result;
+
+            if (amount <= 0)
+            {
+                throw new ArgumentException("Bedrag moet groter zijn dan nul.", nameof(amount));
+            }
+
+            bool success = _gateway.ProcessPayment(amount);
+
+            if (success)
+            {
+                result = "Bestelling bevestigd";
+            }
+            else
+            {
+                result = "Betaling mislukt";
+            }
+
+            return result;
+        }
+    }
+}
+```
+
+`OrderService` kent nu alleen `IPaymentGateway`, niet de concrete klasse. In productie geef je een echte gateway mee. In tests geef je een mock mee.
+
+---
+
+### Stap 8: eerste test met een mock
+
+Maak `ShopWave.Tests/OrderServiceTests.cs` aan:
+
+```csharp
+using FluentAssertions;
+using Moq;
+using ShopWave;
+
+namespace ShopWave.Tests
+{
+    public class OrderServiceTests
+    {
+        [Fact]
+        public void PlaceOrder_WhenPaymentSucceeds_ReturnsBevestigd()
+        {
+            // Arrange
+            Mock<IPaymentGateway> mockGateway = new Mock<IPaymentGateway>();
+            mockGateway.Setup(x => x.ProcessPayment(50.0)).Returns(true);
+
+            OrderService service = new OrderService(mockGateway.Object);
+
+            // Act
+            string result = service.PlaceOrder(50.0);
+
+            // Assert
+            result.Should().Be("Bestelling bevestigd");
+        }
+    }
+}
+```
+
+Voer de test uit.
+
+Wat je ziet:
+
+```
+✓ PlaceOrder_WhenPaymentSucceeds_ReturnsBevestigd
+```
+
+`mockGateway.Setup(x => x.ProcessPayment(50.0)).Returns(true)` zegt: "Als ProcessPayment aangeroepen wordt met 50.0, geef dan true terug." Je hebt nu volledige controle over het gedrag van de gateway, zonder ook maar één regel te veranderen aan `OrderService`.
+
+---
+
+### Stap 9: tweede scenario + Verify
+
+Voeg een tweede test toe voor het geval de betaling mislukt:
+
+```csharp
+        [Fact]
+        public void PlaceOrder_WhenPaymentFails_ReturnsMislukt()
+        {
+            // Arrange
+            Mock<IPaymentGateway> mockGateway = new Mock<IPaymentGateway>();
+            mockGateway.Setup(x => x.ProcessPayment(It.IsAny<double>())).Returns(false);
+
+            OrderService service = new OrderService(mockGateway.Object);
+
+            // Act
+            string result = service.PlaceOrder(50.0);
+
+            // Assert
+            result.Should().Be("Betaling mislukt");
+            mockGateway.Verify(x => x.ProcessPayment(50.0), Times.Once);
+        }
+```
+
+`It.IsAny<double>()` geldt voor elk bedrag. `Verify` controleert achteraf of `ProcessPayment` precies eenmaal aangeroepen werd met het juiste bedrag.
+
+Voer alle tests uit.
+
+Wat je ziet:
+
+```
+✓ ApplyDiscount_WithValidInputs_ReturnsCorrectPrice (4 cases)
+✓ ApplyDiscount_WithNegativePercent_ThrowsArgumentOutOfRangeException
+✓ PlaceOrder_WhenPaymentSucceeds_ReturnsBevestigd
+✓ PlaceOrder_WhenPaymentFails_ReturnsMislukt
+```
+
+Je hebt nu een volledige testsuite voor twee klassen. `DiscountCalculator` zonder mock. `OrderService` met mock. Beide patronen komen je in elke applicatie opnieuw tegen.
+
+---
+
+## 11. Testing en security: de link
 
 Je hebt nu de basis van unit testing in handen. Maar waarom staat dit vak "Testing en Security"? Wat heeft testen te maken met beveiliging?
 
@@ -407,7 +729,7 @@ public void ValidatePassword_WithHardcodedAdmin_FailsSecurityCheck()
 
 Vanaf les 2 gaan we verder op dit pad: hashing, encryptie, JWT-tokens en SQL injection. Al die concepten kan je testen met dezelfde technieken die je vandaag geleerd hebt.
 
-## 11. Samenvatting
+## 12. Samenvatting
 
 | Concept | Wat je moet onthouden |
 |--------|-----------------------|

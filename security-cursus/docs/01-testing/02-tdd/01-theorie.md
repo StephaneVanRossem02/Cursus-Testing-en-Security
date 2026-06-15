@@ -118,9 +118,11 @@ Tests achteraf testen of de code werkt zoals je hem hebt geschreven. TDD-tests t
 
 We voegen een `CouponService` toe aan ShopWave. Die service valideert kortingscoupons die klanten kunnen gebruiken bij het afrekenen.
 
-We weten vooraf nog niet hoe de klasse er precies uitzal uitzien. We laten de tests het ontwerp bepalen.
+We weten vooraf nog niet hoe de klasse er precies uitziet. We laten de tests het ontwerp bepalen.
 
 ### Testlijst (vooraf opgesteld)
+
+Voor je begint, noteer je de gevallen die je verwacht:
 
 ```
 [ ] Een geldige couponcode geeft true terug bij validatie
@@ -130,9 +132,13 @@ We weten vooraf nog niet hoe de klasse er precies uitzal uitzien. We laten de te
 [ ] Een coupon die nog niet gebruikt is, blijft geldig
 ```
 
-### Stap 1: eerste test
+Je werkt de lijst van boven naar onder af.
 
-In TDD begin je altijd met de eenvoudigst mogelijke test. Dit dwingt je om meteen een beslissing te nemen over de naam van de klasse en de naam van de methode. Je denkt vanuit de buitenkant: hoe wil ik deze klasse gebruiken?
+---
+
+### Stap 1: schrijf de eerste test
+
+In TDD begin je altijd met de eenvoudigst mogelijke test. Die dwingt je om meteen een beslissing te nemen over de naam van de klasse en de naam van de methode. Je denkt vanuit de buitenkant: hoe wil ik deze klasse gebruiken?
 
 Maak in `ShopWave.Tests` een bestand `CouponServiceTests.cs` aan:
 
@@ -160,11 +166,17 @@ namespace ShopWave.Tests
 }
 ```
 
-De code compileert niet. `CouponService` bestaat nog niet. Dit is bewust: de compilatiefout is onze rode fase.
+Probeer te bouwen.
 
-### Stap 2: minimale implementatie
+Wat je ziet: een **compilatiefout**. `CouponService` bestaat nog niet. Dit is bewust. Regel 2 van Uncle Bob: niet meer tests schrijven dan nodig om te falen. Een compilatiefout telt als falen. Dit is de rode fase.
 
-Wet 3 van Uncle Bob: schrijf niet meer dan nodig. Maak in `ShopWave` een bestand `CouponService.cs` aan:
+---
+
+### Stap 2: schrijf de minimale implementatie
+
+Regel 3 van Uncle Bob: schrijf niet meer productiecode dan nodig om de test te doen slagen.
+
+Maak in `ShopWave` een bestand `CouponService.cs` aan:
 
 ```csharp
 namespace ShopWave
@@ -179,28 +191,49 @@ namespace ShopWave
 }
 ```
 
-Voer de test uit. Hij slaagt. Groene fase.
+Bouw de solution. Voer de test uit.
+
+Wat je ziet:
+
+```
+✓ IsValid_WithValidCouponCode_ReturnsTrue
+```
+
+Groene fase. `return true` is bewust naïef. Dat is oké. De volgende test zal ons dwingen verder te gaan.
+
+---
 
 ### Stap 3: tweede test daagt de implementatie uit
 
-`return true` is bewust naïef. Nu voegen we een test toe die onze implementatie onderuit haalt:
+Voeg een tweede test toe in `CouponServiceTests.cs`:
 
 ```csharp
-[Fact]
-public void IsValid_WithUnknownCouponCode_ReturnsFalse()
-{
-    // Arrange
-    CouponService service = new CouponService();
+        [Fact]
+        public void IsValid_WithUnknownCouponCode_ReturnsFalse()
+        {
+            // Arrange
+            CouponService service = new CouponService();
 
-    // Act
-    bool result = service.IsValid("BESTAANIET");
+            // Act
+            bool result = service.IsValid("BESTAANIET");
 
-    // Assert
-    result.Should().BeFalse();
-}
+            // Assert
+            result.Should().BeFalse();
+        }
 ```
 
-Voer alle tests uit. De eerste slaagt, de tweede faalt. Rode fase. We moeten nu nadenken over hoe `IsValid` echt werkt. We introduceren een lijst van geldige coupons:
+Voer alle tests uit.
+
+Wat je ziet:
+
+```
+✓ IsValid_WithValidCouponCode_ReturnsTrue
+✗ IsValid_WithUnknownCouponCode_ReturnsFalse
+```
+
+Rode fase. `return true` klopt niet meer. We moeten nadenken over hoe `IsValid` echt werkt.
+
+Pas `CouponService.cs` aan: introduceer een lijst van geldige codes:
 
 ```csharp
 namespace ShopWave
@@ -227,32 +260,45 @@ namespace ShopWave
 }
 ```
 
-Beide tests slagen. Groene fase. De code is eenvoudig en leesbaar, geen refactoring nodig.
+Voer alle tests opnieuw uit.
 
-### Stap 4: kortingswaarde ophalen
+Wat je ziet:
 
-`IsValid` vertelt of een coupon bestaat. Maar om de korting toe te passen, hebben we ook de waarde nodig. We introduceren een methode `GetDiscount`:
-
-```csharp
-[Fact]
-public void GetDiscount_WithValidCouponCode_ReturnsCorrectDiscount()
-{
-    // Arrange
-    CouponService service = new CouponService();
-
-    // Act
-    int discount = service.GetDiscount("ZOMER10");
-
-    // Assert
-    discount.Should().Be(10);
-}
+```
+✓ IsValid_WithValidCouponCode_ReturnsTrue
+✓ IsValid_WithUnknownCouponCode_ReturnsFalse
 ```
 
-Rode fase: `GetDiscount` bestaat nog niet.
+Groene fase. De code is eenvoudig en leesbaar, geen refactoring nodig.
 
-Nu merken we iets: een coupon is meer dan een string. Hij heeft ook een kortingswaarde. Een `List<string>` volstaat niet meer. We introduceren een `Coupon`-klasse.
+---
 
-**Dit is een belangrijke les:** de test heeft ons naar een beter ontwerp geduwd. We hadden dit niet ontdekt als we de klasse van bovenaf hadden ontworpen.
+### Stap 4: de derde test onthult een ontwerprobleem
+
+`IsValid` vertelt of een coupon bestaat. Maar om de korting toe te passen, hebben we ook de kortingswaarde nodig. Schrijf een test voor de nieuwe methode `GetDiscount`:
+
+```csharp
+        [Fact]
+        public void GetDiscount_WithValidCouponCode_ReturnsCorrectDiscount()
+        {
+            // Arrange
+            CouponService service = new CouponService();
+
+            // Act
+            int discount = service.GetDiscount("ZOMER10");
+
+            // Assert
+            discount.Should().Be(10);
+        }
+```
+
+Probeer te bouwen.
+
+Wat je ziet: **compilatiefout**. `GetDiscount` bestaat nog niet. Rode fase.
+
+Nu merken we iets: een coupon is meer dan een string. Hij heeft ook een kortingswaarde. Een `List<string>` volstaat niet meer. De test heeft ons naar een beter ontwerp geduwd.
+
+**Dit is TDD in actie.** We hadden dit niet ontdekt als we de klasse van bovenaf hadden ontworpen. De test stelde de vraag die we zelf niet gesteld hadden.
 
 Maak `Coupon.cs` aan:
 
@@ -316,64 +362,104 @@ namespace ShopWave
 }
 ```
 
-Alle drie de tests slagen. Groene fase.
+Voer alle tests uit.
+
+Wat je ziet:
+
+```
+✓ IsValid_WithValidCouponCode_ReturnsTrue
+✓ IsValid_WithUnknownCouponCode_ReturnsFalse
+✓ GetDiscount_WithValidCouponCode_ReturnsCorrectDiscount
+```
+
+Groene fase. De refactoring van `List<string>` naar `List<Coupon>` heeft de bestaande tests niet gebroken.
+
+---
 
 ### Stap 5: coupon mag maar eenmaal gebruikt worden
 
 We testen twee kanten van hetzelfde gedrag: een gebruikte coupon wordt ongeldig, een niet-gebruikte blijft geldig. Eén test is niet genoeg om het gedrag volledig vast te leggen.
 
-```csharp
-[Fact]
-public void IsValid_AfterCouponIsUsed_ReturnsFalse()
-{
-    // Arrange
-    CouponService service = new CouponService();
-    service.MarkAsUsed("ZOMER10");
-
-    // Act
-    bool result = service.IsValid("ZOMER10");
-
-    // Assert
-    result.Should().BeFalse();
-}
-
-[Fact]
-public void IsValid_BeforeCouponIsUsed_ReturnsTrue()
-{
-    // Arrange
-    CouponService service = new CouponService();
-
-    // Act
-    bool result = service.IsValid("ZOMER10");
-
-    // Assert
-    result.Should().BeTrue();
-}
-```
-
-Rode fase: `MarkAsUsed` bestaat nog niet. Voeg de methode toe en pas `IsValid` aan:
+Voeg beide tests toe aan `CouponServiceTests.cs`:
 
 ```csharp
-public void MarkAsUsed(string code)
-{
-    Coupon coupon = _coupons.Find(c => c.Code == code);
+        [Fact]
+        public void IsValid_AfterCouponIsUsed_ReturnsFalse()
+        {
+            // Arrange
+            CouponService service = new CouponService();
+            service.MarkAsUsed("ZOMER10");
 
-    if (coupon != null)
-    {
-        coupon.IsUsed = true;
-    }
-}
+            // Act
+            bool result = service.IsValid("ZOMER10");
 
-public bool IsValid(string code)
-{
-    Coupon coupon = _coupons.Find(c => c.Code == code);
-    return coupon != null && !coupon.IsUsed;
-}
+            // Assert
+            result.Should().BeFalse();
+        }
+
+        [Fact]
+        public void IsValid_BeforeCouponIsUsed_ReturnsTrue()
+        {
+            // Arrange
+            CouponService service = new CouponService();
+
+            // Act
+            bool result = service.IsValid("ZOMER10");
+
+            // Assert
+            result.Should().BeTrue();
+        }
 ```
 
-Alle vijf de tests slagen. Groene fase.
+Probeer te bouwen.
 
-Controleer de testlijst: alle gevallen zijn gedekt. `CouponService` is volledig via TDD gebouwd, stap voor stap, test voor test, zonder ook maar één lijn productiecode voor er een falende test was.
+Wat je ziet: **compilatiefout**. `MarkAsUsed` bestaat nog niet. Rode fase.
+
+Voeg `MarkAsUsed` toe aan `CouponService.cs` en pas `IsValid` aan:
+
+```csharp
+        public void MarkAsUsed(string code)
+        {
+            Coupon coupon = _coupons.Find(c => c.Code == code);
+
+            if (coupon != null)
+            {
+                coupon.IsUsed = true;
+            }
+        }
+
+        public bool IsValid(string code)
+        {
+            Coupon coupon = _coupons.Find(c => c.Code == code);
+            return coupon != null && !coupon.IsUsed;
+        }
+```
+
+Voer alle tests uit.
+
+Wat je ziet:
+
+```
+✓ IsValid_WithValidCouponCode_ReturnsTrue
+✓ IsValid_WithUnknownCouponCode_ReturnsFalse
+✓ GetDiscount_WithValidCouponCode_ReturnsCorrectDiscount
+✓ IsValid_AfterCouponIsUsed_ReturnsFalse
+✓ IsValid_BeforeCouponIsUsed_ReturnsTrue
+```
+
+Groene fase. Alle vijf de testgevallen uit de testlijst zijn gedekt.
+
+Vink de testlijst af:
+
+```
+[x] Een geldige couponcode geeft true terug bij validatie
+[x] Een onbekende couponcode geeft false terug
+[x] De juiste kortingswaarde wordt teruggegeven voor een geldige code
+[x] Een coupon die al gebruikt is, is niet meer geldig
+[x] Een coupon die nog niet gebruikt is, blijft geldig
+```
+
+`CouponService` is volledig via TDD gebouwd: test voor test, stap voor stap, zonder ook maar één lijn productiecode voor er een falende test was.
 
 ---
 
