@@ -59,7 +59,7 @@ export default function Home() {
           </p>
           <div className={styles.heroButtons}>
             <Link className={clsx('button button--lg', styles.btnPrimary)} to="/docs/testing/unit-testing-mocking">
-              Start met Les 1
+              Ga naar Testing
             </Link>
             <Link className={clsx('button button--lg', styles.btnSecondary)} to="/docs/security/cia-hashing-encryptie">
               Ga naar Security

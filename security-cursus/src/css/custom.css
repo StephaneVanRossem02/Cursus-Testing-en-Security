@@ -47,7 +47,7 @@
 
 .menu__caret::before,
 .menu__link--sublist-caret::after {
-  background-color: var(--ifm-color-primary) !important;
+  background-color: var(--ifm-color-emphasis-500) !important;
 }
 
 /* ── Headings in docs ── */
