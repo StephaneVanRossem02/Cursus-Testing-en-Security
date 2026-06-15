@@ -114,35 +114,6 @@
   background-color: rgba(231, 76, 60, 0.11) !important;
 }
 
-/* ── Caret-knop: button-reset met hoge specificiteit ── */
-button.menu__caret {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  padding: 4px !important;
-  width: 24px !important;
-  min-width: 24px !important;
-  height: 24px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 4px;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.1s;
-}
-
-button.menu__caret:hover {
-  background: var(--ifm-color-emphasis-200) !important;
-}
-
-button.menu__caret::before {
-  background-color: var(--ifm-font-color-base) !important;
-}
-
 /* Geen rode dots via ::before op links */
 .menu__list-item-collapsible > .menu__link::before {
   display: none !important;
