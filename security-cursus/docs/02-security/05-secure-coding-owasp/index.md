@@ -564,10 +564,10 @@ HttpResponseMessage r2 = client.PostAsync("/register",
     new StringContent(kortWachtwoord, Encoding.UTF8, "application/json")).Result;
 Console.WriteLine($"Kort wachtwoord: {r2.StatusCode} — {r2.Content.ReadAsStringAsync().Result}");
 
-string geldig = JsonSerializer.Serialize(
+string validPayload = JsonSerializer.Serialize(
     new { email = "nieuw@shopwave.be", password = "VeiligWw1!" });
 HttpResponseMessage r3 = client.PostAsync("/register",
-    new StringContent(geldig, Encoding.UTF8, "application/json")).Result;
+    new StringContent(validPayload, Encoding.UTF8, "application/json")).Result;
 Console.WriteLine($"Geldig: {r3.StatusCode} — {r3.Content.ReadAsStringAsync().Result}");
 ```
 

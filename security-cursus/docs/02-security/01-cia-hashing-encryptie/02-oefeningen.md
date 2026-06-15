@@ -7,84 +7,15 @@ sidebar_label: "Oefeningen"
 
 Werk de oefeningen in volgorde. Elke oefening bouwt verder op de vorige. Kijk niet vooraf in de oplossingen.
 
-Je werkt in de bestaande ShopWave-solution uit les 1. Alle nieuwe klassen maak je aan in de map `ShopWave/Security/`. Alle testklassen maak je aan in `ShopWave.Tests/`.
+Je werkt in de bestaande ShopWave-solution. Alle nieuwe klassen maak je aan in `ShopWave/Security/`.
 
 ---
 
 <h3 class="opdracht-titel">Opdracht</h3>
 
-## Oefening 1: CustomerAccount testen
+## Oefening 1: AccountRepository bouwen
 
-**Leerdoel:** je leert tests schrijven voor een beveiligingsklasse en begrijpt welke eigenschappen van BCrypt je kan verifiëren zonder de interne werking te kennen.
-
-**Moeilijkheidsgraad:** basis
-
-**Situatie:** de demo bouwde `CustomerAccount` met BCrypt-hashing. Jij schrijft de tests die bewijzen dat de klasse correct werkt.
-
-**Wat je doet:**
-
-Maak `ShopWave.Tests/CustomerAccountTests.cs` aan en schrijf tests voor de volgende vijf scenario's:
-
-1. Na het aanmaken van een `CustomerAccount` is `PasswordHash` niet leeg
-2. De `PasswordHash` begint met `$2a$` of `$2b$` (het BCrypt-formaat)
-3. `VerifyPassword` geeft `true` terug bij het correcte wachtwoord
-4. `VerifyPassword` geeft `false` terug bij een fout wachtwoord
-5. Twee `CustomerAccount`-objecten met hetzelfde wachtwoord hebben een **andere** `PasswordHash`
-
-Gebruik FluentAssertions voor alle assertions.
-
-**Startcode:**
-
-```csharp
-using FluentAssertions;
-using ShopWave.Security;
-
-namespace ShopWave.Tests
-{
-    public class CustomerAccountTests
-    {
-        [Fact]
-        public void CustomerAccount_AfterCreation_PasswordHashIsNotEmpty()
-        {
-            // Arrange & Act
-            CustomerAccount account = new CustomerAccount("alice@shopwave.be", "wachtwoord123");
-
-            // Assert
-            // jouw assertion hier
-        }
-
-        [Fact]
-        public void CustomerAccount_PasswordHash_StartsWithBCryptPrefix()
-        {
-            // Arrange & Act
-            CustomerAccount account = new CustomerAccount("alice@shopwave.be", "wachtwoord123");
-
-            // Assert
-            // Tip: controleer op "$2a$" OF "$2b$"
-        }
-
-        // Voeg de overige drie tests zelf toe
-    }
-}
-```
-
-**Verwacht resultaat:**
-
-```
-✓ CustomerAccount_AfterCreation_PasswordHashIsNotEmpty
-✓ CustomerAccount_PasswordHash_StartsWithBCryptPrefix
-✓ VerifyPassword_WithCorrectPassword_ReturnsTrue
-✓ VerifyPassword_WithWrongPassword_ReturnsFalse
-✓ TwoAccountsWithSamePassword_HaveDifferentHashes
-```
-
----
-
-<h3 class="opdracht-titel">Opdracht</h3>
-
-## Oefening 2: AccountRepository implementeren
-
-**Leerdoel:** je implementeert een klasse die meerdere beveiligingsregels combineert: wachtwoordverificatie, foutentelling en lockout.
+**Leerdoel:** je implementeert een inlogsysteem dat wachtwoorden correct hasht en brute-force-aanvallen afremt via lockout.
 
 **Moeilijkheidsgraad:** basis
 
@@ -92,18 +23,10 @@ namespace ShopWave.Tests
 
 **Wat je doet:**
 
-Maak `ShopWave/Security/AccountRepository.cs` aan met de volgende signatuur:
+Maak `ShopWave/Security/AccountRepository.cs` aan met twee methoden:
 
-```csharp
-namespace ShopWave.Security
-{
-    public class AccountRepository
-    {
-        public void Register(string email, string password) { ... }
-        public string Login(string email, string password)  { ... }
-    }
-}
-```
+- `Register(string email, string password)`: maakt een nieuw account aan. Gebruik `CustomerAccount` intern voor wachtwoordopslag.
+- `Login(string email, string password)`: controleert de inloggegevens en geeft een leesbare string terug.
 
 `Login` geeft precies één van de volgende strings terug:
 
@@ -115,86 +38,142 @@ namespace ShopWave.Security
 | E-mailadres bestaat niet | `"Gebruiker niet gevonden."` |
 
 **Aanvullende regels:**
-- De foutenteller wordt gereset na een succesvolle login
-- Een geblokkeerd account blijft geblokkeerd, ook als daarna het juiste wachtwoord ingevoerd wordt
-- Gebruik `CustomerAccount` intern voor wachtwoordopslag en verificatie
 
-**Tip:** je hebt twee interne datastructuren nodig: één voor de accounts en één voor de foutentellers.
-
----
-
-<h3 class="opdracht-titel">Opdracht</h3>
-
-## Oefening 3: AccountRepository testen
-
-**Leerdoel:** je leert tests schrijven voor een klasse met toestand (de foutenteller verandert tussen aanroepen).
-
-**Moeilijkheidsgraad:** gemiddeld
-
-**Situatie:** je hebt `AccountRepository` geïmplementeerd in oefening 2. Nu schrijf je de tests die bewijzen dat alle scenario's correct werken.
-
-**Wat je doet:**
-
-Maak `ShopWave.Tests/AccountRepositoryTests.cs` aan en schrijf tests voor minstens de volgende vijf scenario's:
-
-1. Registreer een gebruiker en log in met het juiste wachtwoord: resultaat is `"Inloggen geslaagd."`
-2. Log in met een fout wachtwoord: resultaat is `"Inloggen mislukt."`
-3. Log in met een onbestaand e-mailadres: resultaat is `"Gebruiker niet gevonden."`
-4. Drie opeenvolgende foute pogingen, daarna het juiste wachtwoord: resultaat is `"Account geblokkeerd."`
-5. Na een succesvolle login wordt de teller gereset: een nieuwe foute poging is `"Inloggen mislukt."` (niet meteen `"Account geblokkeerd."`)
+- De foutenteller wordt gereset na een succesvolle login.
+- Een geblokkeerd account blijft geblokkeerd, ook als daarna het juiste wachtwoord ingevoerd wordt.
+- Je hebt twee interne datastructuren nodig: één voor de accounts en één voor de foutentellers.
 
 **Startcode:**
 
 ```csharp
-using FluentAssertions;
-using ShopWave.Security;
-
-namespace ShopWave.Tests
+namespace ShopWave.Security
 {
-    public class AccountRepositoryTests
+    public class AccountRepository
     {
-        [Fact]
-        public void Login_WithCorrectPassword_ReturnsGeslaagd()
+        private readonly Dictionary<string, CustomerAccount> _accounts;
+        private readonly Dictionary<string, int>             _failedAttempts;
+        private const int MaxAttempts = 3;
+
+        public AccountRepository()
         {
-            // Arrange
-            AccountRepository repository = new AccountRepository();
-            repository.Register("alice@shopwave.be", "wachtwoord123");
-
-            // Act
-            string result = repository.Login("alice@shopwave.be", "wachtwoord123");
-
-            // Assert
-            result.Should().Be("Inloggen geslaagd.");
+            _accounts       = new Dictionary<string, CustomerAccount>();
+            _failedAttempts = new Dictionary<string, int>();
         }
 
-        // Voeg de overige vier tests zelf toe
+        public void Register(string email, string password)
+        {
+            // jouw code hier
+        }
+
+        public string Login(string email, string password)
+        {
+            // jouw code hier
+            return string.Empty;
+        }
     }
 }
 ```
 
-**Tip voor de lockout-test:** roep `Login` drie keer aan met een fout wachtwoord in het Arrange-gedeelte, daarna de vierde aanroep in het Act-gedeelte.
+**Controleer je werk:** voeg tijdelijk toe aan `Program.cs`:
 
-**Verwacht resultaat:**
+```csharp
+AccountRepository repository = new AccountRepository();
+repository.Register("alice@shopwave.be", "wachtwoord123");
+
+Console.WriteLine(repository.Login("alice@shopwave.be", "fout"));
+Console.WriteLine(repository.Login("alice@shopwave.be", "fout"));
+Console.WriteLine(repository.Login("alice@shopwave.be", "fout"));
+Console.WriteLine(repository.Login("alice@shopwave.be", "wachtwoord123"));
+```
+
+Verwacht resultaat:
 
 ```
-✓ Login_WithCorrectPassword_ReturnsGeslaagd
-✓ Login_WithWrongPassword_ReturnsMislukt
-✓ Login_WithUnknownEmail_ReturnsNietGevonden
-✓ Login_AfterThreeWrongAttempts_ReturnsGeblokkeerd
-✓ Login_AfterSuccessfulLogin_ResetsFailedCounter
+Inloggen mislukt.
+Inloggen mislukt.
+Account geblokkeerd.
+Account geblokkeerd.
 ```
 
 ---
 
 <h3 class="opdracht-titel">Opdracht</h3>
 
-## Oefening 4: OrderEncryptor implementeren en testen
+## Oefening 2: Wachtwoordsterkte afdwingen
 
-**Leerdoel:** je implementeert een klasse die `AesEncryptor` omhult en schrijft tests die de eigenschappen van AES-encryptie verifiëren.
+**Leerdoel:** je begrijpt waarom zwakke wachtwoorden een beveiligingsrisico zijn en implementeert validatieregels die dat risico verkleinen.
+
+**Moeilijkheidsgraad:** basis
+
+**Situatie:** een klant van ShopWave kiest het wachtwoord `"123"`. BCrypt hasht dat correct, maar een aanvaller kan het in seconden raden. ShopWave wil minimale wachtwoordeisen afdwingen bij registratie.
+
+**Wat je doet:**
+
+Maak `ShopWave/Security/PasswordValidator.cs` aan:
+
+```csharp
+namespace ShopWave.Security
+{
+    public class PasswordValidator
+    {
+        public bool IsValid(string password)     { ... }
+        public string GetErrorMessage(string password) { ... }
+    }
+}
+```
+
+Een wachtwoord is geldig als het aan alle vier de regels voldoet:
+
+1. Minstens 8 tekens lang
+2. Minstens één hoofdletter (`A`-`Z`)
+3. Minstens één cijfer (`0`-`9`)
+4. Minstens één speciaal teken uit de reeks: `!@#$%^&*`
+
+`GetErrorMessage` geeft de eerste overtreden regel terug als leesbare foutmelding. Als het wachtwoord geldig is, geeft hij een lege string terug.
+
+Pas daarna `AccountRepository.Register` aan zodat registratie mislukt als het wachtwoord ongeldig is. Voeg daarvoor een returnwaarde toe aan `Register`:
+
+```csharp
+public string Register(string email, string password)
+```
+
+| Situatie | Returnwaarde |
+|----------|-------------|
+| Registratie geslaagd | `"Registratie geslaagd."` |
+| Wachtwoord ongeldig | De foutmelding van `PasswordValidator` |
+| E-mailadres al in gebruik | `"E-mailadres al in gebruik."` |
+
+**Controleer je werk:** voeg tijdelijk toe aan `Program.cs`:
+
+```csharp
+AccountRepository repository = new AccountRepository();
+
+Console.WriteLine(repository.Register("alice@shopwave.be", "123"));
+Console.WriteLine(repository.Register("alice@shopwave.be", "wachtwoord"));
+Console.WriteLine(repository.Register("alice@shopwave.be", "Wachtwoord1!"));
+Console.WriteLine(repository.Register("alice@shopwave.be", "Wachtwoord1!"));
+```
+
+Verwacht resultaat:
+
+```
+Wachtwoord moet minstens 8 tekens lang zijn.
+Wachtwoord moet minstens één hoofdletter bevatten.
+Registratie geslaagd.
+E-mailadres al in gebruik.
+```
+
+---
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+## Oefening 3: OrderEncryptor bouwen
+
+**Leerdoel:** je implementeert een klasse die `AesEncryptor` omhult en gevoelige ordergegevens versleuteld opslaat.
 
 **Moeilijkheidsgraad:** gemiddeld
 
-**Situatie:** ShopWave wil gevoelige ordergegevens versleuteld opslaan. `AesEncryptor` uit de demo werkt rechtstreeks met een sleutel. `OrderEncryptor` verbergt die sleutel intern zodat de rest van de applicatie er niet over hoeft na te denken.
+**Situatie:** ShopWave wil gevoelige ordergegevens versleuteld bewaren in de database. `AesEncryptor` uit de demo werkt rechtstreeks met een sleutelarray. `OrderEncryptor` verbergt die sleutel intern zodat de rest van de applicatie er niet over hoeft na te denken.
 
 **Wat je doet:**
 
@@ -211,51 +190,126 @@ namespace ShopWave.Security
 }
 ```
 
-- Definieer de AES-sleutel als `private const string` in de klasse
-- Gebruik `AesEncryptor` intern
-- De IV wordt automatisch willekeurig gegenereerd per encryptie via `AesEncryptor`
+**Vereisten:**
 
-Maak daarna `ShopWave.Tests/OrderEncryptorTests.cs` aan en schrijf tests voor minstens drie scenario's:
+- Definieer de AES-sleutel als `private const string` in de klasse. Gebruik `"ShopWaveOrderSleutel!!"` als waarde en pas die aan naar 32 bytes via `PadRight(32)`.
+- Gebruik `AesEncryptor` intern. Maak die aan in de constructor.
+- `EncryptOrderData` geeft de versleutelde string terug.
+- `DecryptOrderData` geeft de originele string terug.
 
-1. Versleutelde data is niet gelijk aan de originele string
-2. Ontsleutelen van versleutelde data geeft de originele string terug
-3. Twee keer dezelfde string versleutelen geeft twee **verschillende** ciphertexts, maar ontsleutelen van elk resultaat geeft telkens de originele string terug
-
-**Startcode voor de tests:**
+Maak daarna `ShopWave/Security/OrderRepository.cs` aan. `OrderRepository` bewaart orders als versleutelde strings en kan ze ophalen:
 
 ```csharp
-using FluentAssertions;
-using ShopWave.Security;
-
-namespace ShopWave.Tests
+namespace ShopWave.Security
 {
-    public class OrderEncryptorTests
+    public class OrderRepository
     {
-        [Fact]
-        public void EncryptOrderData_ReturnsValueDifferentFromOriginal()
+        private readonly Dictionary<string, string> _orders;
+        private readonly OrderEncryptor             _encryptor;
+
+        public OrderRepository()
         {
-            // Arrange
-            OrderEncryptor encryptor = new OrderEncryptor();
-            string original          = "alice@shopwave.be | Laptop | 999.99 EUR";
-
-            // Act
-            string encrypted = encryptor.EncryptOrderData(original);
-
-            // Assert
-            // jouw assertion hier
+            _orders    = new Dictionary<string, string>();
+            _encryptor = new OrderEncryptor();
         }
 
-        // Voeg de overige twee tests zelf toe
+        public void SaveOrder(string orderId, string orderData) { ... }
+        public string GetOrder(string orderId)                  { ... }
     }
 }
 ```
 
-**Verwacht resultaat:**
+`SaveOrder` versleutelt de orderdata voor opslag. `GetOrder` haalt de versleutelde data op en ontsleutelt die.
+
+**Controleer je werk:** voeg tijdelijk toe aan `Program.cs`:
+
+```csharp
+OrderRepository orders = new OrderRepository();
+
+orders.SaveOrder("ORD-001", "alice@shopwave.be | Laptop | 999.99 EUR");
+orders.SaveOrder("ORD-002", "bob@shopwave.be   | Muis   |  29.99 EUR");
+
+Console.WriteLine(orders.GetOrder("ORD-001"));
+Console.WriteLine(orders.GetOrder("ORD-002"));
+```
+
+Verwacht resultaat:
 
 ```
-✓ EncryptOrderData_ReturnsValueDifferentFromOriginal
-✓ DecryptOrderData_ReturnsOriginalString
-✓ EncryptOrderData_TwiceSameInput_GivesDifferentCiphertexts
+alice@shopwave.be | Laptop | 999.99 EUR
+bob@shopwave.be   | Muis   |  29.99 EUR
+```
+
+---
+
+<h3 class="opdracht-titel">Opdracht</h3>
+
+## Oefening 4: Versleutelde klantnotities
+
+**Leerdoel:** je past AES-encryptie toe in een realistisch scenario en denkt na over welke data versleuteld moet worden en waarom.
+
+**Moeilijkheidsgraad:** uitdaging
+
+**Situatie:** de klantenservice van ShopWave wil interne notities bijhouden per klant: bezorkinstructies, VIP-status, opmerkingen. Die notities bevatten gevoelige informatie en mogen niet leesbaar opgeslagen worden. Als de database gestolen wordt, mogen aanvallers die notities niet kunnen lezen.
+
+**Wat je doet:**
+
+Maak `ShopWave/Security/CustomerNotesService.cs` aan:
+
+```csharp
+namespace ShopWave.Security
+{
+    public class CustomerNotesService
+    {
+        public void AddNote(string email, string note)           { ... }
+        public string GetNote(string email)                      { ... }
+        public bool HasNote(string email)                        { ... }
+        public void DeleteNote(string email)                     { ... }
+    }
+}
+```
+
+**Vereisten:**
+
+- Notities worden intern versleuteld opgeslagen via `AesEncryptor`. De sleutel definieer je als `private const string`.
+- `GetNote` ontsleutelt en geeft de leesbare notitie terug. Als er geen notitie bestaat, geeft hij een lege string terug.
+- `HasNote` geeft `true` als er een (versleutelde) notitie bestaat voor dat e-mailadres.
+- `DeleteNote` verwijdert de notitie.
+- Als je de interne dictionary van `CustomerNotesService` zou inspecteren, zie je alleen versleutelde data, nooit de plain-text notities.
+
+Voeg daarna een methode `ExportEncryptedNotes` toe die een overzicht geeft van alle opgeslagen notities in hun **versleutelde** vorm. Dat simuleert wat een aanvaller ziet als hij de database steelt.
+
+```csharp
+public Dictionary<string, string> ExportEncryptedNotes() { ... }
+```
+
+**Controleer je werk:** voeg tijdelijk toe aan `Program.cs`:
+
+```csharp
+CustomerNotesService notes = new CustomerNotesService();
+
+notes.AddNote("alice@shopwave.be", "VIP-klant. Altijd prioriteit geven.");
+notes.AddNote("bob@shopwave.be",   "Bezorging: achterdeur gebruiken.");
+
+Console.WriteLine($"Alice heeft notitie: {notes.HasNote("alice@shopwave.be")}");
+Console.WriteLine($"Notitie Alice: {notes.GetNote("alice@shopwave.be")}");
+
+Console.WriteLine("\nWat een aanvaller ziet:");
+foreach (var entry in notes.ExportEncryptedNotes())
+{
+    Console.WriteLine($"{entry.Key}: {entry.Value[..30]}...");
+}
+```
+
+Verwacht resultaat:
+
+```
+Alice heeft notitie: True
+Notitie Alice: VIP-klant. Altijd prioriteit geven.
+
+Wat een aanvaller ziet:
+alice@shopwave.be: a3Fk9mNpQ2rBk3aLvM8sRt1w...
+bob@shopwave.be: Xy7mNpQ2rBk3aLvM8sRt1wJc9...
 ```
 
 ---
@@ -268,17 +322,12 @@ namespace ShopWave.Tests
 
 **Moeilijkheidsgraad:** basis
 
-Bepaal voor elke situatie hieronder:
-- Welke CIA-pijler(s) worden geschonden?
-- Wat is de concrete impact voor ShopWave en haar klanten?
-- Welke technische maatregel lost het probleem op?
+Beantwoord de volgende vragen op papier of in een tekstbestand.
 
-Schrijf je antwoorden op papier of in een tekstbestand.
+**Situatie A:** een aanvaller heeft toegang gekregen tot de database van ShopWave. Alle wachtwoorden zijn opgeslagen als plain text. Welke CIA-pijler is geschonden? Wat is de impact? Welke technische maatregel had dit voorkomen?
 
-**Situatie A:** een aanvaller heeft toegang gekregen tot de database van ShopWave. Alle wachtwoorden zijn opgeslagen als plain text.
+**Situatie B:** een aanvaller slaagt erin de prijs van een product te wijzigen van 999 EUR naar 1 EUR in de database, zonder dat iemand dit merkt. Welke CIA-pijler is geschonden? Wat is de impact voor ShopWave?
 
-**Situatie B:** een aanvaller slaagt erin de prijs van een product te wijzigen van 999 euro naar 1 euro in de database, zonder dat iemand dit merkt.
+**Situatie C:** ShopWave wordt aangevallen met een DDoS-aanval. De webshop is vier uur lang niet bereikbaar tijdens een drukke promotieperiode. Welke CIA-pijler is geschonden? Welke maatregel kan ShopWave nemen om de impact te beperken?
 
-**Situatie C:** ShopWave wordt aangevallen met een DDoS-aanval. De webshop is vier uur lang niet bereikbaar tijdens een drukke promotieperiode.
-
-**Situatie D:** een medewerker stuurt per ongeluk de volledige klantenlijst, inclusief adressen en telefoonnummers, via e-mail naar een verkeerde ontvanger.
+**Situatie D:** een medewerker van ShopWave kan de klantnotities uit oefening 4 lezen door rechtstreeks in de database te kijken, omdat de notities als plain text opgeslagen zijn. Welke CIA-pijler is hier in het geding? Wat lost oefening 4 precies op?
