@@ -230,11 +230,11 @@ Je bouwt verder op de ShopWave.Api uit les 6. Geen nieuw project. De NuGet packa
 
 ---
 
-### Stap 8a: JwtTokenService aanmaken - velden en constructor
+### Stap 8a: JwtTokenService aanmaken - klasse en constructor
 
 Maak een nieuw bestand aan: `ShopWave.Api/JwtTokenService.cs`.
 
-Begin met de velden en constructor:
+Voeg de klasse aan met de velden en constructor:
 
 ```csharp
 using System.Text;
@@ -260,15 +260,15 @@ namespace ShopWave.Api
 }
 ```
 
-De klasse ontvangt de geheime sleutel, de issuer, de audience en de vervaltijd via de constructor. Zo kan je dezelfde klasse gebruiken met verschillende configuraties.
+De klasse ontvangt de geheime sleutel, de issuer, de audience en de vervaltijd via de constructor. Zo kan je dezelfde klasse hergebruiken met andere configuraties.
 
-**Wat je ziet:** het project compileert zonder fouten. De klasse staat klaar voor de methode.
+**Wat je ziet:** het project compileert. De klasse bestaat maar heeft nog geen methoden.
 
 ---
 
-### Stap 8b: GenerateToken methode toevoegen
+### Stap 8b: GenerateToken - sleutel en signing credentials
 
-Voeg de volgende methode toe **binnen de klasse**, na de constructor:
+Voeg de methode toe **binnen de klasse**, na de constructor. Begin met de eerste drie regels:
 
 ```csharp
 using System.Security.Claims;
@@ -280,6 +280,22 @@ public string GenerateToken(string email, string role)
     SymmetricSecurityKey securityKey = new SymmetricSecurityKey(keyBytes);
     SigningCredentials   credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+    // wordt verder uitgebouwd in de volgende stap
+    return string.Empty;
+}
+```
+
+`Encoding.UTF8.GetBytes` zet de geheime sleutelstring om naar bytes. `SymmetricSecurityKey` verpakt die bytes in een sleutelobject dat de JWT-bibliotheek begrijpt. `SigningCredentials` koppelt die sleutel aan het HMACSHA256-algoritme. Dat algoritme berekent straks de signature.
+
+**Wat je ziet:** het project compileert. De methode bestaat maar geeft nog een lege string terug.
+
+---
+
+### Stap 8c: GenerateToken - claims definiëren
+
+Voeg de claims toe, direct na de `credentials`-regel en voor de `return`:
+
+```csharp
     List<Claim> claims = new List<Claim>
     {
         new Claim(JwtRegisteredClaimNames.Sub, email),
@@ -287,7 +303,19 @@ public string GenerateToken(string email, string role)
         new Claim(JwtRegisteredClaimNames.Iat,
             DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
     };
+```
 
+Claims zijn de gegevens die in de payload komen. `Sub` is het e-mailadres van de gebruiker. `Role` bepaalt wat de gebruiker mag doen. `Iat` is het tijdstip van aanmaak als Unix-timestamp.
+
+**Wat je ziet:** het project compileert. De lijst met claims staat klaar maar wordt nog nergens gebruikt.
+
+---
+
+### Stap 8d: GenerateToken - token assembleren en teruggeven
+
+Vervang de tijdelijke `return string.Empty;` door de volgende code:
+
+```csharp
     JwtSecurityToken token = new JwtSecurityToken(
         issuer:             _issuer,
         audience:           _audience,
@@ -297,20 +325,15 @@ public string GenerateToken(string email, string role)
     );
 
     return new JwtSecurityTokenHandler().WriteToken(token);
-}
 ```
 
-`SymmetricSecurityKey` converteert de geheime sleutelstring naar een sleutelobject dat de JWT-bibliotheek begrijpt. `SigningCredentials` koppelt die sleutel aan het HMACSHA256-algoritme.
+`JwtSecurityToken` assembleert header, payload en signature. `WriteToken` serialiseert het resultaat naar de `header.payload.signature`-string die de client ontvangt.
 
-Claims zijn de gegevens die in de payload komen. `Sub` is het e-mailadres, `Role` bepaalt wat de gebruiker mag doen, `Iat` is het tijdstip van aanmaak.
-
-`WriteToken` serialiseert het token naar de `header.payload.signature`-string die de client ontvangt.
-
-**Wat je ziet:** het project compileert. Je kan `GenerateToken("alice@shopwave.be", "user")` aanroepen en krijgt een JWT-string terug.
+**Wat je ziet:** het project compileert. Je kan `jwtTokenService.GenerateToken("alice@shopwave.be", "user")` aanroepen en krijgt een lange JWT-string terug die begint met `eyJ`.
 
 ---
 
-### Stap 8c: JWT-authenticatie registreren in Program.cs
+### Stap 8e: Program.cs - usings en User Secrets
 
 Open `ShopWave.Api/Program.cs`. Voeg bovenaan de nodige usings toe:
 
@@ -323,7 +346,7 @@ using ShopWave.Security;
 using System.Security.Cryptography.X509Certificates;
 ```
 
-Sla de JWT-sleutel op via .NET User Secrets zodat die nooit hardcoded in broncode staat:
+Sla de JWT-sleutel op via .NET User Secrets. Voer dit uit in de terminal in de map van `ShopWave.Api`:
 
 ```
 dotnet user-secrets init
@@ -332,7 +355,7 @@ dotnet user-secrets set "Jwt:SecretKey" "ShopWaveGeheimeSleutel2024!!XYZ#"
 
 Een sleutel die in de repository staat, kan door iedereen met toegang tot de code gebruikt worden om geldige tokens te maken. User Secrets slaan de waarde lokaal op buiten de repository.
 
-Lees de sleutel op via configuratie en definieer de constanten:
+Lees de sleutel op en definieer de constanten bovenaan `Program.cs`:
 
 ```csharp
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -344,7 +367,13 @@ const string Issuer   = "shopwave-api";
 const string Audience = "shopwave-client";
 ```
 
-Voeg HTTPS-configuratie toe zoals in les 6:
+**Wat je ziet:** het project compileert. Als de User Secret ontbreekt, gooit de applicatie meteen een fout bij het opstarten.
+
+---
+
+### Stap 8f: Program.cs - HTTPS en JWT-authenticatie registreren
+
+Voeg na de constanten de HTTPS-configuratie toe, zoals in les 6:
 
 ```csharp
 builder.WebHost.ConfigureKestrel(options =>
@@ -357,7 +386,7 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 ```
 
-Registreer JWT-authenticatie als service:
+Registreer daarna JWT-authenticatie als service:
 
 ```csharp
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -379,7 +408,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 ```
 
-Bouw de applicatie en activeer authenticatie en autorisatie:
+`TokenValidationParameters` vertelt de server wat hij controleert bij elk binnenkomend token: klopt de issuer, is het token voor deze API bedoeld, is het nog niet verlopen, en klopt de signature?
+
+**Wat je ziet:** het project compileert. De middleware is geconfigureerd maar nog niet geactiveerd.
+
+---
+
+### Stap 8g: Program.cs - applicatie bouwen en middleware activeren
+
+Bouw de applicatie en zet de middleware in de juiste volgorde:
 
 ```csharp
 WebApplication app = builder.Build();
@@ -388,32 +425,36 @@ app.UseAuthentication();
 app.UseAuthorization();
 ```
 
-De volgorde is verplicht: authenticatie (wie ben je?) altijd voor autorisatie (wat mag je?).
+De volgorde is verplicht. `UseAuthentication` bepaalt wie de gebruiker is door het token te lezen en te valideren. `UseAuthorization` beslist daarna wat die gebruiker mag doen. Als je de volgorde omdraait, weet de autorisatiemiddleware niet wie de gebruiker is.
 
-**Wat je ziet:** het project compileert. Er zijn nog geen endpoints, maar de JWT-middleware staat klaar.
+**Wat je ziet:** het project compileert. Er zijn nog geen endpoints, maar de middleware staat klaar.
 
 ---
 
-### Stap 8d: Services, testaccounts en endpoints toevoegen
+### Stap 8h: Program.cs - services en testaccounts aanmaken
 
-Maak de service-objecten aan en registreer testgebruikers:
+Voeg na de middleware de service-objecten en testgebruikers toe:
 
 ```csharp
 TwoFactorService  twoFactorService  = new TwoFactorService();
 AccountRepository accountRepository = new AccountRepository(twoFactorService);
 JwtTokenService   jwtTokenService   = new JwtTokenService(secretKey, Issuer, Audience);
 
-accountRepository.Register("alice@shopwave.be",  "wachtwoord123");
-accountRepository.Register("admin@shopwave.be",  "admin123");
+accountRepository.Register("alice@shopwave.be", "wachtwoord123");
+accountRepository.Register("admin@shopwave.be", "admin123");
 ```
 
-Voeg de endpoints toe:
+**Wat je ziet:** het project compileert. De services zijn aangemaakt maar er zijn nog geen endpoints.
+
+---
+
+### Stap 8i: Program.cs - publiek endpoint en login-endpoint
+
+Voeg het publieke endpoint en het login-endpoint toe:
 
 ```csharp
-// Publiek endpoint - geen token vereist
 app.MapGet("/", () => "ShopWave API actief op HTTPS met JWT");
 
-// Login: start de 2FA-flow
 app.MapPost("/login", HandleLogin);
 
 IResult HandleLogin(LoginRequest request)
@@ -422,7 +463,20 @@ IResult HandleLogin(LoginRequest request)
     return Results.Ok(new { Status = result });
 }
 
-// Verify: bevestig de 2FA-code, geef JWT terug bij succes
+record LoginRequest(string Email, string Password);
+```
+
+Het `/`-endpoint vereist geen token. Iedereen kan het aanroepen. Het `/login`-endpoint start de 2FA-flow: de gebruiker geeft e-mail en wachtwoord, de API stuurt een 2FA-code naar de console.
+
+**Wat je ziet:** start de API en stuur een POST naar `/login` met `{"email":"alice@shopwave.be","password":"wachtwoord123"}`. De 2FA-code verschijnt in de API-console.
+
+---
+
+### Stap 8j: Program.cs - verify-endpoint met rolbepaling
+
+Voeg het verify-endpoint toe dat bij succes een JWT teruggeeft:
+
+```csharp
 app.MapPost("/verify", HandleVerify);
 
 IResult HandleVerify(VerifyRequest request)
@@ -456,7 +510,20 @@ string DetermineRole(string email)
     return role;
 }
 
-// Beveiligd endpoint: vereist geldig JWT
+record VerifyRequest(string Email, string Code);
+```
+
+`DetermineRole` bepaalt de rol op basis van het e-mailadres. Die rol komt in de JWT-payload als claim. Elke server die het token valideert, kan de rol uitlezen zonder een database te raadplegen.
+
+**Wat je ziet:** stuur een POST naar `/verify` met de code uit de vorige stap. Je krijgt een JSON-object terug met een `token`-veld dat begint met `eyJ`.
+
+---
+
+### Stap 8k: Program.cs - orders-endpoint en admin-endpoint
+
+Voeg de beveiligde endpoints toe en sluit de applicatie af:
+
+```csharp
 app.MapGet("/orders/{email}", HandleOrders)
    .RequireAuthorization();
 
@@ -470,7 +537,6 @@ IResult HandleOrders(string email)
     return Results.Ok(new { Order = orderData, Signature = signature });
 }
 
-// Admin-endpoint: vereist rol "admin"
 app.MapGet("/admin/orders", HandleAdminOrders)
    .RequireAuthorization(policy => policy.RequireRole("admin"));
 
@@ -479,20 +545,18 @@ IResult HandleAdminOrders()
     return Results.Ok(new { Message = "Alle bestellingen - enkel voor admins" });
 }
 
-// Request-records
-record LoginRequest(string Email, string Password);
-record VerifyRequest(string Email, string Code);
-
 app.Run();
 ```
 
-**Wat je ziet:** het project compileert en start op `https://localhost:5001`. Een request naar `/orders/alice@shopwave.be` zonder token geeft `401 Unauthorized`.
+`.RequireAuthorization()` weigert elke request zonder geldig token met `401 Unauthorized`. `.RequireAuthorization(policy => policy.RequireRole("admin"))` weigert ook geldige tokens van niet-admins met `403 Forbidden`.
+
+**Wat je ziet:** roep `/orders/alice@shopwave.be` aan zonder token. De server geeft `401 Unauthorized`. De endpoints zijn beveiligd.
 
 ---
 
-### Stap 8e: De flow testen vanuit de console
+### Stap 8l: Console - HttpClient aanmaken en login sturen
 
-Open `ShopWave/Program.cs` en voeg tijdelijk de volgende code toe:
+Open `ShopWave/Program.cs`. Voeg de nodige usings toe en maak een `HttpClient` aan die self-signed certificaten accepteert:
 
 ```csharp
 using System.Net.Http;
@@ -505,24 +569,43 @@ handler.ServerCertificateCustomValidationCallback =
 
 HttpClient client = new HttpClient(handler);
 client.BaseAddress = new Uri("https://localhost:5001");
+```
 
-// Stap 1: login
+Stuur de loginrequest en lees de 2FA-code in:
+
+```csharp
 Console.WriteLine("=== Stap 1: Login ===");
 
-string loginPayload  = JsonSerializer.Serialize(new { email = "alice@shopwave.be", password = "wachtwoord123" });
-StringContent loginContent   = new StringContent(loginPayload, Encoding.UTF8, "application/json");
+string        loginPayload  = JsonSerializer.Serialize(new { email = "alice@shopwave.be", password = "wachtwoord123" });
+StringContent loginContent  = new StringContent(loginPayload, Encoding.UTF8, "application/json");
 HttpResponseMessage loginResponse = client.PostAsync("/login", loginContent).Result;
 
 Console.WriteLine(loginResponse.Content.ReadAsStringAsync().Result);
 
-// Stap 2: voer de 2FA-code in (staat in de API-console)
-Console.Write("Voer de 2FA-code in: ");
+Console.Write("Voer de 2FA-code in (staat in de API-console): ");
 string twoFactorCode = Console.ReadLine() ?? string.Empty;
+```
 
-// Stap 3: verify - haal het token op
-Console.WriteLine("=== Stap 2: Verify + Token ===");
+**Wat je ziet:**
 
-string verifyPayload  = JsonSerializer.Serialize(new { email = "alice@shopwave.be", code = twoFactorCode });
+```
+=== Stap 1: Login ===
+{"status":"2FA-code verstuurd."}
+Voer de 2FA-code in (staat in de API-console):
+```
+
+De 2FA-code staat in de console van de API, niet in de console van het console-project. Wissel tussen de twee vensters.
+
+---
+
+### Stap 8m: Console - 2FA-code verifiëren en token ophalen
+
+Stuur de verify-request en haal het token uit de response:
+
+```csharp
+Console.WriteLine("=== Stap 2: Verify + Token ophalen ===");
+
+string        verifyPayload  = JsonSerializer.Serialize(new { email = "alice@shopwave.be", code = twoFactorCode });
 StringContent verifyContent  = new StringContent(verifyPayload, Encoding.UTF8, "application/json");
 HttpResponseMessage verifyResponse = client.PostAsync("/verify", verifyContent).Result;
 
@@ -531,9 +614,25 @@ Console.WriteLine(verifyBody);
 
 JsonDocument verifyDoc = JsonDocument.Parse(verifyBody);
 string token = verifyDoc.RootElement.GetProperty("token").GetString() ?? string.Empty;
+```
 
-// Stap 4: beveiligd endpoint aanroepen met token
-Console.WriteLine("=== Stap 3: Beveiligd endpoint met token ===");
+`JsonDocument.Parse` parseert de JSON-response. `GetProperty("token")` haalt de waarde op van het `token`-veld. Dat is de JWT-string die je bij de volgende requests meestuurt.
+
+**Wat je ziet:**
+
+```
+=== Stap 2: Verify + Token ophalen ===
+{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGljZ..."}
+```
+
+---
+
+### Stap 8n: Console - beveiligd endpoint aanroepen met en zonder token
+
+Test het beveiligde endpoint eerst met token, daarna zonder:
+
+```csharp
+Console.WriteLine("=== Stap 3: Met token (verwacht 200 OK) ===");
 
 client.DefaultRequestHeaders.Authorization =
     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
@@ -542,7 +641,6 @@ HttpResponseMessage ordersResponse = client.GetAsync("/orders/alice@shopwave.be"
 Console.WriteLine($"Status: {ordersResponse.StatusCode}");
 Console.WriteLine(ordersResponse.Content.ReadAsStringAsync().Result);
 
-// Stap 5: zelfde endpoint zonder token
 Console.WriteLine("=== Stap 4: Zonder token (verwacht 401) ===");
 
 client.DefaultRequestHeaders.Authorization = null;
@@ -553,12 +651,7 @@ Console.WriteLine($"Status: {noTokenResponse.StatusCode}");
 **Wat je ziet:**
 
 ```
-=== Stap 1: Login ===
-{"status":"2FA-code verstuurd."}
-Voer de 2FA-code in: 483920
-=== Stap 2: Verify + Token ===
-{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
-=== Stap 3: Beveiligd endpoint met token ===
+=== Stap 3: Met token (verwacht 200 OK) ===
 Status: OK
 {"order":"alice@shopwave.be | Laptop | 999.99 EUR","signature":"..."}
 === Stap 4: Zonder token (verwacht 401) ===
@@ -567,14 +660,16 @@ Status: Unauthorized
 
 ---
 
-### Stap 8f: JWT-payload inspecteren zonder sleutel
+### Stap 8o: Console - JWT-payload inspecteren zonder sleutel
 
-Voeg na stap 8e toe:
+Voeg bovenaan het bestand de using toe en voeg daarna de volgende code toe na stap 8n:
 
 ```csharp
 using System.IdentityModel.Tokens.Jwt;
+```
 
-Console.WriteLine("=== JWT-payload (leesbaar zonder sleutel) ===");
+```csharp
+Console.WriteLine("=== Stap 5: JWT-payload leesbaar zonder sleutel ===");
 
 JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 JwtSecurityToken        parsedToken  = tokenHandler.ReadJwtToken(token);
@@ -591,20 +686,18 @@ handler.Dispose();
 client.Dispose();
 ```
 
-`ReadJwtToken` decodeert de payload zonder de signature te valideren. Dat toont aan dat de payload leesbaar is voor iedereen die het token heeft, ook zonder de geheime sleutel.
+`ReadJwtToken` decodeert de payload zonder de signature te valideren. Iedereen die het token heeft, kan de payload lezen. Stop nooit gevoelige informatie in de payload.
 
 **Wat je ziet:**
 
 ```
-=== JWT-payload (leesbaar zonder sleutel) ===
+=== Stap 5: JWT-payload leesbaar zonder sleutel ===
 Subject:  alice@shopwave.be
 Verloopt: 15/05/2024 14:30:00
   sub: alice@shopwave.be
   http://schemas.microsoft.com/ws/2008/06/identity/claims/role: user
   iat: 1715996400
 ```
-
-Stop nooit gevoelige informatie in de payload: die is leesbaar voor iedereen die het token onderschept.
 
 ---
 
