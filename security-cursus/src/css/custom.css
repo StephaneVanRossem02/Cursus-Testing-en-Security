@@ -72,10 +72,65 @@
    SIDEBAR
    ══════════════════════════════════════════════════════════════ */
 
-/* Active leaf item */
+/* Sidebar achtergrond iets anders dan pagina */
+.theme-doc-sidebar-container {
+  border-right: 1px solid var(--ifm-color-emphasis-100) !important;
+}
+
+/* Alle menu-links: zachter en kleiner */
+.menu__link {
+  font-size: 0.855rem;
+  border-radius: 6px;
+  padding: 0.38rem 0.75rem;
+  line-height: 1.45;
+  transition: background 0.12s, color 0.12s;
+}
+
+/* Top-level secties: TESTING / SECURITY */
+.menu__list > .menu__list-item > .menu__link,
+.menu__list > .menu__list-item > .menu__list-item-collapsible > .menu__link {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-500);
+  padding: 0.5rem 0.75rem 0.3rem;
+  margin-top: 0.5rem;
+}
+
+/* Hover op top-level secties: geen achtergrond */
+.menu__list > .menu__list-item > .menu__list-item-collapsible > .menu__link:hover {
+  background: none;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* Les-labels (tweede niveau): minder zwaar dan nu */
+.menu__list .menu__list .menu__list-item-collapsible > .menu__link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--ifm-color-text-base);
+  padding: 0.38rem 0.75rem;
+}
+
+/* Leaf-items: Theorie / Oefeningen / Oplossingen */
+.menu__list .menu__list .menu__list .menu__link {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--ifm-color-emphasis-700);
+  padding: 0.28rem 0.75rem 0.28rem 1.5rem;
+}
+
+.menu__list .menu__list .menu__list .menu__link:hover {
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-font-color-base);
+}
+
+/* Actief leaf item */
 .menu__link--active:not(.menu__link--sublist) {
   background-color: rgba(192, 57, 43, 0.07);
-  border-right: 3px solid var(--ifm-color-primary);
+  color: var(--ifm-color-primary) !important;
   font-weight: 600;
 }
 
@@ -83,32 +138,24 @@
   background-color: rgba(231, 76, 60, 0.10);
 }
 
-/* Expand/collapse arrows: neutral, not red */
+/* Caret (pijltje): klein, neutraal, geen rode dot */
+.menu__caret {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
 .menu__caret::before,
 .menu__link--sublist-caret::after {
   background-color: var(--ifm-color-emphasis-400) !important;
-  opacity: 0.7;
+  width: 0.55rem !important;
+  height: 0.55rem !important;
+  opacity: 0.6;
 }
 
-/* Category label: small colored dot as accent */
-.menu__list-item-collapsible > .menu__link {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ifm-color-emphasis-700);
-}
-
+/* Geen rode dots via ::before op collapsible links */
 .menu__list-item-collapsible > .menu__link::before {
-  content: '';
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ifm-color-primary);
-  margin-right: 7px;
-  vertical-align: middle;
-  flex-shrink: 0;
+  display: none;
 }
 
 
