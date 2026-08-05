@@ -232,7 +232,9 @@ Je bouwt verder op de ShopWave.Api uit les 6. Geen nieuw project. De NuGet packa
 
 ### Stap 8a: JwtTokenService aanmaken - klasse en constructor
 
-Maak een nieuw bestand aan: `ShopWave.Api/JwtTokenService.cs`.
+Maak een nieuw bestand aan: `ShopWave/Security/JwtTokenService.cs`.
+
+De klasse komt in het gedeelde `ShopWave`-project, niet in `ShopWave.Api`. Dat is bewust: `ShopWave.Api` verwijst al naar `ShopWave`, dus vanuit de API kan je de klasse gebruiken. Zou je hem in `ShopWave.Api` zetten, dan kan het consoleproject er nooit bij, want dat zou een circulaire projectreferentie geven. In oefening 3 heb je de klasse wel nodig vanuit de console.
 
 Voeg de klasse aan met de velden en constructor:
 
@@ -240,21 +242,21 @@ Voeg de klasse aan met de velden en constructor:
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ShopWave.Api
+namespace ShopWave.Security
 {
     public class JwtTokenService
     {
-        private readonly string _secretKey;
-        private readonly string _issuer;
-        private readonly string _audience;
-        private readonly int    _expiresMinutes;
+        private readonly string secretKey;
+        private readonly string issuer;
+        private readonly string audience;
+        private readonly int    expiresMinutes;
 
         public JwtTokenService(string secretKey, string issuer, string audience, int expiresMinutes = 30)
         {
-            _secretKey      = secretKey;
-            _issuer         = issuer;
-            _audience       = audience;
-            _expiresMinutes = expiresMinutes;
+            this.secretKey      = secretKey;
+            this.issuer         = issuer;
+            this.audience       = audience;
+            this.expiresMinutes = expiresMinutes;
         }
     }
 }
@@ -276,7 +278,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 public string GenerateToken(string email, string role)
 {
-    byte[]               keyBytes    = Encoding.UTF8.GetBytes(_secretKey);
+    byte[]               keyBytes    = Encoding.UTF8.GetBytes(secretKey);
     SymmetricSecurityKey securityKey = new SymmetricSecurityKey(keyBytes);
     SigningCredentials   credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -317,10 +319,10 @@ Vervang de tijdelijke `return string.Empty;` door de volgende code:
 
 ```csharp
     JwtSecurityToken token = new JwtSecurityToken(
-        issuer:             _issuer,
-        audience:           _audience,
+        issuer:             issuer,
+        audience:           audience,
         claims:             claims,
-        expires:            DateTime.UtcNow.AddMinutes(_expiresMinutes),
+        expires:            DateTime.UtcNow.AddMinutes(expiresMinutes),
         signingCredentials: credentials
     );
 
@@ -341,10 +343,11 @@ Open `ShopWave.Api/Program.cs`. Voeg bovenaan de nodige usings toe:
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using ShopWave.Api;
 using ShopWave.Security;
 using System.Security.Cryptography.X509Certificates;
 ```
+
+`JwtTokenService` zit in de namespace `ShopWave.Security`, dus die is meteen gedekt door de bestaande using.
 
 De JWT-sleutel mag nooit hardcoded in de broncode staan. Een sleutel in de repository kan door iedereen met toegang tot de code gebruikt worden om geldige tokens te maken. Zelfs als je de sleutel later verwijdert, blijft hij zichtbaar in de git-geschiedenis.
 

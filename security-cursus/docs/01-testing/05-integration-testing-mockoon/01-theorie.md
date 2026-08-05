@@ -17,7 +17,7 @@ Stel dat `ShippingClient` het leveringstarief ophaalt bij een externe verzendser
 public async Task<ShippingResponse> GetShippingRateAsync(string destination, double weight)
 {
     string url = $"https://verzendservice.be/api/tarief?bestemming={destination}&gewicht={weight}";
-    HttpResponseMessage response = await _httpClient.GetAsync(url);
+    HttpResponseMessage response = await httpClient.GetAsync(url);
     string json = await response.Content.ReadAsStringAsync();
     return JsonSerializer.Deserialize<ShippingResponse>(json)!;
 }
@@ -108,20 +108,20 @@ namespace ShopWave
 {
     public class ShippingClient
     {
-        private readonly HttpClient _httpClient;
-        private readonly string     _baseUrl;
+        private readonly HttpClient httpClient;
+        private readonly string     baseUrl;
 
         public ShippingClient(HttpClient httpClient, string baseUrl)
         {
-            _httpClient = httpClient;
-            _baseUrl    = baseUrl;
+            this.httpClient = httpClient;
+            this.baseUrl    = baseUrl;
         }
 
         public async Task<ShippingResponse> GetShippingRateAsync(
             string destination, double weight)
         {
-            string url = $"{_baseUrl}/api/verzending?bestemming={destination}&gewicht={weight}";
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            string url = $"{baseUrl}/api/verzending?bestemming={destination}&gewicht={weight}";
+            HttpResponseMessage response = await httpClient.GetAsync(url);
 
             response.EnsureSuccessStatusCode();
 

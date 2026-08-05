@@ -24,18 +24,18 @@ namespace ShopWave
 {
     public class CheckoutService
     {
-        private readonly CartService     _cartService;
-        private readonly IPaymentGateway _gateway;
+        private readonly CartService     cartService;
+        private readonly IPaymentGateway gateway;
 
         public CheckoutService(CartService cartService, IPaymentGateway gateway)
         {
-            _cartService = cartService;
-            _gateway     = gateway;
+            this.cartService = cartService;
+            this.gateway     = gateway;
         }
 
         public string Checkout()
         {
-            double amount = _cartService.Total;
+            double amount = cartService.Total;
             string result;
 
             if (amount <= 0)
@@ -44,7 +44,7 @@ namespace ShopWave
             }
             else
             {
-                bool success = _gateway.ProcessPayment(amount);
+                bool success = gateway.ProcessPayment(amount);
                 result = success ? "Betaling geslaagd" : "Betaling mislukt";
             }
 
@@ -109,10 +109,10 @@ Pas `CartService` aan zodat die `DiscountCalculator` gebruikt in de `Total`-bere
 // Constructor uitbreiden
 public CartService(ICouponService couponService, DiscountCalculator discountCalculator)
 {
-    _items              = new Dictionary<string, CartItem>();
-    _couponService      = couponService;
-    _discountCalculator = discountCalculator;
-    _couponDiscount     = 0;
+    items              = new Dictionary<string, CartItem>();
+    this.couponService      = couponService;
+    this.discountCalculator = discountCalculator;
+    couponDiscount     = 0;
 }
 
 // Total aanpassen
@@ -122,13 +122,13 @@ public double Total
     {
         double subtotal = 0;
 
-        foreach (CartItem item in _items.Values)
+        foreach (CartItem item in items.Values)
         {
             subtotal += item.Price * item.Quantity;
         }
 
-        return _couponDiscount > 0
-            ? _discountCalculator.Apply(subtotal, _couponDiscount)
+        return couponDiscount > 0
+            ? discountCalculator.Apply(subtotal, couponDiscount)
             : subtotal;
     }
 }
@@ -204,25 +204,25 @@ namespace ShopWave
 {
     public class OrderConfirmationService
     {
-        private readonly Action<string> _onConfirmationCodeGenerated;
+        private readonly Action<string> onConfirmationCodeGenerated;
 
         public OrderConfirmationService()
         {
-            _onConfirmationCodeGenerated = null;
+            onConfirmationCodeGenerated = null;
         }
 
         public OrderConfirmationService(Action<string> onConfirmationCodeGenerated)
         {
-            _onConfirmationCodeGenerated = onConfirmationCodeGenerated;
+            this.onConfirmationCodeGenerated = onConfirmationCodeGenerated;
         }
 
         public string GenerateConfirmationCode(int orderId)
         {
             string code = $"ORD-{orderId:D6}-{Guid.NewGuid().ToString("N")[..4].ToUpper()}";
 
-            if (_onConfirmationCodeGenerated != null)
+            if (onConfirmationCodeGenerated != null)
             {
-                _onConfirmationCodeGenerated(code);
+                onConfirmationCodeGenerated(code);
             }
 
             return code;

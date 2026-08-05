@@ -1,5 +1,5 @@
 ---
-title: "Les 9: Oefeningen - Ethisch Hacken"
+title: "Les 11: Oefeningen - Ethisch Hacken"
 sidebar_label: "Oefeningen"
 ---
 
@@ -228,7 +228,7 @@ Maak `ShopWave/Security/PentestReport.cs` met de volgende structuur:
 
 - Een klasse `Finding` met properties: `Id` (string), `Title` (string), `Risk` (string: `"Critical"`, `"High"`, `"Medium"`, `"Low"` of `"Informational"`), `CvssScore` (double), `Description` (string), `Evidence` (string), `Recommendation` (string), `Status` (string: `"Open"` of `"Closed"`).
 - Een klasse `PentestReport` met:
-  - Een `private readonly List<Finding> _findings` die initialiseerd wordt in de constructor.
+  - Een `private readonly List<Finding> findings` die initialiseerd wordt in de constructor.
   - Een methode `AddFinding(Finding finding)` die de bevinding toevoegt.
   - Een methode `GetByRisk(string risk)` die alle bevindingen met dat risiconiveau teruggeeft.
   - Een methode `GetOpenFindings()` die alle bevindingen met `Status == "Open"` teruggeeft.
@@ -253,7 +253,7 @@ namespace ShopWave.Security
 
     public class PentestReport
     {
-        private readonly List<Finding> _findings;
+        private readonly List<Finding> findings;
 
         public PentestReport()
         {

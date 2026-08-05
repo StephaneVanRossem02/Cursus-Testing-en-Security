@@ -50,14 +50,14 @@ namespace ShopWave.Security
 {
     public class AccountRepository
     {
-        private readonly Dictionary<string, CustomerAccount> _accounts;
-        private readonly Dictionary<string, int>             _failedAttempts;
+        private readonly Dictionary<string, CustomerAccount> accounts;
+        private readonly Dictionary<string, int>             failedAttempts;
         private const int MaxAttempts = 3;
 
         public AccountRepository()
         {
-            _accounts       = new Dictionary<string, CustomerAccount>();
-            _failedAttempts = new Dictionary<string, int>();
+            accounts       = new Dictionary<string, CustomerAccount>();
+            failedAttempts = new Dictionary<string, int>();
         }
 
         public void Register(string email, string password)
@@ -141,7 +141,7 @@ public string Register(string email, string password)
 |----------|-------------|
 | Registratie geslaagd | `"Registratie geslaagd."` |
 | Wachtwoord ongeldig | De foutmelding van `PasswordValidator` |
-| E-mailadres al in gebruik | `"E-mailadres al in gebruik."` |
+| E-mailadres al in gebruik | `"Account bestaat al."` |
 
 **Controleer je werk:** voeg tijdelijk toe aan `Program.cs`:
 
@@ -160,7 +160,7 @@ Verwacht resultaat:
 Wachtwoord moet minstens 8 tekens lang zijn.
 Wachtwoord moet minstens één hoofdletter bevatten.
 Registratie geslaagd.
-E-mailadres al in gebruik.
+Account bestaat al.
 ```
 
 ---
@@ -204,13 +204,13 @@ namespace ShopWave.Security
 {
     public class OrderRepository
     {
-        private readonly Dictionary<string, string> _orders;
-        private readonly OrderEncryptor             _encryptor;
+        private readonly Dictionary<string, string> orders;
+        private readonly OrderEncryptor             encryptor;
 
         public OrderRepository()
         {
-            _orders    = new Dictionary<string, string>();
-            _encryptor = new OrderEncryptor();
+            orders    = new Dictionary<string, string>();
+            encryptor = new OrderEncryptor();
         }
 
         public void SaveOrder(string orderId, string orderData) { ... }

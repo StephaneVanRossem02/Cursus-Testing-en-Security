@@ -45,11 +45,11 @@ namespace ShopWave.Security
 {
     public class PasswordResetService
     {
-        private readonly Dictionary<string, PendingCode> _pendingResets;
+        private readonly Dictionary<string, PendingCode> pendingResets;
 
         public PasswordResetService()
         {
-            _pendingResets = new Dictionary<string, PendingCode>();
+            pendingResets = new Dictionary<string, PendingCode>();
         }
 
         public void RequestReset(string email, Action<string, string> onCodeSent)

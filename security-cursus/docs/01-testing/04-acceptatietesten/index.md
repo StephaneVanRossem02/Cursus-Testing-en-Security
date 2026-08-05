@@ -219,12 +219,12 @@ namespace ShopWave.Specs.StepDefinitions
 Voeg de velden toe die de stappen met elkaar delen:
 
 ```csharp
-        private AccountRepository _accountRepository = null!;
-        private TwoFactorService  _twoFactorService  = null!;
-        private string            _result            = string.Empty;
+        private AccountRepository accountRepository = null!;
+        private TwoFactorService  twoFactorService  = null!;
+        private string            result            = string.Empty;
 ```
 
-`_result` bewaart het antwoord van de login-methode zodat de `Then`-stap er bij kan.
+`result` bewaart het antwoord van de login-methode zodat de `Then`-stap er bij kan.
 
 Implementeer de `Given`-stap — de beginsituatie opzetten:
 
@@ -232,9 +232,9 @@ Implementeer de `Given`-stap — de beginsituatie opzetten:
         [Given("er is een account voor {string} met wachtwoord {string}")]
         public void GivenErIsEenAccount(string email, string wachtwoord)
         {
-            _twoFactorService  = new TwoFactorService();
-            _accountRepository = new AccountRepository(_twoFactorService);
-            _accountRepository.Register(email, wachtwoord);
+            twoFactorService  = new TwoFactorService();
+            accountRepository = new AccountRepository(twoFactorService);
+            accountRepository.Register(email, wachtwoord);
         }
 ```
 
@@ -246,7 +246,7 @@ Implementeer de `When`-stap — de actie uitvoeren:
         [When("de gebruiker inlogt met {string} en {string}")]
         public void WhenDeGebruikerInlogt(string email, string wachtwoord)
         {
-            _result = _accountRepository.Login(email, wachtwoord);
+            result = accountRepository.Login(email, wachtwoord);
         }
 ```
 
@@ -256,7 +256,7 @@ Implementeer de `Then`-stap — het resultaat controleren:
         [Then("ontvangt de gebruiker de melding {string}")]
         public void ThenOntvangtDeGebruikerDeMelding(string verwachteMelding)
         {
-            Assert.Equal(verwachteMelding, _result);
+            Assert.Equal(verwachteMelding, result);
         }
     }
 }
@@ -351,20 +351,20 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class CommonSteps
     {
-        private readonly LoginContext _ctx;
+        private readonly LoginContext ctx;
 
         public CommonSteps(LoginContext ctx)
         {
-            _ctx = ctx;
+            this.ctx = ctx;
         }
 
         // Eén definitie, gedeeld door alle features — nooit dupliceren
         [Given("er is een account voor {string} met wachtwoord {string}")]
         public void GivenErIsEenAccount(string email, string wachtwoord)
         {
-            _ctx.TwoFactorService  = new TwoFactorService();
-            _ctx.AccountRepository = new AccountRepository(_ctx.TwoFactorService);
-            _ctx.AccountRepository.Register(email, wachtwoord);
+            ctx.TwoFactorService  = new TwoFactorService();
+            ctx.AccountRepository = new AccountRepository(ctx.TwoFactorService);
+            ctx.AccountRepository.Register(email, wachtwoord);
         }
     }
 }
@@ -380,23 +380,23 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class LoginSteps
     {
-        private readonly LoginContext _ctx;
+        private readonly LoginContext ctx;
 
         public LoginSteps(LoginContext ctx)
         {
-            _ctx = ctx;
+            this.ctx = ctx;
         }
 
         [When("de gebruiker inlogt met {string} en {string}")]
         public void WhenDeGebruikerInlogt(string email, string wachtwoord)
         {
-            _ctx.Result = _ctx.AccountRepository.Login(email, wachtwoord);
+            ctx.Result = ctx.AccountRepository.Login(email, wachtwoord);
         }
 
         [Then("ontvangt de gebruiker de melding {string}")]
         public void ThenOntvangtDeGebruikerDeMelding(string verwachteMelding)
         {
-            Assert.Equal(verwachteMelding, _ctx.Result);
+            Assert.Equal(verwachteMelding, ctx.Result);
         }
     }
 }
@@ -412,11 +412,11 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class LockoutSteps
     {
-        private readonly LoginContext _ctx;
+        private readonly LoginContext ctx;
 
         public LockoutSteps(LoginContext ctx)
         {
-            _ctx = ctx;
+            this.ctx = ctx;
         }
 
         // Geen [Given] hier — CommonSteps.cs regelt dat voor alle features
@@ -424,15 +424,15 @@ namespace ShopWave.Specs.StepDefinitions
         [When("de gebruiker drie keer inlogt met een fout wachtwoord")]
         public void WhenDrieKeerFoutWachtwoord()
         {
-            _ctx.AccountRepository.Login("bob@shopwave.be", "fout1");
-            _ctx.AccountRepository.Login("bob@shopwave.be", "fout2");
-            _ctx.AccountRepository.Login("bob@shopwave.be", "fout3");
+            ctx.AccountRepository.Login("bob@shopwave.be", "fout1");
+            ctx.AccountRepository.Login("bob@shopwave.be", "fout2");
+            ctx.AccountRepository.Login("bob@shopwave.be", "fout3");
         }
 
         [Then("is het account van {string} geblokkeerd")]
         public void ThenIsHetAccountGeblokkeerd(string email)
         {
-            string result = _ctx.AccountRepository.Login(email, "veiligPw");
+            string result = ctx.AccountRepository.Login(email, "veiligPw");
             Assert.Equal("Account geblokkeerd.", result);
         }
     }
@@ -542,12 +542,12 @@ public class LoginContext
 [Given("er is een account voor {string} met wachtwoord {string}")]
 public void GivenErIsEenAccount(string email, string wachtwoord)
 {
-    _ctx.TwoFactorService = new TwoFactorService(onCodeGenerated: (mail, code) =>
+    ctx.TwoFactorService = new TwoFactorService(onCodeGenerated: (mail, code) =>
     {
-        _ctx.LastCode = code;
+        ctx.LastCode = code;
     });
-    _ctx.AccountRepository = new AccountRepository(_ctx.TwoFactorService);
-    _ctx.AccountRepository.Register(email, wachtwoord);
+    ctx.AccountRepository = new AccountRepository(ctx.TwoFactorService);
+    ctx.AccountRepository.Register(email, wachtwoord);
 }
 ```
 
@@ -559,11 +559,11 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class TwoFactorSteps
     {
-        private readonly LoginContext _ctx;
+        private readonly LoginContext ctx;
 
         public TwoFactorSteps(LoginContext ctx)
         {
-            _ctx = ctx;
+            this.ctx = ctx;
         }
 
         // Geen [Given] — CommonSteps.cs regelt dat inclusief de callback
@@ -571,25 +571,25 @@ namespace ShopWave.Specs.StepDefinitions
         [When("de gebruiker inlogt met het correcte wachtwoord voor {string}")]
         public void WhenInloggenMetCorrecteWachtwoord(string email)
         {
-            _ctx.AccountRepository.Login(email, "pw123");
+            ctx.AccountRepository.Login(email, "pw123");
         }
 
         [When("de gebruiker voert de correcte 2FA-code in voor {string}")]
         public void WhenCorrecteTwoFactorCode(string email)
         {
-            _ctx.Result = _ctx.AccountRepository.VerifyTwoFactor(email, _ctx.LastCode);
+            ctx.Result = ctx.AccountRepository.VerifyTwoFactor(email, ctx.LastCode);
         }
 
         [When("de gebruiker voert een foute 2FA-code in voor {string}")]
         public void WhenFouteTwoFactorCode(string email)
         {
-            _ctx.Result = _ctx.AccountRepository.VerifyTwoFactor(email, "000000");
+            ctx.Result = ctx.AccountRepository.VerifyTwoFactor(email, "000000");
         }
 
         [Then("is de gebruiker {string} ingelogd")]
         public void ThenIsDeGebruikerIngelogd(string email)
         {
-            Assert.Equal("Inloggen geslaagd.", _ctx.Result);
+            Assert.Equal("Inloggen geslaagd.", ctx.Result);
         }
     }
 }

@@ -39,11 +39,11 @@ namespace ShopWave
 {
     public class CartService
     {
-        private readonly Dictionary<string, CartItem> _items;
+        private readonly Dictionary<string, CartItem> items;
 
         public CartService()
         {
-            _items = new Dictionary<string, CartItem>();
+            items = new Dictionary<string, CartItem>();
         }
 
         public double Total
@@ -52,7 +52,7 @@ namespace ShopWave
             {
                 double total = 0;
 
-                foreach (CartItem item in _items.Values)
+                foreach (CartItem item in items.Values)
                 {
                     total += item.Price * item.Quantity;
                 }
@@ -68,27 +68,27 @@ namespace ShopWave
                 throw new ArgumentException("Aantal mag niet negatief zijn.", nameof(quantity));
             }
 
-            if (_items.ContainsKey(name))
+            if (items.ContainsKey(name))
             {
-                _items[name].Quantity += quantity;
+                items[name].Quantity += quantity;
             }
             else
             {
-                _items[name] = new CartItem(name, price, quantity);
+                items[name] = new CartItem(name, price, quantity);
             }
         }
 
         public void RemoveItem(string name)
         {
-            if (_items.ContainsKey(name))
+            if (items.ContainsKey(name))
             {
-                _items.Remove(name);
+                items.Remove(name);
             }
         }
 
         public void Clear()
         {
-            _items.Clear();
+            items.Clear();
         }
     }
 }
@@ -199,6 +199,16 @@ namespace ShopWave
 }
 ```
 
+### CouponService laten voldoen aan de interface
+
+De `CouponService` die je in de theorie via TDD bouwde, heeft deze drie methoden al. Je hoeft alleen nog vast te leggen dat de klasse de interface implementeert. Pas de klasse-declaratie aan in `CouponService.cs`:
+
+```csharp
+public class CouponService : ICouponService
+```
+
+Zonder die toevoeging kan je de echte `CouponService` nergens meegeven waar een `ICouponService` verwacht wordt. Dat heb je later nodig in les 5, waar `CartService` en `OrderService` met de echte `CouponService` samenwerken in plaats van met een mock.
+
 ### CartService.cs (uitgebreid)
 
 ```csharp
@@ -206,15 +216,15 @@ namespace ShopWave
 {
     public class CartService
     {
-        private readonly Dictionary<string, CartItem> _items;
-        private readonly ICouponService               _couponService;
-        private          double                        _couponDiscount;
+        private readonly Dictionary<string, CartItem> items;
+        private readonly ICouponService               couponService;
+        private          double                        couponDiscount;
 
         public CartService(ICouponService couponService)
         {
-            _items          = new Dictionary<string, CartItem>();
-            _couponService  = couponService;
-            _couponDiscount = 0;
+            items          = new Dictionary<string, CartItem>();
+            this.couponService  = couponService;
+            couponDiscount = 0;
         }
 
         public double Total
@@ -223,12 +233,12 @@ namespace ShopWave
             {
                 double subtotal = 0;
 
-                foreach (CartItem item in _items.Values)
+                foreach (CartItem item in items.Values)
                 {
                     subtotal += item.Price * item.Quantity;
                 }
 
-                return subtotal * (1 - _couponDiscount / 100.0);
+                return subtotal * (1 - couponDiscount / 100.0);
             }
         }
 
@@ -239,36 +249,36 @@ namespace ShopWave
                 throw new ArgumentException("Aantal mag niet negatief zijn.", nameof(quantity));
             }
 
-            if (_items.ContainsKey(name))
+            if (items.ContainsKey(name))
             {
-                _items[name].Quantity += quantity;
+                items[name].Quantity += quantity;
             }
             else
             {
-                _items[name] = new CartItem(name, price, quantity);
+                items[name] = new CartItem(name, price, quantity);
             }
         }
 
         public void ApplyCoupon(string code)
         {
-            if (_couponService.IsValid(code))
+            if (couponService.IsValid(code))
             {
-                _couponDiscount = _couponService.GetDiscount(code);
-                _couponService.MarkAsUsed(code);
+                couponDiscount = couponService.GetDiscount(code);
+                couponService.MarkAsUsed(code);
             }
         }
 
         public void RemoveItem(string name)
         {
-            if (_items.ContainsKey(name))
+            if (items.ContainsKey(name))
             {
-                _items.Remove(name);
+                items.Remove(name);
             }
         }
 
         public void Clear()
         {
-            _items.Clear();
+            items.Clear();
         }
     }
 }
@@ -361,18 +371,18 @@ namespace ShopWave
 {
     public class OrderService
     {
-        private readonly IPaymentGateway _gateway;
-        private readonly IStockService   _stockService;
-        private readonly ICouponService  _couponService;
+        private readonly IPaymentGateway gateway;
+        private readonly IStockService   stockService;
+        private readonly ICouponService  couponService;
 
         public OrderService(
             IPaymentGateway gateway,
             IStockService   stockService,
             ICouponService  couponService)
         {
-            _gateway       = gateway;
-            _stockService  = stockService;
-            _couponService = couponService;
+            this.gateway       = gateway;
+            this.stockService  = stockService;
+            this.couponService = couponService;
         }
 
         public string PlaceOrder(int productId, int quantity, double amount, string couponCode = "")
@@ -384,10 +394,8 @@ namespace ShopWave
                 throw new ArgumentException("Bedrag moet groter zijn dan nul.", nameof(amount));
             }
 
-            if (couponCode != "" && !_couponService.IsValid(couponCode))
+            if (couponCode != "" && !couponService.IsValid(couponCode))
             {
-                bool isUsed = false;
-
                 // Onderscheid: onbekende coupon vs. al gebruikte coupon
                 // We controleren dit door te kijken of IsValid false geeft terwijl de code niet leeg is.
                 // De eenvoudigste aanpak: voeg IsUsed toe aan de interface,
@@ -396,35 +404,36 @@ namespace ShopWave
                 // enkel als de coupon al gebruikt is (extra methode op interface nodig).
                 // Vereenvoudigde versie: zie toelichting.
                 result = "Coupon reeds gebruikt.";
-                return result;
-            }
-
-            bool inStock = _stockService.IsInStock(productId, quantity);
-
-            if (!inStock)
-            {
-                result = "Product niet beschikbaar";
             }
             else
             {
-                double finalAmount = amount;
+                bool inStock = stockService.IsInStock(productId, quantity);
 
-                if (couponCode != "" && _couponService.IsValid(couponCode))
+                if (!inStock)
                 {
-                    int discount = _couponService.GetDiscount(couponCode);
-                    finalAmount  = amount * (1 - discount / 100.0);
-                    _couponService.MarkAsUsed(couponCode);
-                }
-
-                bool success = _gateway.ProcessPayment(finalAmount);
-
-                if (success)
-                {
-                    result = "Bestelling bevestigd";
+                    result = "Product niet beschikbaar";
                 }
                 else
                 {
-                    result = "Betaling mislukt";
+                    double finalAmount = amount;
+
+                    if (couponCode != "" && couponService.IsValid(couponCode))
+                    {
+                        int discount = couponService.GetDiscount(couponCode);
+                        finalAmount  = amount * (1 - discount / 100.0);
+                        couponService.MarkAsUsed(couponCode);
+                    }
+
+                    bool success = gateway.ProcessPayment(finalAmount);
+
+                    if (success)
+                    {
+                        result = "Bestelling bevestigd";
+                    }
+                    else
+                    {
+                        result = "Betaling mislukt";
+                    }
                 }
             }
 
@@ -445,51 +454,51 @@ namespace ShopWave.Tests
 {
     public class OrderServiceCouponTests
     {
-        private Mock<IPaymentGateway> _mockGateway;
-        private Mock<IStockService>   _mockStock;
-        private Mock<ICouponService>  _mockCoupon;
-        private OrderService          _service;
+        private Mock<IPaymentGateway> mockGateway;
+        private Mock<IStockService>   mockStock;
+        private Mock<ICouponService>  mockCoupon;
+        private OrderService          service;
 
         public OrderServiceCouponTests()
         {
-            _mockGateway = new Mock<IPaymentGateway>();
-            _mockStock   = new Mock<IStockService>();
-            _mockCoupon  = new Mock<ICouponService>();
-            _service     = new OrderService(_mockGateway.Object, _mockStock.Object, _mockCoupon.Object);
+            mockGateway = new Mock<IPaymentGateway>();
+            mockStock   = new Mock<IStockService>();
+            mockCoupon  = new Mock<ICouponService>();
+            service     = new OrderService(mockGateway.Object, mockStock.Object, mockCoupon.Object);
         }
 
         [Fact]
         public void PlaceOrder_WithoutCoupon_ProcessesFullAmount()
         {
-            _mockStock.Setup(s => s.IsInStock(1, 1)).Returns(true);
-            _mockGateway.Setup(g => g.ProcessPayment(100.0)).Returns(true);
+            mockStock.Setup(s => s.IsInStock(1, 1)).Returns(true);
+            mockGateway.Setup(g => g.ProcessPayment(100.0)).Returns(true);
 
-            string result = _service.PlaceOrder(1, 1, 100.0);
+            string result = service.PlaceOrder(1, 1, 100.0);
 
             result.Should().Be("Bestelling bevestigd");
-            _mockGateway.Verify(g => g.ProcessPayment(100.0), Times.Once);
+            mockGateway.Verify(g => g.ProcessPayment(100.0), Times.Once);
         }
 
         [Fact]
         public void PlaceOrder_WithValidCoupon_ProcessesReducedAmount()
         {
-            _mockStock.Setup(s => s.IsInStock(1, 1)).Returns(true);
-            _mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(true);
-            _mockCoupon.Setup(c => c.GetDiscount("ZOMER10")).Returns(10);
-            _mockGateway.Setup(g => g.ProcessPayment(90.0)).Returns(true);
+            mockStock.Setup(s => s.IsInStock(1, 1)).Returns(true);
+            mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(true);
+            mockCoupon.Setup(c => c.GetDiscount("ZOMER10")).Returns(10);
+            mockGateway.Setup(g => g.ProcessPayment(90.0)).Returns(true);
 
-            string result = _service.PlaceOrder(1, 1, 100.0, "ZOMER10");
+            string result = service.PlaceOrder(1, 1, 100.0, "ZOMER10");
 
             result.Should().Be("Bestelling bevestigd");
-            _mockGateway.Verify(g => g.ProcessPayment(90.0), Times.Once);
+            mockGateway.Verify(g => g.ProcessPayment(90.0), Times.Once);
         }
 
         [Fact]
         public void PlaceOrder_WithUsedCoupon_ReturnsCouponGebruikt()
         {
-            _mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(false);
+            mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(false);
 
-            string result = _service.PlaceOrder(1, 1, 100.0, "ZOMER10");
+            string result = service.PlaceOrder(1, 1, 100.0, "ZOMER10");
 
             result.Should().Be("Coupon reeds gebruikt.");
         }
@@ -497,19 +506,19 @@ namespace ShopWave.Tests
         [Fact]
         public void PlaceOrder_WithUsedCoupon_NeverCallsProcessPayment()
         {
-            _mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(false);
+            mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(false);
 
-            _service.PlaceOrder(1, 1, 100.0, "ZOMER10");
+            service.PlaceOrder(1, 1, 100.0, "ZOMER10");
 
-            _mockGateway.Verify(g => g.ProcessPayment(It.IsAny<double>()), Times.Never);
+            mockGateway.Verify(g => g.ProcessPayment(It.IsAny<double>()), Times.Never);
         }
 
         [Fact]
         public void PlaceOrder_WhenNotInStock_ReturnsNietBeschikbaar()
         {
-            _mockStock.Setup(s => s.IsInStock(1, 1)).Returns(false);
+            mockStock.Setup(s => s.IsInStock(1, 1)).Returns(false);
 
-            string result = _service.PlaceOrder(1, 1, 100.0);
+            string result = service.PlaceOrder(1, 1, 100.0);
 
             result.Should().Be("Product niet beschikbaar");
         }

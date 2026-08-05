@@ -184,8 +184,8 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class LoginSteps
     {
-        private AccountRepository _accountRepository = null!;
-        private string            _result            = string.Empty;
+        private AccountRepository accountRepository = null!;
+        private string            result            = string.Empty;
     }
 }
 ```
@@ -198,8 +198,8 @@ Voeg nu de `Given`-stap toe:
         [Given("er is een account voor {string} met wachtwoord {string}")]
         public void GivenErIsEenAccount(string email, string wachtwoord)
         {
-            _accountRepository = new AccountRepository(new TwoFactorService());
-            _accountRepository.Register(email, wachtwoord);
+            accountRepository = new AccountRepository(new TwoFactorService());
+            accountRepository.Register(email, wachtwoord);
         }
 ```
 
@@ -219,11 +219,11 @@ Voeg de `When`-stap toe in `LoginSteps.cs`:
         [When("de gebruiker inlogt met {string} en {string}")]
         public void WhenDeGebruikerInlogt(string email, string wachtwoord)
         {
-            _result = _accountRepository.Login(email, wachtwoord);
+            result = accountRepository.Login(email, wachtwoord);
         }
 ```
 
-De `When`-stap roept `Login` aan en bewaart het resultaat in `_result`. Die waarde is beschikbaar voor de `Then`-stap in dezelfde klasse.
+De `When`-stap roept `Login` aan en bewaart het resultaat in `result`. Die waarde is beschikbaar voor de `Then`-stap in dezelfde klasse.
 
 Voeg de `Then`-stap toe:
 
@@ -231,11 +231,11 @@ Voeg de `Then`-stap toe:
         [Then("ontvangt de gebruiker de melding {string}")]
         public void ThenOntvangtDeGebruikerDeMelding(string verwachteMelding)
         {
-            Assert.Equal(verwachteMelding, _result);
+            Assert.Equal(verwachteMelding, result);
         }
 ```
 
-`Assert.Equal` is de xUnit-assert die we al kennen. De verwachte waarde (`verwachteMelding`) komt uit de feature file. De echte waarde is `_result`, het antwoord van `Login`.
+`Assert.Equal` is de xUnit-assert die we al kennen. De verwachte waarde (`verwachteMelding`) komt uit de feature file. De echte waarde is `result`, het antwoord van `Login`.
 
 Bouw de solution en voer de test uit. De test slaagt nu.
 
@@ -294,7 +294,7 @@ Ambiguous step definition.
 
 Reqnroll zoekt over **alle** `[Binding]`-klassen in het project naar stap-patronen. Als hetzelfde patroon twee keer voorkomt, weet het niet welke methode het moet aanroepen.
 
-Er is ook een tweede probleem. De `_result`-field staat nu als private field in `LoginSteps`. Als de lockout-test een `Then`-stap in een andere klasse gebruikt, heeft die geen toegang tot `_result`.
+Er is ook een tweede probleem. De `result`-field staat nu als private field in `LoginSteps`. Als de lockout-test een `Then`-stap in een andere klasse gebruikt, heeft die geen toegang tot `result`.
 
 De oplossing voor beide problemen: een **context-klasse** als gedeelde toestand.
 
@@ -342,27 +342,27 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class CommonSteps
     {
-        private readonly LoginContext _ctx;
+        private readonly LoginContext ctx;
 
         public CommonSteps(LoginContext ctx)
         {
-            _ctx = ctx;
+            this.ctx = ctx;
         }
 
         [Given("er is een account voor {string} met wachtwoord {string}")]
         public void GivenErIsEenAccount(string email, string wachtwoord)
         {
-            _ctx.TwoFactorService = new TwoFactorService(
-                onCodeGenerated: (mail, code) => { _ctx.LastCode = code; });
+            ctx.TwoFactorService = new TwoFactorService(
+                onCodeGenerated: (mail, code) => { ctx.LastCode = code; });
 
-            _ctx.AccountRepository = new AccountRepository(_ctx.TwoFactorService);
-            _ctx.AccountRepository.Register(email, wachtwoord);
+            ctx.AccountRepository = new AccountRepository(ctx.TwoFactorService);
+            ctx.AccountRepository.Register(email, wachtwoord);
         }
     }
 }
 ```
 
-De constructor ontvangt een `LoginContext`. Reqnroll injecteert die automatisch. De `TwoFactorService` wordt aangemaakt met de callback-techniek uit les 5: elke gegenereerde 2FA-code wordt opgeslagen in `_ctx.LastCode`, zodat andere stappen er bij kunnen.
+De constructor ontvangt een `LoginContext`. Reqnroll injecteert die automatisch. De `TwoFactorService` wordt aangemaakt met de callback-techniek uit les 5: elke gegenereerde 2FA-code wordt opgeslagen in `ctx.LastCode`, zodat andere stappen er bij kunnen.
 
 Pas nu `LoginSteps.cs` aan: verwijder de eigen fields en de `Given`-stap, en gebruik de context:
 
@@ -375,29 +375,29 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class LoginSteps
     {
-        private readonly LoginContext _ctx;
+        private readonly LoginContext ctx;
 
         public LoginSteps(LoginContext ctx)
         {
-            _ctx = ctx;
+            this.ctx = ctx;
         }
 
         [When("de gebruiker inlogt met {string} en {string}")]
         public void WhenDeGebruikerInlogt(string email, string wachtwoord)
         {
-            _ctx.Result = _ctx.AccountRepository.Login(email, wachtwoord);
+            ctx.Result = ctx.AccountRepository.Login(email, wachtwoord);
         }
 
         [Then("ontvangt de gebruiker de melding {string}")]
         public void ThenOntvangtDeGebruikerDeMelding(string verwachteMelding)
         {
-            Assert.Equal(verwachteMelding, _ctx.Result);
+            Assert.Equal(verwachteMelding, ctx.Result);
         }
     }
 }
 ```
 
-De `Given`-stap is verdwenen uit `LoginSteps.cs`. Die staat nu alleen in `CommonSteps.cs` en is beschikbaar voor zowel de loginfeature als de lockoutfeature. `_result` is ook verdwenen: die staat nu als `Result` in de context, toegankelijk voor elke step definition-klasse.
+De `Given`-stap is verdwenen uit `LoginSteps.cs`. Die staat nu alleen in `CommonSteps.cs` en is beschikbaar voor zowel de loginfeature als de lockoutfeature. `result` is ook verdwenen: die staat nu als `Result` in de context, toegankelijk voor elke step definition-klasse.
 
 Bouw en voer de tests uit. Beide loginscenario's slagen nog steeds.
 

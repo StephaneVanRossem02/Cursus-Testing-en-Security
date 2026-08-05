@@ -190,7 +190,7 @@ void ToonCertificaatInfo()
         };
 
     HttpClient client = new HttpClient(handler);
-    client.GetStringAsync("https://localhost:5001/veilig/certificaatinfo").Result;
+    _ = client.GetStringAsync("https://localhost:5001/veilig/certificaatinfo").Result;
 
     Console.WriteLine($"Subject:     {subject}");
     Console.WriteLine($"Issuer:      {issuer}");

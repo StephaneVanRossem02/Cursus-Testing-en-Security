@@ -240,11 +240,11 @@ namespace ShopWave
 {
     public class CouponService
     {
-        private readonly List<string> _validCoupons;
+        private readonly List<string> validCoupons;
 
         public CouponService()
         {
-            _validCoupons = new List<string>
+            validCoupons = new List<string>
             {
                 "ZOMER10",
                 "WELKOM20",
@@ -254,7 +254,7 @@ namespace ShopWave
 
         public bool IsValid(string code)
         {
-            return _validCoupons.Contains(code);
+            return validCoupons.Contains(code);
         }
     }
 }
@@ -328,11 +328,11 @@ namespace ShopWave
 {
     public class CouponService
     {
-        private readonly List<Coupon> _coupons;
+        private readonly List<Coupon> coupons;
 
         public CouponService()
         {
-            _coupons = new List<Coupon>
+            coupons = new List<Coupon>
             {
                 new Coupon("ZOMER10",  10),
                 new Coupon("WELKOM20", 20),
@@ -342,13 +342,13 @@ namespace ShopWave
 
         public bool IsValid(string code)
         {
-            Coupon coupon = _coupons.Find(c => c.Code == code);
+            Coupon coupon = coupons.Find(c => c.Code == code);
             return coupon != null;
         }
 
         public int GetDiscount(string code)
         {
-            Coupon coupon = _coupons.Find(c => c.Code == code);
+            Coupon coupon = coupons.Find(c => c.Code == code);
             int discount  = 0;
 
             if (coupon != null)
@@ -420,7 +420,7 @@ Voeg `MarkAsUsed` toe aan `CouponService.cs` en pas `IsValid` aan:
 ```csharp
         public void MarkAsUsed(string code)
         {
-            Coupon coupon = _coupons.Find(c => c.Code == code);
+            Coupon coupon = coupons.Find(c => c.Code == code);
 
             if (coupon != null)
             {
@@ -430,7 +430,7 @@ Voeg `MarkAsUsed` toe aan `CouponService.cs` en pas `IsValid` aan:
 
         public bool IsValid(string code)
         {
-            Coupon coupon = _coupons.Find(c => c.Code == code);
+            Coupon coupon = coupons.Find(c => c.Code == code);
             return coupon != null && !coupon.IsUsed;
         }
 ```

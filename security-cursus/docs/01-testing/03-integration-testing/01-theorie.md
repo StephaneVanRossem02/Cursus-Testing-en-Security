@@ -313,27 +313,27 @@ Voorbeeld: stel dat `CouponService` in de toekomst couponcodes genereert voor kl
 // In de klasse (vereenvoudigd voorbeeld)
 public class CouponGenerator
 {
-    private readonly Action<string> _onCodeGenerated;
+    private readonly Action<string> onCodeGenerated;
 
     // Constructor voor productie
     public CouponGenerator()
     {
-        _onCodeGenerated = null;
+        onCodeGenerated = null;
     }
 
     // Constructor voor integration testing
     public CouponGenerator(Action<string> onCodeGenerated)
     {
-        _onCodeGenerated = onCodeGenerated;
+        this.onCodeGenerated = onCodeGenerated;
     }
 
     public string GenerateCode()
     {
         string code = Guid.NewGuid().ToString("N")[..8].ToUpper();
 
-        if (_onCodeGenerated != null)
+        if (onCodeGenerated != null)
         {
-            _onCodeGenerated(code);
+            onCodeGenerated(code);
         }
 
         return code;

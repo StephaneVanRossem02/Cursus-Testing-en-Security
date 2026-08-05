@@ -250,11 +250,11 @@ namespace ShopWave.Api
 {
     public class TokenBlacklist
     {
-        private readonly HashSet<string> _revokedTokens;
+        private readonly HashSet<string> revokedTokens;
 
         public TokenBlacklist()
         {
-            _revokedTokens = new HashSet<string>();
+            revokedTokens = new HashSet<string>();
         }
 
         public void Revoke(string token)

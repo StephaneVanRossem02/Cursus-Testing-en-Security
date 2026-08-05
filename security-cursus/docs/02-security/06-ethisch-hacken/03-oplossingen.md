@@ -1,5 +1,5 @@
 ---
-title: "Les 9: Oplossingen - Ethisch Hacken"
+title: "Les 11: Oplossingen - Ethisch Hacken"
 sidebar_label: "Oplossingen"
 ---
 
@@ -178,35 +178,35 @@ namespace ShopWave.Security
 
     public class PentestReport
     {
-        private readonly List<Finding> _findings;
+        private readonly List<Finding> findings;
 
         public PentestReport()
         {
-            _findings = new List<Finding>();
+            findings = new List<Finding>();
         }
 
         public void AddFinding(Finding finding)
         {
-            _findings.Add(finding);
+            findings.Add(finding);
         }
 
         public List<Finding> GetByRisk(string risk)
         {
-            return _findings
+            return findings
                 .Where(f => f.Risk == risk)
                 .ToList();
         }
 
         public List<Finding> GetOpenFindings()
         {
-            return _findings
+            return findings
                 .Where(f => f.Status == "Open")
                 .ToList();
         }
 
         public void PrintSummary()
         {
-            foreach (Finding f in _findings)
+            foreach (Finding f in findings)
             {
                 Console.WriteLine($"[{f.Id}] {f.Risk} ({f.CvssScore}) - {f.Title} [{f.Status}]");
             }

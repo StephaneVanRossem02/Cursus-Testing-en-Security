@@ -133,6 +133,8 @@ Het verschil tussen `401` en `403` is belangrijk:
 ### ShopWave/Program.cs
 
 ```csharp
+using ShopWave.Security;
+
 void DemoExpiredToken()
 {
     string secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
@@ -188,21 +190,21 @@ namespace ShopWave.Api
 {
     public class TokenBlacklist
     {
-        private readonly HashSet<string> _revokedTokens;
+        private readonly HashSet<string> revokedTokens;
 
         public TokenBlacklist()
         {
-            _revokedTokens = new HashSet<string>();
+            revokedTokens = new HashSet<string>();
         }
 
         public void Revoke(string token)
         {
-            _revokedTokens.Add(token);
+            revokedTokens.Add(token);
         }
 
         public bool IsRevoked(string token)
         {
-            return _revokedTokens.Contains(token);
+            return revokedTokens.Contains(token);
         }
     }
 }

@@ -68,31 +68,31 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class LockoutSteps
     {
-        private readonly LoginContext _ctx;
+        private readonly LoginContext ctx;
 
         public LockoutSteps(LoginContext ctx)
         {
-            _ctx = ctx;
+            this.ctx = ctx;
         }
 
         [When("de gebruiker drie keer inlogt met een fout wachtwoord")]
         public void WhenDrieKeerFoutWachtwoord()
         {
-            _ctx.AccountRepository.Login("bob@shopwave.be", "fout1");
-            _ctx.AccountRepository.Login("bob@shopwave.be", "fout2");
-            _ctx.AccountRepository.Login("bob@shopwave.be", "fout3");
+            ctx.AccountRepository.Login("bob@shopwave.be", "fout1");
+            ctx.AccountRepository.Login("bob@shopwave.be", "fout2");
+            ctx.AccountRepository.Login("bob@shopwave.be", "fout3");
         }
 
         [When("de gebruiker inlogt met het correcte wachtwoord {string}")]
         public void WhenInloggenMetCorrecteWachtwoord(string wachtwoord)
         {
-            _ctx.Result = _ctx.AccountRepository.Login("bob@shopwave.be", wachtwoord);
+            ctx.Result = ctx.AccountRepository.Login("bob@shopwave.be", wachtwoord);
         }
 
         [Then("is het account van {string} geblokkeerd")]
         public void ThenIsHetAccountGeblokkeerd(string email)
         {
-            string result = _ctx.AccountRepository.Login(email, "veiligPw");
+            string result = ctx.AccountRepository.Login(email, "veiligPw");
             Assert.Equal("Account geblokkeerd.", result);
         }
     }
@@ -105,7 +105,7 @@ De `Given`-stap staat in `CommonSteps.cs`. `LockoutSteps.cs` bevat geen `[Given]
 
 **Veelgemaakte fout:** studenten definiëren "er is een account voor..." opnieuw in `LockoutSteps.cs`. Dat geeft een "Ambiguous step definition"-fout. De stap staat al in `CommonSteps.cs` en is beschikbaar voor alle features.
 
-**Veelgemaakte fout:** de `Then`-stap in scenario 1 roept `Login` aan om te controleren of het account geblokkeerd is. Studenten vergeten dat ze het resultaat van die aanroep moeten controleren. Ze schrijven `_ctx.AccountRepository.Login(email, "veiligPw");` zonder `Assert`. De test slaagt dan altijd, ook als het account niet geblokkeerd is.
+**Veelgemaakte fout:** de `Then`-stap in scenario 1 roept `Login` aan om te controleren of het account geblokkeerd is. Studenten vergeten dat ze het resultaat van die aanroep moeten controleren. Ze schrijven `ctx.AccountRepository.Login(email, "veiligPw");` zonder `Assert`. De test slaagt dan altijd, ook als het account niet geblokkeerd is.
 
 **Veelgemaakte fout:** in scenario 2 staat de `Then`-stap "ontvangt de gebruiker de melding". Die is al gedefinieerd in `LoginSteps.cs`. Je hoeft die niet opnieuw te definiëren in `LockoutSteps.cs`. Reqnroll zoekt over alle `[Binding]`-klassen naar het stap-patroon en vindt het in `LoginSteps.cs`.
 
@@ -141,51 +141,51 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class RegistratieSteps
     {
-        private readonly LoginContext _ctx;
-        private          string       _registratieResultaat = string.Empty;
+        private readonly LoginContext ctx;
+        private          string       registratieResultaat = string.Empty;
 
         public RegistratieSteps(LoginContext ctx)
         {
-            _ctx = ctx;
+            this.ctx = ctx;
         }
 
         [Given("er bestaat nog geen account voor {string}")]
         public void GivenGeenAccountVoor(string email)
         {
-            _ctx.TwoFactorService  = new TwoFactorService();
-            _ctx.AccountRepository = new AccountRepository(_ctx.TwoFactorService);
+            ctx.TwoFactorService  = new TwoFactorService();
+            ctx.AccountRepository = new AccountRepository(ctx.TwoFactorService);
         }
 
         [Given("er is al een account voor {string}")]
         public void GivenAccountBestaatAl(string email)
         {
-            _ctx.TwoFactorService  = new TwoFactorService();
-            _ctx.AccountRepository = new AccountRepository(_ctx.TwoFactorService);
-            _ctx.AccountRepository.Register(email, "bestaandWachtwoord");
+            ctx.TwoFactorService  = new TwoFactorService();
+            ctx.AccountRepository = new AccountRepository(ctx.TwoFactorService);
+            ctx.AccountRepository.Register(email, "bestaandWachtwoord");
         }
 
         [When("de gebruiker zich registreert met e-mailadres {string} en wachtwoord {string}")]
         public void WhenRegistreer(string email, string wachtwoord)
         {
-            _registratieResultaat = _ctx.AccountRepository.Register(email, wachtwoord);
+            registratieResultaat = ctx.AccountRepository.Register(email, wachtwoord);
         }
 
         [When("de gebruiker zich opnieuw registreert met hetzelfde e-mailadres {string}")]
         public void WhenHerregistreer(string email)
         {
-            _registratieResultaat = _ctx.AccountRepository.Register(email, "nieuwPw");
+            registratieResultaat = ctx.AccountRepository.Register(email, "nieuwPw");
         }
 
         [Then("is het account aangemaakt")]
         public void ThenAccountAangemaakt()
         {
-            Assert.Equal("Registratie geslaagd.", _registratieResultaat);
+            Assert.Equal("Registratie geslaagd.", registratieResultaat);
         }
 
         [Then("ontvangt de gebruiker de registratiefout {string}")]
         public void ThenRegistratieFout(string verwachteFout)
         {
-            Assert.Equal(verwachteFout, _registratieResultaat);
+            Assert.Equal(verwachteFout, registratieResultaat);
         }
     }
 }
@@ -195,7 +195,7 @@ namespace ShopWave.Specs.StepDefinitions
 
 De `Given`-stappen "er bestaat nog geen account voor..." en "er is al een account voor..." zijn apart gedefinieerd in `RegistratieSteps.cs`. Ze zijn bewust anders dan "er is een account voor... met wachtwoord..." uit `CommonSteps.cs`. Die verschil is intentioneel: de registratiescenario's beginnen vanuit een andere beginsituatie.
 
-**Veelgemaakte fout:** studenten bewaren `_registratieResultaat` in `LoginContext.Result`. Dat werkt technisch, maar mengt de toestand van de registratieflow met die van de loginflow. Als je daarna een scenario combineert dat eerst registreert en daarna inlogt, overschrijft `_ctx.Result` de registratiestatus. Gebruik een lokale field in `RegistratieSteps` voor het registratieresultaat.
+**Veelgemaakte fout:** studenten bewaren `registratieResultaat` in `LoginContext.Result`. Dat werkt technisch, maar mengt de toestand van de registratieflow met die van de loginflow. Als je daarna een scenario combineert dat eerst registreert en daarna inlogt, overschrijft `ctx.Result` de registratiestatus. Gebruik een lokale field in `RegistratieSteps` voor het registratieresultaat.
 
 **Veelgemaakte fout:** studenten hergebruiken de `Then`-stap voor loginmeldingen uit `LoginSteps.cs` ook voor de registratiefout. Dat werkt technisch, maar het is verwarrend: de stap-tekst suggereert een loginmelding. Schrijf een aparte `Then`-stap met een duidelijke naam voor de registratiecontext.
 
@@ -245,48 +245,48 @@ namespace ShopWave.Specs.StepDefinitions
     [Binding]
     public class TwoFactorSteps
     {
-        private readonly LoginContext _ctx;
+        private readonly LoginContext ctx;
 
         public TwoFactorSteps(LoginContext ctx)
         {
-            _ctx = ctx;
+            this.ctx = ctx;
         }
 
         [When("de gebruiker inlogt met het correcte wachtwoord voor {string}")]
         public void WhenInloggenMetCorrecteWachtwoord(string email)
         {
-            _ctx.AccountRepository.Login(email, "pw123");
+            ctx.AccountRepository.Login(email, "pw123");
         }
 
         [When("de gebruiker voert de correcte 2FA-code in voor {string}")]
         public void WhenCorrecteTwoFactorCode(string email)
         {
-            _ctx.Result = _ctx.AccountRepository.VerifyTwoFactor(email, _ctx.LastCode);
+            ctx.Result = ctx.AccountRepository.VerifyTwoFactor(email, ctx.LastCode);
         }
 
         [When("de gebruiker voert een foute 2FA-code in voor {string}")]
         public void WhenFouteTwoFactorCode(string email)
         {
-            _ctx.Result = _ctx.AccountRepository.VerifyTwoFactor(email, "000000");
+            ctx.Result = ctx.AccountRepository.VerifyTwoFactor(email, "000000");
         }
 
         [When("de gebruiker voert de 2FA-code {string} in voor {string}")]
         public void WhenTwoFactorCodeType(string type, string email)
         {
-            string code = type == "correct" ? _ctx.LastCode : "000000";
-            _ctx.Result = _ctx.AccountRepository.VerifyTwoFactor(email, code);
+            string code = type == "correct" ? ctx.LastCode : "000000";
+            ctx.Result = ctx.AccountRepository.VerifyTwoFactor(email, code);
         }
 
         [Then("is de gebruiker {string} ingelogd")]
         public void ThenIsDeGebruikerIngelogd(string email)
         {
-            Assert.Equal("Inloggen geslaagd.", _ctx.Result);
+            Assert.Equal("Inloggen geslaagd.", ctx.Result);
         }
 
         [Then("ontvangt de gebruiker het resultaat {string}")]
         public void ThenOntvangtDeGebruikerHetResultaat(string verwacht)
         {
-            Assert.Equal(verwacht, _ctx.Result);
+            Assert.Equal(verwacht, ctx.Result);
         }
     }
 }
@@ -296,11 +296,11 @@ namespace ShopWave.Specs.StepDefinitions
 
 De uitdaging bij de `Scenario Outline` is dat de twee scenario's verschillende `Then`-stappen hebben. De oplossing is een gecombineerde stap met een string-placeholder, hier "ontvangt de gebruiker het resultaat", die voor beide gevallen werkt. In de `Examples`-tabel staan dan de verwachte resultaten per rij.
 
-De `When`-stap voor de 2FA-code vertaalt het type ("correct" of "fout") naar de echte code. Als het type "correct" is, gebruiken we `_ctx.LastCode`. Als het type "fout" is, gebruiken we een bekende foute code.
+De `When`-stap voor de 2FA-code vertaalt het type ("correct" of "fout") naar de echte code. Als het type "correct" is, gebruiken we `ctx.LastCode`. Als het type "fout" is, gebruiken we een bekende foute code.
 
 **Veelgemaakte fout:** studenten proberen de `Then`-stap "is de gebruiker ingelogd" en "ontvangt de gebruiker de melding" te combineren in één `Scenario Outline`. Dat kan niet rechtstreeks als de stap-teksten fundamenteel verschillen. De oplossing is altijd een nieuwe, abstractere stap schrijven die beide gevallen dekt.
 
-**Veelgemaakte fout:** studenten vergeten dat `_ctx.LastCode` alleen gevuld is als de callback in `CommonSteps.cs` opgeroepen is. Die callback wordt opgeroepen op het moment van `Login(...)`. Als je `VerifyTwoFactor` aanroept zonder eerst `Login` aan te roepen, is `LastCode` leeg.
+**Veelgemaakte fout:** studenten vergeten dat `ctx.LastCode` alleen gevuld is als de callback in `CommonSteps.cs` opgeroepen is. Die callback wordt opgeroepen op het moment van `Login(...)`. Als je `VerifyTwoFactor` aanroept zonder eerst `Login` aan te roepen, is `LastCode` leeg.
 
 **Reflectievraag 3:** `Login(...)` geeft "Voer uw 2FA-code in." terug als het wachtwoord correct is. Die returnwaarde is de melding aan de gebruiker, niet de 2FA-code zelf. De 2FA-code wordt intern gegenereerd door `TwoFactorService` en naar de gebruiker gestuurd via een apart kanaal (in een echte applicatie: e-mail of sms). De callback-techniek laat ons die code opvangen zonder de interne implementatie te wijzigen.
 

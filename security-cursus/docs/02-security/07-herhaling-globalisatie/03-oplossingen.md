@@ -1,5 +1,5 @@
 ---
-title: "Les 10: Oplossingen - ShopWave in Productie"
+title: "Les 12: Oplossingen - ShopWave in Productie"
 sidebar_label: "Oplossingen"
 ---
 
@@ -74,16 +74,16 @@ namespace ShopWave.Security
 
     public class SecurityChecklist
     {
-        private readonly List<ChecklistItem> _items;
+        private readonly List<ChecklistItem> items;
 
         public SecurityChecklist()
         {
-            _items = new List<ChecklistItem>();
+            items = new List<ChecklistItem>();
         }
 
         public void AddItem(string category, string description)
         {
-            _items.Add(new ChecklistItem
+            items.Add(new ChecklistItem
             {
                 Category    = category,
                 Description = description
@@ -92,7 +92,7 @@ namespace ShopWave.Security
 
         public void SetStatus(string description, string status, string notes)
         {
-            ChecklistItem? item = _items.FirstOrDefault(
+            ChecklistItem? item = items.FirstOrDefault(
                 i => i.Description == description);
 
             if (item != null)
@@ -104,28 +104,28 @@ namespace ShopWave.Security
 
         public List<ChecklistItem> GetByStatus(string status)
         {
-            return _items
+            return items
                 .Where(i => i.Status == status)
                 .ToList();
         }
 
         public List<ChecklistItem> GetByCategory(string category)
         {
-            return _items
+            return items
                 .Where(i => i.Category == category)
                 .ToList();
         }
 
         public bool IsFullyImplemented()
         {
-            return _items.All(i => i.Status == "Implemented");
+            return items.All(i => i.Status == "Implemented");
         }
 
         public void PrintReport()
         {
             Console.WriteLine("=== ShopWave Security Checklist ===");
 
-            List<string> categories = _items
+            List<string> categories = items
                 .Select(i => i.Category)
                 .Distinct()
                 .ToList();
@@ -157,7 +157,7 @@ namespace ShopWave.Security
             int implemented    = GetByStatus("Implemented").Count;
             int partial        = GetByStatus("Partial").Count;
             int notImplemented = GetByStatus("NotImplemented").Count;
-            int total          = _items.Count;
+            int total          = items.Count;
 
             Console.WriteLine($"\nGeimplementeerd: {implemented}/{total}   " +
                               $"Gedeeltelijk: {partial}/{total}   " +
@@ -171,7 +171,7 @@ namespace ShopWave.Security
 
 `FirstOrDefault` geeft het eerste item terug dat aan de voorwaarde voldoet, of `null` als er geen is. De `?`-operator in `ChecklistItem?` markeert de variabele als nullable zodat de compiler waarschuwt als je `item` gebruikt zonder de `null`-check.
 
-`_items.All(i => i.Status == "Implemented")` geeft `true` als alle elementen de voorwaarde vervullen. Als de lijst leeg is, geeft `All` ook `true` terug. In dit geval is een lege checklist semantisch niet "volledig geimplementeerd", maar de oefening vereist die extra check niet.
+`items.All(i => i.Status == "Implemented")` geeft `true` als alle elementen de voorwaarde vervullen. Als de lijst leeg is, geeft `All` ook `true` terug. In dit geval is een lege checklist semantisch niet "volledig geimplementeerd", maar de oefening vereist die extra check niet.
 
 `Distinct()` verwijdert dubbele waarden uit de categorie-lijst. Zo verschijnt elke categorie slechts één keer als sectieheader.
 
@@ -189,20 +189,20 @@ namespace ShopWave.Security
     public class CiaPillar
     {
         public string Name { get; }
-        private readonly List<string> _examples;
+        private readonly List<string> examples;
 
         public CiaPillar(string name)
         {
             Name      = name;
-            _examples = new List<string>();
+            examples = new List<string>();
         }
 
         public void AddExample(string example)
         {
-            _examples.Add(example);
+            examples.Add(example);
         }
 
-        public IReadOnlyList<string> Examples => _examples;
+        public IReadOnlyList<string> Examples => examples;
     }
 
     public class CiaPijlerAnalyse
@@ -246,7 +246,7 @@ namespace ShopWave.Security
 
 `private void PrintPillar(CiaPillar pillar)` is een hulpmethode die de herhaling in `PrintAnalysis` elimineert. Dezelfde logica wordt drie keer toegepast op drie verschillende pijlers. Dat is de juiste toepassing van het DRY-principe (Don't Repeat Yourself) zonder onnodige abstractie.
 
-**Veelgemaakte fout:** studenten maken `_examples` `public` of gebruiken een `public List<string>` als property. Dat geeft externe code volledige controle over de lijst, inclusief `Clear()` en directe `Add()` zonder via de publieke methode te gaan. Gebruik altijd `IReadOnlyList<T>` voor leesbare collecties die intern beheerd worden.
+**Veelgemaakte fout:** studenten maken `examples` `public` of gebruiken een `public List<string>` als property. Dat geeft externe code volledige controle over de lijst, inclusief `Clear()` en directe `Add()` zonder via de publieke methode te gaan. Gebruik altijd `IReadOnlyList<T>` voor leesbare collecties die intern beheerd worden.
 
 ---
 
@@ -259,11 +259,11 @@ namespace ShopWave.Security
 {
     public class SecretsAudit
     {
-        private readonly List<string> _secretKeywords;
+        private readonly List<string> secretKeywords;
 
         public SecretsAudit()
         {
-            _secretKeywords = new List<string>
+            secretKeywords = new List<string>
             {
                 "password", "secret", "key", "token", "connectionstring"
             };
@@ -273,7 +273,7 @@ namespace ShopWave.Security
         {
             string lowerLine = codeLine.ToLowerInvariant();
 
-            bool containsKeyword = _secretKeywords
+            bool containsKeyword = secretKeywords
                 .Any(keyword => lowerLine.Contains(keyword));
 
             bool containsStringLiteral = codeLine.Contains("\"");
@@ -308,22 +308,23 @@ namespace ShopWave.Security
             if (hardcodedLines.Count == 0)
             {
                 Console.WriteLine("\nGeen hardcoded secrets gevonden.");
-                return;
             }
-
-            Console.WriteLine($"\nMogelijke hardcoded secrets gevonden: {hardcodedLines.Count}");
-            Console.WriteLine();
-
-            for (int index = 0; index < codeLines.Count; index++)
+            else
             {
-                if (IsHardcoded(codeLines[index]))
-                {
-                    Console.WriteLine($"  Regel {index + 1}: {codeLines[index].Trim()}");
-                }
-            }
+                Console.WriteLine($"\nMogelijke hardcoded secrets gevonden: {hardcodedLines.Count}");
+                Console.WriteLine();
 
-            Console.WriteLine("\nAanbeveling: vervang hardcoded waarden door " +
-                              "Environment.GetEnvironmentVariable(...).");
+                for (int index = 0; index < codeLines.Count; index++)
+                {
+                    if (IsHardcoded(codeLines[index]))
+                    {
+                        Console.WriteLine($"  Regel {index + 1}: {codeLines[index].Trim()}");
+                    }
+                }
+
+                Console.WriteLine("\nAanbeveling: vervang hardcoded waarden door " +
+                                  "Environment.GetEnvironmentVariable(...).");
+            }
         }
     }
 }
@@ -333,7 +334,7 @@ namespace ShopWave.Security
 
 `ToLowerInvariant()` zet de string om naar kleine letters zonder afhankelijk te zijn van de locale van het systeem. `ToLower()` kan anders gedragen op systemen met een Turkse locale, waar de hoofdletter `I` wordt omgezet naar `ı` (zonder punt) in plaats van `i`. `ToLowerInvariant()` is de veilige keuze voor string-vergelijkingen in code.
 
-`_secretKeywords.Any(keyword => lowerLine.Contains(keyword))` controleert of minstens één trefwoord in de regel voorkomt. `Any` stopt zodra het eerste overeenkomende element gevonden is, wat efficiënter is dan `Where(...).Count() > 0`.
+`secretKeywords.Any(keyword => lowerLine.Contains(keyword))` controleert of minstens één trefwoord in de regel voorkomt. `Any` stopt zodra het eerste overeenkomende element gevonden is, wat efficiënter is dan `Where(...).Count() > 0`.
 
 De audit is bewust simpel. Een productiewaardige secrets-scanner gebruikt reguliere expressies voor betere detectie van string-literals en houdt rekening met multiline-strings, interpolated strings en verbatim strings. Tools zoals `trufflehog`, `gitleaks` of de ingebouwde GitHub secret scanning zijn betrouwbaarder voor productiegebruik.
 

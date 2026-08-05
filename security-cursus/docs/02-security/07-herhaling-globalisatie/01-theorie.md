@@ -1,9 +1,9 @@
 ---
-title: "Les 10: Theorie - ShopWave in Productie"
+title: "Les 12: Theorie - ShopWave in Productie"
 sidebar_label: "Theorie"
 ---
 
-# Les 10: Theorie - ShopWave in Productie
+# Les 12: Theorie - ShopWave in Productie
 
 ## 1. Development vs productie
 
@@ -249,19 +249,19 @@ app.UseHttpsRedirection(); // Redirect HTTP naar HTTPS
 
 ## 6. OWASP Top 10: status van ShopWave
 
-Na tien lessen heeft ShopWave alle behandelde OWASP-kwetsbaarheden aangepakt:
+Na elf lessen heeft ShopWave alle behandelde OWASP-kwetsbaarheden aangepakt:
 
 | # | Kwetsbaarheid | Behandeld in | Status ShopWave |
 |---|--------------|--------------|-----------------|
 | A01 | Broken Access Control | Les 7 | JWT met rolgebaseerde autorisatie |
-| A02 | Cryptographic Failures | Les 1, 6 | BCrypt, AES-256 met random IV, TLS 1.3 |
-| A03 | Injection | Les 8 | Parameterized queries, input validatie |
-| A04 | Insecure Design | Les 1, 4 | Lockout, 2FA, defense in depth |
-| A05 | Security Misconfiguration | Les 6, 7, 8 | Omgevingsvariabelen, CORS, productieconfiguratie |
-| A06 | Vulnerable Components | Les 8, 9 | `dotnet list package --vulnerable` |
-| A07 | Auth and Session Failures | Les 1, 4, 7 | BCrypt, 2FA, JWT met vervaldatum |
-| A08 | Software and Data Integrity | Les 2 | Digitale handtekeningen op orders |
-| A09 | Logging and Monitoring Failures | Les 10 | Productielogging via Warning-niveau, geen stack traces |
+| A02 | Cryptographic Failures | Les 2, 6 | BCrypt, AES-256 met random IV, TLS 1.3 |
+| A03 | Injection | Les 9 | Parameterized queries, input validatie |
+| A04 | Insecure Design | Les 2, 4 | Lockout, 2FA, defense in depth |
+| A05 | Security Misconfiguration | Les 6, 7, 9 | Omgevingsvariabelen, CORS, productieconfiguratie |
+| A06 | Vulnerable Components | Les 9, 11 | `dotnet list package --vulnerable` |
+| A07 | Auth and Session Failures | Les 2, 4, 7 | BCrypt, 2FA, JWT met vervaldatum |
+| A08 | Software and Data Integrity | Les 4 | Digitale handtekeningen op orders |
+| A09 | Logging and Monitoring Failures | Les 12 | Productielogging via Warning-niveau, geen stack traces |
 | A10 | SSRF | Niet behandeld | Buiten scope van deze cursus |
 
 **Defense in depth** is het principe dat al deze maatregelen samen realiseren. Een aanvaller die door laag 1 breekt (een JWT steelt), stuit op laag 2 (versleutelde data in de database). Een aanvaller die de database inziet, leest geen leesbare wachtwoorden want die zijn gehasht met BCrypt. Elke laag beperkt de schade van een aanval op de lagen daarboven.

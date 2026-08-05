@@ -134,7 +134,7 @@ Feature: Registratie bij ShopWave
 
 Maak `ShopWave.Specs/Features/TwoFactor.feature` aan.
 
-De `CommonSteps.cs` installeert al de callback op `TwoFactorService` en slaat de gegenereerde code op in `_ctx.LastCode`.
+De `CommonSteps.cs` installeert al de callback op `TwoFactorService` en slaat de gegenereerde code op in `ctx.LastCode`.
 
 <h3 class="opdracht-titel">Opdracht</h3>
 
@@ -174,6 +174,6 @@ Beantwoord deze vragen voor jezelf voor je de oplossingen bekijkt.
 
 2. De `CommonSteps.cs` bevat de `Given`-stap voor het aanmaken van een account. Wat zou er fout gaan als je die stap in zowel `LoginSteps.cs` als `LockoutSteps.cs` zou definiëren?
 
-3. In oefening 4 gebruik je `_ctx.LastCode` om de 2FA-code op te vangen. Waarom kan je de returnwaarde van `Login(...)` niet gebruiken om de code te achterhalen?
+3. In oefening 4 gebruik je `ctx.LastCode` om de 2FA-code op te vangen. Waarom kan je de returnwaarde van `Login(...)` niet gebruiken om de code te achterhalen?
 
 4. Wanneer is een `Scenario Outline` beter dan meerdere afzonderlijke scenario's? En wanneer schrijf je liever afzonderlijke scenario's?

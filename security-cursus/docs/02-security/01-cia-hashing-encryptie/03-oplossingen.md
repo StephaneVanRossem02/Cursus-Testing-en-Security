@@ -16,49 +16,49 @@ namespace ShopWave.Security
 {
     public class AccountRepository
     {
-        private readonly Dictionary<string, CustomerAccount> _accounts;
-        private readonly Dictionary<string, int>             _failedAttempts;
+        private readonly Dictionary<string, CustomerAccount> accounts;
+        private readonly Dictionary<string, int>             failedAttempts;
         private const int MaxAttempts = 3;
 
         public AccountRepository()
         {
-            _accounts       = new Dictionary<string, CustomerAccount>();
-            _failedAttempts = new Dictionary<string, int>();
+            accounts       = new Dictionary<string, CustomerAccount>();
+            failedAttempts = new Dictionary<string, int>();
         }
 
         public void Register(string email, string password)
         {
             CustomerAccount account = new CustomerAccount(email, password);
-            _accounts[email]        = account;
-            _failedAttempts[email]  = 0;
+            accounts[email]        = account;
+            failedAttempts[email]  = 0;
         }
 
         public string Login(string email, string password)
         {
             string result;
 
-            if (!_accounts.ContainsKey(email))
+            if (!accounts.ContainsKey(email))
             {
                 result = "Gebruiker niet gevonden.";
             }
-            else if (_failedAttempts[email] >= MaxAttempts)
+            else if (failedAttempts[email] >= MaxAttempts)
             {
                 result = "Account geblokkeerd.";
             }
             else
             {
-                bool correct = _accounts[email].VerifyPassword(password);
+                bool correct = accounts[email].VerifyPassword(password);
 
                 if (correct)
                 {
-                    _failedAttempts[email] = 0;
+                    failedAttempts[email] = 0;
                     result = "Inloggen geslaagd.";
                 }
                 else
                 {
-                    _failedAttempts[email]++;
+                    failedAttempts[email]++;
 
-                    if (_failedAttempts[email] >= MaxAttempts)
+                    if (failedAttempts[email] >= MaxAttempts)
                     {
                         result = "Account geblokkeerd.";
                     }
@@ -79,7 +79,7 @@ namespace ShopWave.Security
 
 De volgorde van de `if`-controles in `Login` is bewust. Eerst controleer je of het account bestaat. Daarna controleer je of het geblokkeerd is. Die tweede controle staat vóór `VerifyPassword`. Dat is belangrijk: BCrypt-verificatie is opzettelijk traag (100+ milliseconden). Als je eerst `VerifyPassword` aanroept en daarna de blokkering controleert, laat je voor elk geblokkeerd account een trage berekening uitvoeren. Een aanvaller kan dat misbruiken om de server te belasten.
 
-`_failedAttempts[email]++` telt de foute poging op. Direct daarna controleer je of het maximum bereikt is. Zo geeft de derde foute poging al de melding `"Account geblokkeerd."` in plaats van `"Inloggen mislukt."`.
+`failedAttempts[email]++` telt de foute poging op. Direct daarna controleer je of het maximum bereikt is. Zo geeft de derde foute poging al de melding `"Account geblokkeerd."` in plaats van `"Inloggen mislukt."`.
 
 **Veelgemaakte fout:** studenten resetten de teller niet na een succesvolle login. Daarna tellen eerdere foute pogingen mee. Na twee foute pogingen en één correcte poging zou de volgende foute poging dan het account blokkeren. Dat is niet de bedoeling.
 
@@ -103,57 +103,48 @@ namespace ShopWave.Security
 
         public string GetErrorMessage(string password)
         {
-            if (password.Length < 8)
-            {
-                return "Wachtwoord moet minstens 8 tekens lang zijn.";
-            }
+            string result = string.Empty;
 
             bool hasUppercase = false;
+            bool hasDigit     = false;
+            bool hasSpecial   = false;
+
             foreach (char c in password)
             {
                 if (char.IsUpper(c))
                 {
                     hasUppercase = true;
-                    break;
                 }
-            }
 
-            if (!hasUppercase)
-            {
-                return "Wachtwoord moet minstens één hoofdletter bevatten.";
-            }
-
-            bool hasDigit = false;
-            foreach (char c in password)
-            {
                 if (char.IsDigit(c))
                 {
                     hasDigit = true;
-                    break;
                 }
-            }
 
-            if (!hasDigit)
-            {
-                return "Wachtwoord moet minstens één cijfer bevatten.";
-            }
-
-            bool hasSpecial = false;
-            foreach (char c in password)
-            {
                 if (SpecialCharacters.Contains(c))
                 {
                     hasSpecial = true;
-                    break;
                 }
             }
 
-            if (!hasSpecial)
+            if (password.Length < 8)
             {
-                return "Wachtwoord moet minstens één speciaal teken bevatten (!@#$%^&*).";
+                result = "Wachtwoord moet minstens 8 tekens lang zijn.";
+            }
+            else if (!hasUppercase)
+            {
+                result = "Wachtwoord moet minstens één hoofdletter bevatten.";
+            }
+            else if (!hasDigit)
+            {
+                result = "Wachtwoord moet minstens één cijfer bevatten.";
+            }
+            else if (!hasSpecial)
+            {
+                result = "Wachtwoord moet minstens één speciaal teken bevatten (!@#$%^&*).";
             }
 
-            return string.Empty;
+            return result;
         }
     }
 }
@@ -164,34 +155,42 @@ namespace ShopWave.Security
 Pas `Register` aan zodat hij een `string` teruggeeft:
 
 ```csharp
-private readonly PasswordValidator _validator;
+private readonly PasswordValidator validator;
 
 public AccountRepository()
 {
-    _accounts       = new Dictionary<string, CustomerAccount>();
-    _failedAttempts = new Dictionary<string, int>();
-    _validator      = new PasswordValidator();
+    accounts       = new Dictionary<string, CustomerAccount>();
+    failedAttempts = new Dictionary<string, int>();
+    validator      = new PasswordValidator();
 }
 
 public string Register(string email, string password)
 {
-    if (_accounts.ContainsKey(email))
+    string result;
+
+    if (accounts.ContainsKey(email))
     {
-        return "E-mailadres al in gebruik.";
+        result = "Account bestaat al.";
+    }
+    else
+    {
+        string error = validator.GetErrorMessage(password);
+
+        if (error != string.Empty)
+        {
+            result = error;
+        }
+        else
+        {
+            CustomerAccount account = new CustomerAccount(email, password);
+            accounts[email]        = account;
+            failedAttempts[email]  = 0;
+
+            result = "Registratie geslaagd.";
+        }
     }
 
-    string error = _validator.GetErrorMessage(password);
-
-    if (error != string.Empty)
-    {
-        return error;
-    }
-
-    CustomerAccount account = new CustomerAccount(email, password);
-    _accounts[email]        = account;
-    _failedAttempts[email]  = 0;
-
-    return "Registratie geslaagd.";
+    return result;
 }
 ```
 
@@ -201,7 +200,9 @@ public string Register(string email, string password)
 
 De volgorde van controles in `Register` is bewust: eerst controleer je of het e-mailadres al bestaat, daarna het wachtwoord. Als je het omgekeerd doet, geef je een aanvaller informatie: hij ziet aan de foutmelding dat het e-mailadres al bestaat, ook al heeft hij een zwak wachtwoord ingegeven.
 
-**Veelgemaakte fout:** studenten gebruiken een `if`-keten zonder `break` in de lussen. Als `hasUppercase` al `true` is, heeft de rest van de lus geen nut. Gebruik `break` zodra je het teken gevonden hebt om de lus te stoppen.
+De methode gebruikt één lus die alle drie de eigenschappen tegelijk opzoekt, en daarna één `if`-`else if`-keten die de eerste ontbrekende eigenschap in een `result`-variabele zet. Zo heeft de methode maar één `return` op het einde. Dat is de stijl die we in heel ShopWave aanhouden: één uitgang per methode, geen `break` en geen tussentijdse `return`.
+
+**Veelgemaakte fout:** studenten schrijven drie aparte lussen, één per eigenschap. Dat werkt, maar je loopt dan drie keer over hetzelfde wachtwoord. Met drie booleans in één lus doe je hetzelfde werk in één doorloop.
 
 ---
 
@@ -210,29 +211,26 @@ De volgorde van controles in `Register` is bewust: eerst controleer je of het e-
 ### OrderEncryptor.cs
 
 ```csharp
-using System.Text;
-
 namespace ShopWave.Security
 {
     public class OrderEncryptor
     {
         private const  string       KeyString = "ShopWaveOrderSleutel!!";
-        private readonly AesEncryptor _aes;
+        private readonly AesEncryptor aes;
 
         public OrderEncryptor()
         {
-            byte[] key = Encoding.UTF8.GetBytes(KeyString.PadRight(32));
-            _aes       = new AesEncryptor(key);
+            aes = new AesEncryptor(KeyString);
         }
 
         public string EncryptOrderData(string orderData)
         {
-            return _aes.Encrypt(orderData);
+            return aes.Encrypt(orderData);
         }
 
         public string DecryptOrderData(string encryptedData)
         {
-            return _aes.Decrypt(encryptedData);
+            return aes.Decrypt(encryptedData);
         }
     }
 }
@@ -245,28 +243,34 @@ namespace ShopWave.Security
 {
     public class OrderRepository
     {
-        private readonly Dictionary<string, string> _orders;
-        private readonly OrderEncryptor             _encryptor;
+        private readonly Dictionary<string, string> orders;
+        private readonly OrderEncryptor             encryptor;
 
         public OrderRepository()
         {
-            _orders    = new Dictionary<string, string>();
-            _encryptor = new OrderEncryptor();
+            orders    = new Dictionary<string, string>();
+            encryptor = new OrderEncryptor();
         }
 
         public void SaveOrder(string orderId, string orderData)
         {
-            _orders[orderId] = _encryptor.EncryptOrderData(orderData);
+            orders[orderId] = encryptor.EncryptOrderData(orderData);
         }
 
         public string GetOrder(string orderId)
         {
-            if (!_orders.ContainsKey(orderId))
+            string result;
+
+            if (!orders.ContainsKey(orderId))
             {
-                return string.Empty;
+                result = string.Empty;
+            }
+            else
+            {
+                result = encryptor.DecryptOrderData(orders[orderId]);
             }
 
-            return _encryptor.DecryptOrderData(_orders[orderId]);
+            return result;
         }
     }
 }
@@ -278,58 +282,63 @@ namespace ShopWave.Security
 
 `OrderRepository` slaat de versleutelde string op in de dictionary. Als je de dictionary inspecteert, zie je alleen versleutelde data. Dat simuleert een database: een aanvaller die de database steelt, ziet geen leesbare orderdata.
 
-**Veelgemaakte fout:** studenten maken een nieuwe `AesEncryptor` aan in `EncryptOrderData` en een andere in `DecryptOrderData`. Omdat `AesEncryptor` de sleutel als byte-array ontvangt, werkt dat nog steeds. Maar het is zuiverder om de encryptor éénmalig aan te maken in de constructor en hem intern te hergebruiken.
+**Veelgemaakte fout:** studenten maken een nieuwe `AesEncryptor` aan in `EncryptOrderData` en een andere in `DecryptOrderData`. Omdat beide encryptors dezelfde sleutel krijgen, werkt dat nog steeds. Maar het is zuiverder om de encryptor éénmalig aan te maken in de constructor en hem intern te hergebruiken.
+
+De sleutel geef je als gewone string mee. `AesEncryptor` vult die zelf aan of kapt hem af tot exact 32 bytes (zie de constructor in de theorie). Je hoeft dus zelf geen `PadRight` of `Encoding.UTF8.GetBytes` te schrijven.
 
 ---
 
 ## Oplossing 4: Versleutelde klantnotities
 
 ```csharp
-using System.Text;
-
 namespace ShopWave.Security
 {
     public class CustomerNotesService
     {
         private const  string        KeyString = "ShopWaveNotitiesSleutel!";
-        private readonly AesEncryptor  _aes;
-        private readonly Dictionary<string, string> _encryptedNotes;
+        private readonly AesEncryptor  aes;
+        private readonly Dictionary<string, string> encryptedNotes;
 
         public CustomerNotesService()
         {
-            byte[] key      = Encoding.UTF8.GetBytes(KeyString.PadRight(32));
-            _aes            = new AesEncryptor(key);
-            _encryptedNotes = new Dictionary<string, string>();
+            aes            = new AesEncryptor(KeyString);
+            encryptedNotes = new Dictionary<string, string>();
         }
 
         public void AddNote(string email, string note)
         {
-            _encryptedNotes[email] = _aes.Encrypt(note);
+            encryptedNotes[email] = aes.Encrypt(note);
         }
 
         public string GetNote(string email)
         {
-            if (!_encryptedNotes.ContainsKey(email))
+            string result;
+
+            if (!encryptedNotes.ContainsKey(email))
             {
-                return string.Empty;
+                result = string.Empty;
+            }
+            else
+            {
+                result = aes.Decrypt(encryptedNotes[email]);
             }
 
-            return _aes.Decrypt(_encryptedNotes[email]);
+            return result;
         }
 
         public bool HasNote(string email)
         {
-            return _encryptedNotes.ContainsKey(email);
+            return encryptedNotes.ContainsKey(email);
         }
 
         public void DeleteNote(string email)
         {
-            _encryptedNotes.Remove(email);
+            encryptedNotes.Remove(email);
         }
 
         public Dictionary<string, string> ExportEncryptedNotes()
         {
-            return new Dictionary<string, string>(_encryptedNotes);
+            return new Dictionary<string, string>(encryptedNotes);
         }
     }
 }
@@ -337,7 +346,7 @@ namespace ShopWave.Security
 
 ### Toelichting
 
-`_encryptedNotes` slaat nooit plain-text op. `AddNote` versleutelt onmiddellijk bij opslag. `GetNote` ontsleutelt bij opvragen. Een medewerker die rechtstreeks in de interne dictionary kijkt, ziet altijd versleutelde data.
+`encryptedNotes` slaat nooit plain-text op. `AddNote` versleutelt onmiddellijk bij opslag. `GetNote` ontsleutelt bij opvragen. Een medewerker die rechtstreeks in de interne dictionary kijkt, ziet altijd versleutelde data.
 
 `ExportEncryptedNotes` geeft een kopie terug van de dictionary, niet de dictionary zelf. Zo kan de aanroeper de interne toestand niet wijzigen door de dictionary aan te passen.
 

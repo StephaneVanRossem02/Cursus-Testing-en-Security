@@ -1,5 +1,5 @@
 ---
-title: "Les 8: Oefeningen - Secure Coding (OWASP)"
+title: "Les 9: Oefeningen - Secure Coding (OWASP)"
 sidebar_label: "Oefeningen"
 ---
 
@@ -243,7 +243,7 @@ Poging 7: TooManyRequests
 
 - De toegestane origins staan als `private readonly List<string>` in de klasse.
 - De constructor vult die lijst.
-- `SimulateRequest` gebruikt `_allowedOrigins.Contains(origin)`.
+- `SimulateRequest` gebruikt `allowedOrigins.Contains(origin)`.
 
 **Startcode:**
 
@@ -252,11 +252,11 @@ namespace ShopWave.Security
 {
     public class CorsValidator
     {
-        private readonly List<string> _allowedOrigins;
+        private readonly List<string> allowedOrigins;
 
         public CorsValidator()
         {
-            _allowedOrigins = new List<string>
+            allowedOrigins = new List<string>
             {
                 "https://shopwave.be",
                 "https://localhost:3000"

@@ -88,11 +88,11 @@ namespace ShopWave
 {
     public class OrderService
     {
-        private readonly IPaymentGateway _gateway;
+        private readonly IPaymentGateway gateway;
 
         public OrderService(IPaymentGateway gateway)
         {
-            _gateway = gateway;
+            this.gateway = gateway;
         }
 
         public string PlaceOrder(double amount)
@@ -106,7 +106,7 @@ namespace ShopWave
                     nameof(amount));
             }
 
-            bool success = _gateway.ProcessPayment(amount);
+            bool success = gateway.ProcessPayment(amount);
 
             if (success)
             {
@@ -160,13 +160,13 @@ namespace ShopWave
 {
     public class OrderService
     {
-        private readonly IPaymentGateway _gateway;
-        private readonly IStockService _stockService;
+        private readonly IPaymentGateway gateway;
+        private readonly IStockService stockService;
 
         public OrderService(IPaymentGateway gateway, IStockService stockService)
         {
-            _gateway = gateway;
-            _stockService = stockService;
+            this.gateway = gateway;
+            this.stockService = stockService;
         }
 
         public string PlaceOrder(int productId, int quantity, double amount)
@@ -180,7 +180,7 @@ namespace ShopWave
                     nameof(amount));
             }
 
-            bool inStock = _stockService.IsInStock(productId, quantity);
+            bool inStock = stockService.IsInStock(productId, quantity);
 
             if (!inStock)
             {
@@ -188,7 +188,7 @@ namespace ShopWave
             }
             else
             {
-                bool success = _gateway.ProcessPayment(amount);
+                bool success = gateway.ProcessPayment(amount);
 
                 if (success)
                 {
@@ -244,20 +244,20 @@ namespace ShopWave
 {
     public class CheckoutService
     {
-        private readonly IShippingService _shippingService;
-        private readonly DiscountCalculator _discountCalculator;
+        private readonly IShippingService shippingService;
+        private readonly DiscountCalculator discountCalculator;
 
         public CheckoutService(IShippingService shippingService)
         {
-            _shippingService = shippingService;
-            _discountCalculator = new DiscountCalculator();
+            this.shippingService = shippingService;
+            discountCalculator = new DiscountCalculator();
         }
 
         public double CalculateFinalTotal(double unitPrice, int quantity, int discountPercent)
         {
             double subtotal = unitPrice * quantity;
-            double afterDiscount = _discountCalculator.ApplyDiscount(subtotal, discountPercent);
-            double shippingCost = _shippingService.GetShippingCost(afterDiscount);
+            double afterDiscount = discountCalculator.ApplyDiscount(subtotal, discountPercent);
+            double shippingCost = shippingService.GetShippingCost(afterDiscount);
             double finalTotal = afterDiscount + shippingCost;
 
             return finalTotal;

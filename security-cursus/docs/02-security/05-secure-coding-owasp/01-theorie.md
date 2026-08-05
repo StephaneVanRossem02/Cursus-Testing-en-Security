@@ -1,9 +1,9 @@
 ---
-title: "Les 8: Theorie - Secure Coding (OWASP)"
+title: "Les 9: Theorie - Secure Coding (OWASP)"
 sidebar_label: "Theorie"
 ---
 
-# Les 8: Theorie - Secure Coding (OWASP)
+# Les 9: Theorie - Secure Coding (OWASP)
 
 ## 1. Waarom code zelf de zwakste schakel is
 
@@ -308,7 +308,13 @@ ShopWave heeft al 2FA als extra laag, maar het is beter de aanval vroeg te stopp
 
 ### De oplossing
 
-ASP.NET Core 7 en hoger heeft ingebouwde rate limiting via `AddRateLimiter`. Een fixed window limiter staat een vast aantal requests toe per tijdsvenster:
+ASP.NET Core 7 en hoger heeft ingebouwde rate limiting via `AddRateLimiter`. Een fixed window limiter staat een vast aantal requests toe per tijdsvenster.
+
+`AddFixedWindowLimiter` is een uitbreidingsmethode. Voeg bovenaan `Program.cs` de bijhorende using toe, anders vindt de compiler de methode niet:
+
+```csharp
+using Microsoft.AspNetCore.RateLimiting;
+```
 
 ```csharp
 builder.Services.AddRateLimiter(options =>

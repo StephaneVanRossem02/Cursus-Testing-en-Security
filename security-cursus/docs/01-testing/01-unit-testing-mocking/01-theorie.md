@@ -255,11 +255,11 @@ namespace ShopWave
 ```csharp
 public class OrderService
 {
-    private readonly IPaymentGateway _gateway;
+    private readonly IPaymentGateway gateway;
 
     public OrderService(IPaymentGateway gateway)
     {
-        _gateway = gateway;
+        this.gateway = gateway;
     }
 
     public string PlaceOrder(double amount)
@@ -271,7 +271,7 @@ public class OrderService
             throw new ArgumentException("Bedrag moet groter zijn dan nul.", nameof(amount));
         }
 
-        bool success = _gateway.ProcessPayment(amount);
+        bool success = gateway.ProcessPayment(amount);
 
         if (success)
         {
@@ -579,11 +579,11 @@ namespace ShopWave
 {
     public class OrderService
     {
-        private readonly IPaymentGateway _gateway;
+        private readonly IPaymentGateway gateway;
 
         public OrderService(IPaymentGateway gateway)
         {
-            _gateway = gateway;
+            this.gateway = gateway;
         }
 
         public string PlaceOrder(double amount)
@@ -595,7 +595,7 @@ namespace ShopWave
                 throw new ArgumentException("Bedrag moet groter zijn dan nul.", nameof(amount));
             }
 
-            bool success = _gateway.ProcessPayment(amount);
+            bool success = gateway.ProcessPayment(amount);
 
             if (success)
             {

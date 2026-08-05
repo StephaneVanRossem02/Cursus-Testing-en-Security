@@ -1,5 +1,5 @@
 ---
-title: "Les 8: Oplossingen - Secure Coding (OWASP)"
+title: "Les 9: Oplossingen - Secure Coding (OWASP)"
 sidebar_label: "Oplossingen"
 ---
 
@@ -161,6 +161,12 @@ De validatiecontroles staan in volgorde van meest voor de hand liggend naar mees
 
 ### ShopWave.Api/Program.cs
 
+Vergeet de using niet, anders is `AddFixedWindowLimiter` niet beschikbaar:
+
+```csharp
+using Microsoft.AspNetCore.RateLimiting;
+```
+
 ```csharp
 builder.Services.AddRateLimiter(options =>
 {
@@ -259,11 +265,11 @@ namespace ShopWave.Security
 {
     public class CorsValidator
     {
-        private readonly List<string> _allowedOrigins;
+        private readonly List<string> allowedOrigins;
 
         public CorsValidator()
         {
-            _allowedOrigins = new List<string>
+            allowedOrigins = new List<string>
             {
                 "https://shopwave.be",
                 "https://localhost:3000"
@@ -272,7 +278,7 @@ namespace ShopWave.Security
 
         public bool SimulateRequest(string origin)
         {
-            return _allowedOrigins.Contains(origin);
+            return allowedOrigins.Contains(origin);
         }
     }
 }

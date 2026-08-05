@@ -1,9 +1,9 @@
 ---
-title: "Les 9: Theorie - Ethisch Hacken"
+title: "Les 11: Theorie - Ethisch Hacken"
 sidebar_label: "Theorie"
 ---
 
-# Les 9: Theorie - Ethisch Hacken
+# Les 11: Theorie - Ethisch Hacken
 
 ## 1. Wat is ethisch hacken?
 
@@ -486,7 +486,7 @@ Als poging 6 ook `200` of `401` geeft, is rate limiting niet geactiveerd. Noteer
 
 ### Stap 8k: SQL Injection verificatie
 
-Verifieer dat de SQL Injection-fix uit les 8 effectief werkt:
+Verifieer dat de SQL Injection-fix uit les 9 effectief werkt:
 
 ```powershell
 # Normale zoekopdracht

@@ -18,18 +18,18 @@ namespace ShopWave
 {
     public class CheckoutService
     {
-        private readonly CartService     _cartService;
-        private readonly IPaymentGateway _gateway;
+        private readonly CartService     cartService;
+        private readonly IPaymentGateway gateway;
 
         public CheckoutService(CartService cartService, IPaymentGateway gateway)
         {
-            _cartService = cartService;
-            _gateway     = gateway;
+            this.cartService = cartService;
+            this.gateway     = gateway;
         }
 
         public string Checkout()
         {
-            double amount = _cartService.Total;
+            double amount = cartService.Total;
             string result;
 
             if (amount <= 0)
@@ -38,7 +38,7 @@ namespace ShopWave
             }
             else
             {
-                bool success = _gateway.ProcessPayment(amount);
+                bool success = gateway.ProcessPayment(amount);
                 result = success ? "Betaling geslaagd" : "Betaling mislukt";
             }
 
@@ -182,17 +182,17 @@ namespace ShopWave
 {
     public class CartService
     {
-        private readonly Dictionary<string, CartItem> _items;
-        private readonly ICouponService               _couponService;
-        private readonly DiscountCalculator           _discountCalculator;
-        private          int                           _couponDiscount;
+        private readonly Dictionary<string, CartItem> items;
+        private readonly ICouponService               couponService;
+        private readonly DiscountCalculator           discountCalculator;
+        private          int                           couponDiscount;
 
         public CartService(ICouponService couponService, DiscountCalculator discountCalculator)
         {
-            _items              = new Dictionary<string, CartItem>();
-            _couponService      = couponService;
-            _discountCalculator = discountCalculator;
-            _couponDiscount     = 0;
+            items              = new Dictionary<string, CartItem>();
+            this.couponService      = couponService;
+            this.discountCalculator = discountCalculator;
+            couponDiscount     = 0;
         }
 
         public double Total
@@ -201,13 +201,13 @@ namespace ShopWave
             {
                 double subtotal = 0;
 
-                foreach (CartItem item in _items.Values)
+                foreach (CartItem item in items.Values)
                 {
                     subtotal += item.Price * item.Quantity;
                 }
 
-                return _couponDiscount > 0
-                    ? _discountCalculator.Apply(subtotal, _couponDiscount)
+                return couponDiscount > 0
+                    ? discountCalculator.Apply(subtotal, couponDiscount)
                     : subtotal;
             }
         }
@@ -219,36 +219,36 @@ namespace ShopWave
                 throw new ArgumentException("Aantal mag niet negatief zijn.", nameof(quantity));
             }
 
-            if (_items.ContainsKey(name))
+            if (items.ContainsKey(name))
             {
-                _items[name].Quantity += quantity;
+                items[name].Quantity += quantity;
             }
             else
             {
-                _items[name] = new CartItem(name, price, quantity);
+                items[name] = new CartItem(name, price, quantity);
             }
         }
 
         public void ApplyCoupon(string code)
         {
-            if (_couponService.IsValid(code))
+            if (couponService.IsValid(code))
             {
-                _couponDiscount = _couponService.GetDiscount(code);
-                _couponService.MarkAsUsed(code);
+                couponDiscount = couponService.GetDiscount(code);
+                couponService.MarkAsUsed(code);
             }
         }
 
         public void RemoveItem(string name)
         {
-            if (_items.ContainsKey(name))
+            if (items.ContainsKey(name))
             {
-                _items.Remove(name);
+                items.Remove(name);
             }
         }
 
         public void Clear()
         {
-            _items.Clear();
+            items.Clear();
         }
     }
 }
@@ -499,25 +499,25 @@ namespace ShopWave
 {
     public class OrderConfirmationService
     {
-        private readonly Action<string> _onConfirmationCodeGenerated;
+        private readonly Action<string> onConfirmationCodeGenerated;
 
         public OrderConfirmationService()
         {
-            _onConfirmationCodeGenerated = null;
+            onConfirmationCodeGenerated = null;
         }
 
         public OrderConfirmationService(Action<string> onConfirmationCodeGenerated)
         {
-            _onConfirmationCodeGenerated = onConfirmationCodeGenerated;
+            this.onConfirmationCodeGenerated = onConfirmationCodeGenerated;
         }
 
         public string GenerateConfirmationCode(int orderId)
         {
             string code = $"ORD-{orderId:D6}-{Guid.NewGuid().ToString("N")[..4].ToUpper()}";
 
-            if (_onConfirmationCodeGenerated != null)
+            if (onConfirmationCodeGenerated != null)
             {
-                _onConfirmationCodeGenerated(code);
+                onConfirmationCodeGenerated(code);
             }
 
             return code;

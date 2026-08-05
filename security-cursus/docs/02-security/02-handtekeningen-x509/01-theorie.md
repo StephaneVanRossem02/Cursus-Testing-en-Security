@@ -252,19 +252,30 @@ namespace ShopWave.Security
 {
     public class TwoFactorService
     {
-        private readonly Dictionary<string, PendingCode> _pendingCodes;
-        private readonly int                             _validitySeconds;
+        private readonly Dictionary<string, PendingCode> pendingCodes;
+        private readonly int                             validitySeconds;
+        private readonly Action<string, string>          onCodeGenerated;
 
         public TwoFactorService(int validitySeconds = 30)
         {
-            _pendingCodes    = new Dictionary<string, PendingCode>();
-            _validitySeconds = validitySeconds;
+            pendingCodes    = new Dictionary<string, PendingCode>();
+            this.validitySeconds = validitySeconds;
+            onCodeGenerated = null;
+        }
+
+        public TwoFactorService(Action<string, string> onCodeGenerated, int validitySeconds = 30)
+        {
+            pendingCodes    = new Dictionary<string, PendingCode>();
+            this.validitySeconds = validitySeconds;
+            this.onCodeGenerated = onCodeGenerated;
         }
     }
 }
 ```
 
-`_pendingCodes` is een dictionary die per e-mailadres bijhoudt welke code er gegenereerd is. `_validitySeconds` bepaalt hoe lang een code geldig is. De standaardwaarde is 30 seconden, zoals bij echte TOTP-codes.
+`pendingCodes` is een dictionary die per e-mailadres bijhoudt welke code er gegenereerd is. `validitySeconds` bepaalt hoe lang een code geldig is. De standaardwaarde is 30 seconden, zoals bij echte TOTP-codes.
+
+Er zijn twee constructors. De eerste gebruik je normaal. De tweede aanvaardt een **callback**: een methode die opgeroepen wordt zodra er een code gegenereerd is. Dat is de callback-techniek uit les 5. Je hebt ze nodig in les 8, waar de acceptatietests de gegenereerde code moeten opvangen zonder in de console te kijken.
 
 Bouw de solution.
 
@@ -284,9 +295,14 @@ Voeg de methode `GenerateCode` toe aan `TwoFactorService`:
 public string GenerateCode(string email)
 {
     string   code      = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
-    DateTime expiresAt = DateTime.UtcNow.AddSeconds(_validitySeconds);
+    DateTime expiresAt = DateTime.UtcNow.AddSeconds(validitySeconds);
 
-    _pendingCodes[email] = new PendingCode(code, expiresAt);
+    pendingCodes[email] = new PendingCode(code, expiresAt);
+
+    if (onCodeGenerated != null)
+    {
+        onCodeGenerated(email, code);
+    }
 
     return code;
 }
@@ -295,8 +311,9 @@ public string GenerateCode(string email)
 Regel voor regel:
 
 - `RandomNumberGenerator.GetInt32(100000, 999999)` genereert een willekeurig getal tussen 100000 en 999999. Dat zijn altijd 6 cijfers. Let op: gebruik nooit `Random` voor beveiligingsgevoelige codes. `Random` is voorspelbaar; `RandomNumberGenerator` is cryptografisch veilig.
-- `DateTime.UtcNow.AddSeconds(_validitySeconds)` berekent het tijdstip waarop de code verloopt.
-- `_pendingCodes[email] = new PendingCode(code, expiresAt)` slaat de code op in de dictionary. Als er al een code stond voor dit e-mailadres, wordt die overschreven.
+- `DateTime.UtcNow.AddSeconds(validitySeconds)` berekent het tijdstip waarop de code verloopt.
+- `pendingCodes[email] = new PendingCode(code, expiresAt)` slaat de code op in de dictionary. Als er al een code stond voor dit e-mailadres, wordt die overschreven.
+- `onCodeGenerated(email, code)` roept de callback op als die meegegeven is. Zo kan een test de code opvangen.
 - De methode geeft de code terug zodat de aanroeper hem kan doorsturen (via e-mail, sms of callback).
 
 Bouw de solution.
@@ -318,16 +335,16 @@ public bool VerifyCode(string email, string code)
 {
     bool isValid = false;
 
-    if (_pendingCodes.ContainsKey(email))
+    if (pendingCodes.ContainsKey(email))
     {
-        PendingCode pending = _pendingCodes[email];
+        PendingCode pending = pendingCodes[email];
 
         if (DateTime.UtcNow <= pending.ExpiresAt && pending.Code == code)
         {
             isValid = true;
         }
 
-        _pendingCodes.Remove(email);
+        pendingCodes.Remove(email);
     }
 
     return isValid;
@@ -336,10 +353,10 @@ public bool VerifyCode(string email, string code)
 
 Regel voor regel:
 
-- `_pendingCodes.ContainsKey(email)` controleert of er überhaupt een code bestaat voor dit e-mailadres. Als de gebruiker nooit ingelogd heeft, staat er niets in de dictionary.
+- `pendingCodes.ContainsKey(email)` controleert of er überhaupt een code bestaat voor dit e-mailadres. Als de gebruiker nooit ingelogd heeft, staat er niets in de dictionary.
 - `DateTime.UtcNow <= pending.ExpiresAt` controleert of de code nog niet verlopen is.
 - `pending.Code == code` vergelijkt de ingevoerde code met de opgeslagen code.
-- `_pendingCodes.Remove(email)` staat **buiten** de `if`. Dat is bewust: of de code nu geldig is of niet, hij wordt altijd verwijderd na één verificatiepoging. Zo is elke code eenmalig bruikbaar. Een aanvaller kan niet onbeperkt codes blijven proberen.
+- `pendingCodes.Remove(email)` staat **buiten** de `if`. Dat is bewust: of de code nu geldig is of niet, hij wordt altijd verwijderd na één verificatiepoging. Zo is elke code eenmalig bruikbaar. Een aanvaller kan niet onbeperkt codes blijven proberen.
 
 Bouw de solution.
 
@@ -366,33 +383,48 @@ namespace ShopWave.Security
 {
     public class AccountRepository
     {
-        private readonly Dictionary<string, CustomerAccount> _accounts;
-        private readonly Dictionary<string, int>             _failedAttempts;
-        private readonly TwoFactorService                    _twoFactorService;
-        private readonly Action<string, string>              _onCodeGenerated;
+        private readonly Dictionary<string, CustomerAccount> accounts;
+        private readonly Dictionary<string, int>             failedAttempts;
+        private readonly TwoFactorService                    twoFactorService;
+        private readonly Action<string, string>              onCodeGenerated;
         private const int MaxAttempts = 3;
 
         public AccountRepository(
             TwoFactorService       twoFactorService,
             Action<string, string> onCodeGenerated = null)
         {
-            _accounts         = new Dictionary<string, CustomerAccount>();
-            _failedAttempts   = new Dictionary<string, int>();
-            _twoFactorService = twoFactorService;
-            _onCodeGenerated  = onCodeGenerated;
+            accounts         = new Dictionary<string, CustomerAccount>();
+            failedAttempts   = new Dictionary<string, int>();
+            this.twoFactorService = twoFactorService;
+            this.onCodeGenerated  = onCodeGenerated;
         }
 
-        public void Register(string email, string password)
+        public string Register(string email, string password)
         {
-            CustomerAccount account = new CustomerAccount(email, password);
-            _accounts[email]        = account;
-            _failedAttempts[email]  = 0;
+            string result;
+
+            if (accounts.ContainsKey(email))
+            {
+                result = "Account bestaat al.";
+            }
+            else
+            {
+                CustomerAccount account = new CustomerAccount(email, password);
+                accounts[email]        = account;
+                failedAttempts[email]  = 0;
+
+                result = "Registratie geslaagd.";
+            }
+
+            return result;
         }
     }
 }
 ```
 
 `Action<string, string>` is een delegate die twee strings accepteert en niets teruggeeft. De eerste string is het e-mailadres, de tweede is de gegenereerde code. De parameter `onCodeGenerated = null` betekent dat de callback optioneel is.
+
+`Register` geeft een `string` terug in plaats van `void`. Zo weet de aanroeper of de registratie gelukt is of dat het e-mailadres al bestond. Die returnwaarde gebruik je in les 8 om de registratie te controleren in een acceptatietest.
 
 Bouw de solution.
 
@@ -413,41 +445,41 @@ public string Login(string email, string password)
 {
     string result;
 
-    if (!_accounts.ContainsKey(email))
+    if (!accounts.ContainsKey(email))
     {
         result = "Gebruiker niet gevonden.";
     }
-    else if (_failedAttempts[email] >= MaxAttempts)
+    else if (failedAttempts[email] >= MaxAttempts)
     {
         result = "Account geblokkeerd.";
     }
     else
     {
-        bool correct = _accounts[email].VerifyPassword(password);
+        bool correct = accounts[email].VerifyPassword(password);
 
         if (correct)
         {
-            string code = _twoFactorService.GenerateCode(email);
+            string code = twoFactorService.GenerateCode(email);
 
-            if (_onCodeGenerated != null)
+            if (onCodeGenerated != null)
             {
-                _onCodeGenerated(email, code);
+                onCodeGenerated(email, code);
             }
 
-            _failedAttempts[email] = 0;
-            result = "2FA vereist.";
+            failedAttempts[email] = 0;
+            result = "Voer uw 2FA-code in.";
         }
         else
         {
-            _failedAttempts[email]++;
+            failedAttempts[email]++;
 
-            if (_failedAttempts[email] >= MaxAttempts)
+            if (failedAttempts[email] >= MaxAttempts)
             {
                 result = "Account geblokkeerd.";
             }
             else
             {
-                result = "Inloggen mislukt.";
+                result = "Ongeldig wachtwoord.";
             }
         }
     }
@@ -462,7 +494,7 @@ De volgorde van controles is bewust:
 2. Is het account geblokkeerd? Zo ja: stop. Deze controle staat vóór `VerifyPassword`, zodat een geblokkeerd account geen BCrypt-berekening triggert.
 3. Is het wachtwoord correct? Als ja: genereer een 2FA-code en roep de callback aan. Als nee: tel de mislukte poging en controleer of het maximum bereikt is.
 
-`_twoFactorService.GenerateCode(email)` genereert de code. `_onCodeGenerated(email, code)` stuurt die code door via de callback (als die meegegeven is).
+`twoFactorService.GenerateCode(email)` genereert de code. `onCodeGenerated(email, code)` stuurt die code door via de callback (als die meegegeven is).
 
 Bouw de solution.
 
@@ -482,7 +514,7 @@ Voeg de methode `VerifyTwoFactor` toe aan `AccountRepository`:
 public string VerifyTwoFactor(string email, string code)
 {
     string result;
-    bool   valid = _twoFactorService.VerifyCode(email, code);
+    bool   valid = twoFactorService.VerifyCode(email, code);
 
     if (valid)
     {
@@ -490,7 +522,7 @@ public string VerifyTwoFactor(string email, string code)
     }
     else
     {
-        result = "Ongeldige of verlopen 2FA-code.";
+        result = "Ongeldige 2FA-code.";
     }
 
     return result;
@@ -538,7 +570,7 @@ Wat je ziet:
 
 ```csharp
 [2FA] Code voor alice@shopwave.be: 482917
-2FA vereist.
+Voer uw 2FA-code in.
 Voer de 2FA-code in: 482917
 Inloggen geslaagd.
 ```
@@ -635,16 +667,16 @@ namespace ShopWave.Security
 {
     public class OrderSigner
     {
-        private readonly X509Certificate2 _certificate;
+        private readonly X509Certificate2 certificate;
 
         public OrderSigner(X509Certificate2 certificate)
         {
-            _certificate = certificate;
+            this.certificate = certificate;
         }
 
         public string Sign(string orderData)
         {
-            RSA privateKey = _certificate.GetRSAPrivateKey()!;
+            RSA privateKey = certificate.GetRSAPrivateKey()!;
 
             byte[] dataBytes      = Encoding.UTF8.GetBytes(orderData);
             byte[] signatureBytes = privateKey.SignData(
@@ -660,7 +692,7 @@ namespace ShopWave.Security
 
 Regel voor regel:
 
-- `_certificate.GetRSAPrivateKey()` haalt de private sleutel op uit het certificaat. Die is nodig om te ondertekenen. Het uitroepteken (`!`) zegt aan de compiler dat we zeker weten dat de sleutel er is.
+- `certificate.GetRSAPrivateKey()` haalt de private sleutel op uit het certificaat. Die is nodig om te ondertekenen. Het uitroepteken (`!`) zegt aan de compiler dat we zeker weten dat de sleutel er is.
 - `Encoding.UTF8.GetBytes(orderData)` zet de tekst om naar een byte-array. `SignData` werkt met bytes, niet met strings.
 - `privateKey.SignData(...)` berekent intern een SHA-256-hash van `dataBytes` en versleutelt die hash met RSA. Het resultaat is de handtekening als byte-array.
 - `Convert.ToBase64String(signatureBytes)` zet de byte-array om naar een leesbare Base64-string, zodat je hem eenvoudig kan opslaan of meesturen.
@@ -682,7 +714,7 @@ Voeg de methode `Verify` toe aan `OrderSigner`:
 ```csharp
 public bool Verify(string orderData, string signature)
 {
-    RSA publicKey = _certificate.GetRSAPublicKey()!;
+    RSA publicKey = certificate.GetRSAPublicKey()!;
 
     byte[] dataBytes      = Encoding.UTF8.GetBytes(orderData);
     byte[] signatureBytes = Convert.FromBase64String(signature);
@@ -697,7 +729,7 @@ public bool Verify(string orderData, string signature)
 
 Regel voor regel:
 
-- `_certificate.GetRSAPublicKey()` haalt de **publieke** sleutel op. Die is nodig om te verifiëren. Verifiëren vereist nooit de private sleutel.
+- `certificate.GetRSAPublicKey()` haalt de **publieke** sleutel op. Die is nodig om te verifiëren. Verifiëren vereist nooit de private sleutel.
 - `Convert.FromBase64String(signature)` zet de Base64-string terug naar een byte-array. Dat is het omgekeerde van wat `Sign` deed.
 - `publicKey.VerifyData(...)` berekent opnieuw de SHA-256-hash van `dataBytes` en vergelijkt die met de hash die uit de handtekening ontsleuteld wordt. Als beide hashes overeenkomen, geeft `VerifyData` `true` terug.
 

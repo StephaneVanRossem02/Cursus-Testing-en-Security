@@ -1,9 +1,9 @@
 ---
-title: "Les 8: Secure Coding (OWASP)"
+title: "Les 9: Secure Coding (OWASP)"
 sidebar_label: "Overzicht"
 ---
 
-# Les 8: Secure Coding (OWASP)
+# Les 9: Secure Coding (OWASP)
 
 ## ShopWave
 

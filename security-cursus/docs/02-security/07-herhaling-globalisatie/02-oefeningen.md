@@ -1,5 +1,5 @@
 ---
-title: "Les 10: Oefeningen - ShopWave in Productie"
+title: "Les 12: Oefeningen - ShopWave in Productie"
 sidebar_label: "Oefeningen"
 ---
 
@@ -88,7 +88,7 @@ Maak `ShopWave/Security/SecurityChecklist.cs` met de volgende structuur:
 
 - Een klasse `ChecklistItem` met properties: `Category` (string), `Description` (string), `Status` (string: `"Implemented"`, `"Partial"` of `"NotImplemented"`), `Notes` (string).
 - Een klasse `SecurityChecklist` met:
-  - Een `private readonly List<ChecklistItem> _items` die initialiseerd wordt in de constructor.
+  - Een `private readonly List<ChecklistItem> items` die initialiseerd wordt in de constructor.
   - Een methode `AddItem(string category, string description)` die een item toevoegt met `Status = "NotImplemented"` en lege `Notes`.
   - Een methode `SetStatus(string description, string status, string notes)` die de status en toelichting van het item met die beschrijving instelt.
   - Een methode `GetByStatus(string status)` die alle items met die status teruggeeft.
@@ -111,7 +111,7 @@ namespace ShopWave.Security
 
     public class SecurityChecklist
     {
-        private readonly List<ChecklistItem> _items;
+        private readonly List<ChecklistItem> items;
 
         public SecurityChecklist()
         {
@@ -215,7 +215,7 @@ Niet-geimplementeerde items:
 
 Maak `ShopWave/Security/CiaPijlerAnalyse.cs` met de volgende structuur:
 
-- Een klasse `CiaPillar` met properties: `Name` (string: `"Confidentiality"`, `"Integrity"` of `"Availability"`), een `private readonly List<string> _examples`, een methode `AddExample(string example)` en een property `Examples` die de lijst als `IReadOnlyList<string>` teruggeeft.
+- Een klasse `CiaPillar` met properties: `Name` (string: `"Confidentiality"`, `"Integrity"` of `"Availability"`), een `private readonly List<string> examples`, een methode `AddExample(string example)` en een property `Examples` die de lijst als `IReadOnlyList<string>` teruggeeft.
 - Een klasse `CiaPijlerAnalyse` met:
   - Drie vaste properties: `Confidentiality`, `Integrity` en `Availability` (allemaal van het type `CiaPillar`).
   - Een constructor die de drie pijlers initialiseert.
@@ -229,7 +229,7 @@ namespace ShopWave.Security
     public class CiaPillar
     {
         public string Name { get; }
-        private readonly List<string> _examples;
+        private readonly List<string> examples;
 
         public CiaPillar(string name)
         {
@@ -241,7 +241,7 @@ namespace ShopWave.Security
             // jouw code hier
         }
 
-        public IReadOnlyList<string> Examples => _examples;
+        public IReadOnlyList<string> Examples => examples;
     }
 
     public class CiaPijlerAnalyse
@@ -344,11 +344,11 @@ namespace ShopWave.Security
 {
     public class SecretsAudit
     {
-        private readonly List<string> _secretKeywords;
+        private readonly List<string> secretKeywords;
 
         public SecretsAudit()
         {
-            _secretKeywords = new List<string>
+            secretKeywords = new List<string>
             {
                 "password", "secret", "key", "token", "connectionstring"
             };

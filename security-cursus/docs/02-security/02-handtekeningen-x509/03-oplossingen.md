@@ -16,13 +16,19 @@ sidebar_label: "Oplossingen"
 ```csharp
 public bool ChangePassword(string email, string newPassword)
 {
-    if (!_accounts.ContainsKey(email))
+    bool result;
+
+    if (!accounts.ContainsKey(email))
     {
-        return false;
+        result = false;
+    }
+    else
+    {
+        accounts[email] = new CustomerAccount(email, newPassword);
+        result = true;
     }
 
-    _accounts[email] = new CustomerAccount(email, newPassword);
-    return true;
+    return result;
 }
 ```
 
@@ -35,11 +41,11 @@ namespace ShopWave.Security
 {
     public class PasswordResetService
     {
-        private readonly Dictionary<string, PendingCode> _pendingResets;
+        private readonly Dictionary<string, PendingCode> pendingResets;
 
         public PasswordResetService()
         {
-            _pendingResets = new Dictionary<string, PendingCode>();
+            pendingResets = new Dictionary<string, PendingCode>();
         }
 
         public void RequestReset(string email, Action<string, string> onCodeSent)
@@ -47,7 +53,7 @@ namespace ShopWave.Security
             string   code      = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
             DateTime expiresAt = DateTime.UtcNow.AddMinutes(15);
 
-            _pendingResets[email] = new PendingCode(code, expiresAt);
+            pendingResets[email] = new PendingCode(code, expiresAt);
 
             onCodeSent(email, code);
         }
@@ -56,16 +62,16 @@ namespace ShopWave.Security
         {
             bool isValid = false;
 
-            if (_pendingResets.ContainsKey(email))
+            if (pendingResets.ContainsKey(email))
             {
-                PendingCode pending = _pendingResets[email];
+                PendingCode pending = pendingResets[email];
 
                 if (DateTime.UtcNow <= pending.ExpiresAt && pending.Code == code)
                 {
                     isValid = true;
                 }
 
-                _pendingResets.Remove(email);
+                pendingResets.Remove(email);
             }
 
             return isValid;
@@ -77,13 +83,19 @@ namespace ShopWave.Security
             string            newPassword,
             AccountRepository accounts)
         {
+            string result;
+
             if (VerifyCode(email, code))
             {
                 accounts.ChangePassword(email, newPassword);
-                return "Wachtwoord gewijzigd.";
+                result = "Wachtwoord gewijzigd.";
+            }
+            else
+            {
+                result = "Ongeldige of verlopen code.";
             }
 
-            return "Ongeldige of verlopen code.";
+            return result;
         }
     }
 }
@@ -110,24 +122,39 @@ namespace ShopWave.Security
 {
     public class TwoFactorService
     {
-        private readonly Dictionary<string, PendingCode> _pendingCodes;
-        private readonly Dictionary<string, int>         _failedAttempts;
-        private readonly int                             _validitySeconds;
+        private readonly Dictionary<string, PendingCode> pendingCodes;
+        private readonly Dictionary<string, int>         failedAttempts;
+        private readonly int                             validitySeconds;
+        private readonly Action<string, string>          onCodeGenerated;
 
         public TwoFactorService(int validitySeconds = 30)
         {
-            _pendingCodes   = new Dictionary<string, PendingCode>();
-            _failedAttempts = new Dictionary<string, int>();
-            _validitySeconds = validitySeconds;
+            pendingCodes   = new Dictionary<string, PendingCode>();
+            failedAttempts = new Dictionary<string, int>();
+            this.validitySeconds = validitySeconds;
+            onCodeGenerated = null;
+        }
+
+        public TwoFactorService(Action<string, string> onCodeGenerated, int validitySeconds = 30)
+        {
+            pendingCodes   = new Dictionary<string, PendingCode>();
+            failedAttempts = new Dictionary<string, int>();
+            this.validitySeconds = validitySeconds;
+            this.onCodeGenerated = onCodeGenerated;
         }
 
         public string GenerateCode(string email)
         {
             string   code      = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
-            DateTime expiresAt = DateTime.UtcNow.AddSeconds(_validitySeconds);
+            DateTime expiresAt = DateTime.UtcNow.AddSeconds(validitySeconds);
 
-            _pendingCodes[email]   = new PendingCode(code, expiresAt);
-            _failedAttempts[email] = 0;
+            pendingCodes[email]   = new PendingCode(code, expiresAt);
+            failedAttempts[email] = 0;
+
+            if (onCodeGenerated != null)
+            {
+                onCodeGenerated(email, code);
+            }
 
             return code;
         }
@@ -136,25 +163,25 @@ namespace ShopWave.Security
         {
             bool isValid = false;
 
-            if (_pendingCodes.ContainsKey(email))
+            if (pendingCodes.ContainsKey(email))
             {
-                PendingCode pending = _pendingCodes[email];
+                PendingCode pending = pendingCodes[email];
 
                 if (DateTime.UtcNow <= pending.ExpiresAt && pending.Code == code)
                 {
                     isValid                = true;
-                    _failedAttempts[email] = 0;
-                    _pendingCodes.Remove(email);
+                    failedAttempts[email] = 0;
+                    pendingCodes.Remove(email);
                 }
                 else
                 {
-                    _failedAttempts[email] = _failedAttempts.ContainsKey(email)
-                        ? _failedAttempts[email] + 1
+                    failedAttempts[email] = failedAttempts.ContainsKey(email)
+                        ? failedAttempts[email] + 1
                         : 1;
 
-                    if (_failedAttempts[email] >= 3)
+                    if (failedAttempts[email] >= 3)
                     {
-                        _pendingCodes.Remove(email);
+                        pendingCodes.Remove(email);
                     }
                 }
             }
@@ -164,13 +191,19 @@ namespace ShopWave.Security
 
         public int GetRemainingAttempts(string email)
         {
-            if (!_failedAttempts.ContainsKey(email))
+            int result;
+
+            if (!failedAttempts.ContainsKey(email))
             {
-                return 3;
+                result = 3;
+            }
+            else
+            {
+                int remaining = 3 - failedAttempts[email];
+                result = remaining < 0 ? 0 : remaining;
             }
 
-            int remaining = 3 - _failedAttempts[email];
-            return remaining < 0 ? 0 : remaining;
+            return result;
         }
     }
 }
@@ -180,9 +213,9 @@ namespace ShopWave.Security
 
 `GenerateCode` reset de teller op nul bij het aanmaken van een nieuwe code. Zo start elke nieuwe loginpoging met een schone lei.
 
-In `VerifyCode` staat `_pendingCodes.Remove(email)` nu **binnen** de `if`-blokken in plaats van altijd buiten. Bij een geslaagde verificatie wordt de code direct verwijderd. Bij een mislukte verificatie na 3 pogingen wordt de code ook verwijderd. Bij minder dan 3 mislukte pogingen blijft de code staan zodat de klant nog een kans heeft.
+In `VerifyCode` staat `pendingCodes.Remove(email)` nu **binnen** de `if`-blokken in plaats van altijd buiten. Bij een geslaagde verificatie wordt de code direct verwijderd. Bij een mislukte verificatie na 3 pogingen wordt de code ook verwijderd. Bij minder dan 3 mislukte pogingen blijft de code staan zodat de klant nog een kans heeft.
 
-**Veelgemaakte fout:** studenten laten `_pendingCodes.Remove(email)` buiten alle `if`-blokken staan (zoals in de originele versie). Daardoor wordt de code na elke verificatiepoging verwijderd. De pogingenteller heeft dan geen effect: er is nooit een code om te blokkeren.
+**Veelgemaakte fout:** studenten laten `pendingCodes.Remove(email)` buiten alle `if`-blokken staan (zoals in de originele versie). Daardoor wordt de code na elke verificatiepoging verwijderd. De pogingenteller heeft dan geen effect: er is nooit een code om te blokkeren.
 
 ---
 
@@ -201,16 +234,16 @@ namespace ShopWave.Security
 {
     public abstract class DocumentSigner
     {
-        private readonly X509Certificate2 _certificate;
+        private readonly X509Certificate2 certificate;
 
         protected DocumentSigner(X509Certificate2 certificate)
         {
-            _certificate = certificate;
+            this.certificate = certificate;
         }
 
         public string Sign(string data)
         {
-            RSA privateKey = _certificate.GetRSAPrivateKey()!;
+            RSA privateKey = certificate.GetRSAPrivateKey()!;
 
             byte[] dataBytes      = Encoding.UTF8.GetBytes(data);
             byte[] signatureBytes = privateKey.SignData(
@@ -223,7 +256,7 @@ namespace ShopWave.Security
 
         public bool Verify(string data, string signature)
         {
-            RSA publicKey = _certificate.GetRSAPublicKey()!;
+            RSA publicKey = certificate.GetRSAPublicKey()!;
 
             byte[] dataBytes      = Encoding.UTF8.GetBytes(data);
             byte[] signatureBytes = Convert.FromBase64String(signature);
@@ -320,36 +353,31 @@ namespace ShopWave.Security
 ### SecureOrderDocument.cs
 
 ```csharp
-using System.Text;
-
 namespace ShopWave.Security
 {
     public class SecureOrderDocument
     {
-        private readonly AesEncryptor _encryptor;
-        private readonly OrderSigner  _signer;
+        private readonly AesEncryptor encryptor;
+        private readonly OrderSigner  signer;
 
         public SecureOrderDocument()
         {
-            byte[] key = Encoding.UTF8.GetBytes(
-                "ShopWaveGeheimeSleutel!!".PadRight(32));
-
-            _encryptor = new AesEncryptor(key);
-            _signer    = new OrderSigner(
+            encryptor = new AesEncryptor("ShopWaveGeheimeSleutel!!");
+            signer    = new OrderSigner(
                 CertificateHelper.CreateSelfSignedCertificate("ShopWave"));
         }
 
         public ProtectedOrder Protect(string orderData)
         {
-            string encryptedData = _encryptor.Encrypt(orderData);
-            string signature     = _signer.Sign(encryptedData);
+            string encryptedData = encryptor.Encrypt(orderData);
+            string signature     = signer.Sign(encryptedData);
 
             return new ProtectedOrder(encryptedData, signature);
         }
 
         public string Unprotect(string encryptedData, string signature)
         {
-            bool signatureValid = _signer.Verify(encryptedData, signature);
+            bool signatureValid = signer.Verify(encryptedData, signature);
 
             if (!signatureValid)
             {
@@ -357,7 +385,7 @@ namespace ShopWave.Security
                     "Handtekening ongeldig. Data mogelijk gemanipuleerd.");
             }
 
-            return _encryptor.Decrypt(encryptedData);
+            return encryptor.Decrypt(encryptedData);
         }
     }
 }

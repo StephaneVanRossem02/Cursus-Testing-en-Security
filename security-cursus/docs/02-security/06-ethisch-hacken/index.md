@@ -1,13 +1,13 @@
 ---
-title: "Les 9: Ethisch Hacken"
+title: "Les 11: Ethisch Hacken"
 sidebar_label: "Overzicht"
 ---
 
-# Les 9: Ethisch Hacken
+# Les 11: Ethisch Hacken
 
 ## ShopWave
 
-Negen lessen lang heb je ShopWave gebouwd en beveiligd. Wachtwoorden worden gehasht met BCrypt. 2FA beschermt de loginflow. Orders worden digitaal ondertekend. De API draait op HTTPS. JWT bewaakt de endpoints. SQL Injection, XSS en misconfiguraties zijn gefixed. Maar hoe weet je of al die maatregelen ook echt werken?
+Tien lessen lang heb je ShopWave gebouwd en beveiligd. Wachtwoorden worden gehasht met BCrypt. 2FA beschermt de loginflow. Orders worden digitaal ondertekend. De API draait op HTTPS. JWT bewaakt de endpoints. SQL Injection, XSS en misconfiguraties zijn gefixed. Maar hoe weet je of al die maatregelen ook echt werken?
 
 **Ethisch hacken**, ook wel penetration testing of pentesting, is het gecontroleerd aanvallen van een systeem met toestemming van de eigenaar. Het doel is kwetsbaarheden vinden voor een echte aanvaller dat doet. In deze les draai je de rollen om: jij bent de aanvaller op je eigen systeem.
 

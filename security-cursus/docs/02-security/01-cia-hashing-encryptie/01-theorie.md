@@ -264,7 +264,7 @@ namespace ShopWave.Security
 {
     public class UserRepository
     {
-        private readonly Dictionary<string, string> _users = new Dictionary<string, string>
+        private readonly Dictionary<string, string> users = new Dictionary<string, string>
         {
             { "alice@shopwave.be", "mijnWachtwoord123" },
             { "bob@shopwave.be",   "qwerty" }
@@ -274,9 +274,9 @@ namespace ShopWave.Security
         {
             bool result = false;
 
-            if (_users.ContainsKey(email))
+            if (users.ContainsKey(email))
             {
-                result = _users[email] == password;
+                result = users[email] == password;
             }
 
             return result;
@@ -323,7 +323,24 @@ namespace ShopWave.Security
 }
 ```
 
-Voeg tijdelijk toe aan `Program.cs`:
+**Over `Program.cs`.** Het consoleproject gebruikt geen top-level statements maar een gewone `Program`-klasse met een `Main`-methode:
+
+```csharp
+namespace ShopWave
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            // hier komt de code van de demo's
+        }
+    }
+}
+```
+
+Telkens als hierna staat "voeg toe aan `Program.cs`", bedoelen we: zet die regels **in `Main`**. De `using`-regels komen zoals altijd bovenaan het bestand.
+
+Voeg tijdelijk toe aan `Main`:
 
 ```csharp
 using ShopWave.Security;
@@ -392,18 +409,18 @@ namespace ShopWave.Security
         public string Email        { get; private set; }
         public string PasswordHash { get; private set; }
 
-        private readonly PasswordHasher _hasher;
+        private readonly PasswordHasher hasher;
 
         public CustomerAccount(string email, string password)
         {
-            _hasher      = new PasswordHasher();
+            hasher      = new PasswordHasher();
             Email        = email;
-            PasswordHash = _hasher.Hash(password);
+            PasswordHash = hasher.Hash(password);
         }
 
         public bool VerifyPassword(string password)
         {
-            return _hasher.Verify(password, PasswordHash);
+            return hasher.Verify(password, PasswordHash);
         }
     }
 }
@@ -439,12 +456,17 @@ namespace ShopWave.Security
 {
     public class AesEncryptor
     {
-        private readonly byte[] _key;
+        private readonly byte[] key;
 
         public AesEncryptor(string key)
         {
             string paddedKey = key.PadRight(32).Substring(0, 32);
-            _key = Encoding.UTF8.GetBytes(paddedKey);
+            this.key = Encoding.UTF8.GetBytes(paddedKey);
+        }
+
+        public AesEncryptor(byte[] key)
+        {
+            this.key = key;
         }
     }
 }
@@ -453,6 +475,8 @@ namespace ShopWave.Security
 AES-256 vereist een sleutel van exact 32 bytes. `PadRight(32)` vult een kortere sleutel aan met spaties. `Substring(0, 32)` kapt een langere sleutel af. Zo werkt de klasse altijd, ongeacht hoe lang de meegegeven sleutel is.
 
 `Encoding.UTF8.GetBytes` zet de string om naar een byte-array, want AES werkt intern op bytes, niet op tekst.
+
+De tweede constructor neemt een sleutel die al als bytes klaarstaat. Die heb je nodig zodra de sleutel niet uit leesbare tekst bestaat maar willekeurig gegenereerd is, zoals de sessiesleutel in les 6. Beide constructors vullen hetzelfde veld `key`, dus `Encrypt` en `Decrypt` werken in beide gevallen identiek.
 
 Bouw de solution.
 
@@ -473,7 +497,7 @@ Voeg de `Encrypt`-methode toe aan `AesEncryptor`:
         {
             using (Aes aes = Aes.Create())
             {
-                aes.Key = _key;
+                aes.Key = key;
                 aes.GenerateIV();
 ```
 
@@ -519,7 +543,7 @@ Voeg de `Decrypt`-methode toe:
         {
             using (Aes aes = Aes.Create())
             {
-                aes.Key = _key;
+                aes.Key = key;
 
                 byte[] inputBytes     = Convert.FromBase64String(cipherText);
                 byte[] iv             = new byte[16];
