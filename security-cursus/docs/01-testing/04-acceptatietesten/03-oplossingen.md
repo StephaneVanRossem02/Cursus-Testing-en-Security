@@ -5,6 +5,8 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Acceptatietesten
 
+> [Download het volledige ShopWave-project van les 8](/downloads/shopwave-08-acceptatietesten.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
+
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** De waarde van BDD zit in het zelf schrijven van scenario's en het ontdekken van ambiguïteiten in de specificatie. Lees de toelichting ook als je het juist had.
 
 ---

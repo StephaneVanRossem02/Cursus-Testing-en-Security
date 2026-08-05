@@ -5,6 +5,8 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Unit Testing en Mocking
 
+> [Download het volledige ShopWave-project van les 1](/downloads/shopwave-01-unit-testing-en-mocking.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
+
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** De waarde van oefeningen zit in het zelf denken, niet in het kopiëren. Lees de toelichting ook als je het juist had: er staat uitleg bij over veelgemaakte fouten en alternatieve aanpakken.
 
 ---

@@ -5,6 +5,8 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Integration Testing
 
+> [Download het volledige ShopWave-project van les 5](/downloads/shopwave-05-integration-testing.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
+
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** De waarde van integration testing zit in het zelf ontdekken van integratiefouten, niet in het lezen van het eindresultaat. Lees de toelichting ook als je het juist had.
 
 ---

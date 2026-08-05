@@ -5,6 +5,8 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: JWT en OAuth2
 
+> [Download het volledige ShopWave-project van les 7](/downloads/shopwave-07-jwt-en-oauth2.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
+
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---

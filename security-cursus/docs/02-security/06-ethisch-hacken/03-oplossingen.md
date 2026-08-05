@@ -5,6 +5,8 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Ethisch Hacken
 
+> [Download het volledige ShopWave-project van les 11](/downloads/shopwave-11-ethisch-hacken.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
+
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---
