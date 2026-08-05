@@ -432,5 +432,3 @@ De CIA-pijler is **Confidentiality**: wachtwoorden zijn persoonlijke gegevens di
 [Download het volledige ShopWave-project van les 4](/downloads/shopwave-04-2fa-handtekeningen-en-x509.zip) (ZIP)
 
 Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
-
-Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

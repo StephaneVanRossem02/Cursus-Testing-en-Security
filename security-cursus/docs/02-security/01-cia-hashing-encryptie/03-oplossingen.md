@@ -381,5 +381,3 @@ CIA-pijler: **Confidentiality**. Interne notities bevatten gevoelige informatie 
 [Download het volledige ShopWave-project van les 2](/downloads/shopwave-02-cia-hashing-en-encryptie.zip) (ZIP)
 
 Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
-
-Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).
