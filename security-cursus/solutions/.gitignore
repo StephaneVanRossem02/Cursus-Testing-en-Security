@@ -1,0 +1,15 @@
+## Build-output van de ShopWave-oplossingsprojecten
+bin/
+obj/
+
+## Door Reqnroll gegenereerde code-behind bij de .feature-bestanden.
+## Deze bestanden worden bij elke build opnieuw aangemaakt; handmatige
+## wijzigingen gaan verloren.
+*.feature.cs
+
+## Lokale IDE-bestanden (Visual Studio, Rider). Horen bij jouw machine,
+## niet bij het cursusmateriaal.
+.vs/
+.idea/
+*.user
+*.suo
