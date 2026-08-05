@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Integration Testing (Mockoon)
 
-> [Download het volledige ShopWave-project van les 10](/downloads/shopwave-10-integration-testing-mockoon.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---
@@ -311,3 +309,13 @@ Unit tests en les-5-integration tests merken niets: die raken de JSON-parsing ni
 **Vraag 4: Mockoon vs WireMock.Net in CI/CD**
 
 WireMock.Net is beter geschikt voor CI/CD. De server start en stopt automatisch als onderdeel van het testproces. Geen handmatige stap nodig. Mockoon vereist dat een persoon de applicatie opstart voor de tests draaien, wat niet mogelijk is in een geautomatiseerde pipeline.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 10](/downloads/shopwave-10-integration-testing-mockoon.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

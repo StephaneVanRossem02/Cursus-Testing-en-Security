@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Ethisch Hacken
 
-> [Download het volledige ShopWave-project van les 11](/downloads/shopwave-11-ethisch-hacken.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---
@@ -334,3 +332,13 @@ foreach (Finding f in report.GetOpenFindings())
 3. `FINDING-05` heeft de hoogste prioriteit. Als de Developer Exception Page actief is in productie, lekt de API databaseconnectiestrings, bestandspaden en bibliotheekinformatie. Een aanvaller gebruikt die gegevens om directe toegang te krijgen tot de database. Dat is een volledige compromittering van alle klantdata.
 
 **Veelgemaakte fout:** studenten classificeren bevindingen waarvan de maatregel al correct is als `"High"`. Een bevinding beschrijft een risico of test. Als de test bewijst dat het systeem correct werkt, is de status `"Closed"` en het risiconiveau `"Informational"` of `0.0` CVSS.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 11](/downloads/shopwave-11-ethisch-hacken.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

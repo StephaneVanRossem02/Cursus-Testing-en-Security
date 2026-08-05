@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Acceptatietesten
 
-> [Download het volledige ShopWave-project van les 8](/downloads/shopwave-08-acceptatietesten.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** De waarde van BDD zit in het zelf schrijven van scenario's en het ontdekken van ambiguïteiten in de specificatie. Lees de toelichting ook als je het juist had.
 
 ---
@@ -307,3 +305,13 @@ De `When`-stap voor de 2FA-code vertaalt het type ("correct" of "fout") naar de 
 **Reflectievraag 3:** `Login(...)` geeft "Voer uw 2FA-code in." terug als het wachtwoord correct is. Die returnwaarde is de melding aan de gebruiker, niet de 2FA-code zelf. De 2FA-code wordt intern gegenereerd door `TwoFactorService` en naar de gebruiker gestuurd via een apart kanaal (in een echte applicatie: e-mail of sms). De callback-techniek laat ons die code opvangen zonder de interne implementatie te wijzigen.
 
 **Reflectievraag 4:** een `Scenario Outline` is beter als meerdere gevallen precies hetzelfde patroon volgen met verschillende data, zoals grenswaarden of equivalentieklassen. Afzonderlijke scenario's zijn beter als elk geval een eigen context of eigen stap-volgorde heeft, of als de leesbaarheid van het scenario belangrijker is dan de beknoptheid.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 8](/downloads/shopwave-08-acceptatietesten.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

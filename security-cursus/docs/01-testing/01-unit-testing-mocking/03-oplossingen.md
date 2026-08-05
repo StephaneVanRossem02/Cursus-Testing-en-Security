@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Unit Testing en Mocking
 
-> [Download het volledige ShopWave-project van les 1](/downloads/shopwave-01-unit-testing-en-mocking.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** De waarde van oefeningen zit in het zelf denken, niet in het kopiëren. Lees de toelichting ook als je het juist had: er staat uitleg bij over veelgemaakte fouten en alternatieve aanpakken.
 
 ---
@@ -462,3 +460,13 @@ namespace ShopWave.Tests
 **Reflectievraag 2:** de `Verify`-test toont dat `GetShippingCost` precies eenmaal aangeroepen wordt. Zonder die test kan een foutieve implementatie die methode twee keer aanroepen terwijl het resultaat toevallig nog correct is.
 
 **Reflectievraag 3:** zonder mock zou `GetShippingCost` een echte netwerkoproep doen. De test wordt traag, kan falen bij een storing bij de externe API en is niet meer herhaalbaar op elke machine.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 1](/downloads/shopwave-01-unit-testing-en-mocking.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: JWT en OAuth2
 
-> [Download het volledige ShopWave-project van les 7](/downloads/shopwave-07-jwt-en-oauth2.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---
@@ -291,3 +289,13 @@ HTTPS (les 6) en JWT (les 7) beschermen twee verschillende lagen:
 | 7 | JWT | De endpoints: niemand kan een endpoint aanroepen zonder geldig token |
 
 Zonder HTTPS kan een aanvaller het JWT-token onderscheppen uit de `Authorization`-header en het hergebruiken. Zonder JWT zijn alle endpoints open voor iedereen, ook al is de verbinding versleuteld. Beide lagen zijn nodig: HTTPS beveiligt de verbinding, JWT beveiligt de toegang.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 7](/downloads/shopwave-07-jwt-en-oauth2.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

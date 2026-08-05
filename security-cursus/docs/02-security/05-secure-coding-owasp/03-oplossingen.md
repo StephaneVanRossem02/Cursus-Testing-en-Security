@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Secure Coding (OWASP)
 
-> [Download het volledige ShopWave-project van les 9](/downloads/shopwave-09-secure-coding-owasp.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---
@@ -327,3 +325,13 @@ Een HTTP-client zoals Postman of curl stuurt geen `Origin`-header en voert geen 
 - CIA-pijler: Confidentiality. De aanvaller leest interne systeemgegevens die bedoeld zijn voor ontwikkelaars.
 - Maatregel: `UseDeveloperExceptionPage()` enkel in development. In productie een generieke foutpagina zonder interne details.
 - Impact: de aanvaller heeft het IP-adres, de gebruikersnaam en het wachtwoord van de databaseserver. Hij kan rechtstreeks verbinding maken met de database, buiten de applicatie om, en alle data lezen, wijzigen of vernietigen.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 9](/downloads/shopwave-09-secure-coding-owasp.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: 2FA, Handtekeningen en X.509
 
-> [Download het volledige ShopWave-project van les 4](/downloads/shopwave-04-2fa-handtekeningen-en-x509.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---
@@ -426,3 +424,13 @@ Een systeem dat alleen `AesEncryptor` gebruikt, kan niet bewijzen dat de orderbe
 Als je wachtwoorden versleutelt met AES, bestaat er ergens een sleutel waarmee je ze kan ontsleutelen. Als die sleutel gestolen wordt, zijn alle wachtwoorden direct leesbaar. BCrypt heeft geen sleutel: de hash is niet omkeerbaar. Zelfs als een aanvaller de volledige database inclusief BCrypt-hashes steelt, kan hij wachtwoorden niet herleiden.
 
 De CIA-pijler is **Confidentiality**: wachtwoorden zijn persoonlijke gegevens die vertrouwelijk moeten blijven. Een medewerker die wachtwoorden kan opvragen via een decryptieoptie, is zelf een beveiligingsrisico. De juiste oplossing is een resetflow: het bestaande wachtwoord wordt nooit opgevraagd, de klant stelt zelf een nieuw wachtwoord in.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 4](/downloads/shopwave-04-2fa-handtekeningen-en-x509.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

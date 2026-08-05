@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Test Driven Development
 
-> [Download het volledige ShopWave-project van les 3](/downloads/shopwave-03-test-driven-development.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** De waarde van TDD zit in het zelf doorlopen van de cyclus, niet in het lezen van het eindresultaat. Lees de toelichting ook als je het juist had.
 
 ---
@@ -539,3 +537,13 @@ De `OrderServiceCouponTests` gebruikt een constructor om de mocks en de service 
 **Reflectievraag 2:** de overgang van `List<string>` naar `List<Coupon>` toont dat tests het ontwerp sturen. Je zou dit principe "design by tests" kunnen noemen, maar in TDD-terminologie is het gewoon de normale werking van de Red-Green-Refactor cyclus.
 
 **Reflectievraag 3:** in de groene fase is je enige doel de test laten slagen. Refactoring en implementatie tegelijk doen is twee dingen tegelijk doen. Je verliest het overzicht en riskeert dat je tests breekt zonder te weten waardoor.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 3](/downloads/shopwave-03-test-driven-development.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

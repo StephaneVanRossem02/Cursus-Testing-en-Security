@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: ShopWave in Productie
 
-> [Download het volledige ShopWave-project van les 12](/downloads/shopwave-12-shopwave-in-productie.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---
@@ -380,3 +378,13 @@ Twee concrete bevindingen uit ShopWave:
 1. JWT-tokens worden bij elke API-request in de `Authorization`-header meegestuurd. Over HTTP zijn die headers leesbaar voor iedereen die het netwerkverkeer kan afluisteren. Wie het token heeft, heeft volledige toegang tot de account, inclusief admin-rechten als het een admin-token is. Dit is een man-in-the-middle aanval zonder dat de aanvaller ook maar één wachtwoord hoeft te raden.
 
 2. Wachtwoorden worden bij de inlogstap verstuurd in de request-body. Over HTTP is die body leesbaar in plain text. Een aanvaller op hetzelfde wifi-netwerk (in een café, op een beurs, bij een klant) leest het wachtwoord direct mee. BCrypt beschermt het opgeslagen wachtwoord in de database, maar niet het wachtwoord dat over het netwerk reist. HTTPS sluit die aanvalsvector volledig.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 12](/downloads/shopwave-12-shopwave-in-productie.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

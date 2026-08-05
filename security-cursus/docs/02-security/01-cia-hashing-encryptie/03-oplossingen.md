@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: CIA, Hashing en Encryptie
 
-> [Download het volledige ShopWave-project van les 2](/downloads/shopwave-02-cia-hashing-en-encryptie.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---
@@ -375,3 +373,13 @@ CIA-pijler: **Availability**. De webshop is niet beschikbaar voor klanten. De fi
 **Situatie D: klantnotities leesbaar**
 
 CIA-pijler: **Confidentiality**. Interne notities bevatten gevoelige informatie over klanten. Als een medewerker die rechtstreeks in de database kan lezen, is er geen scheiding tussen de applicatielaag en de datalaag. Oefening 4 lost dit op door notities versleuteld op te slaan via `AesEncryptor`. Een medewerker die de database inspecteert, ziet alleen ciphertext, nooit de leesbare notities.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 2](/downloads/shopwave-02-cia-hashing-en-encryptie.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: Integration Testing
 
-> [Download het volledige ShopWave-project van les 5](/downloads/shopwave-05-integration-testing.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** De waarde van integration testing zit in het zelf ontdekken van integratiefouten, niet in het lezen van het eindresultaat. Lees de toelichting ook als je het juist had.
 
 ---
@@ -620,3 +618,13 @@ De callback geeft je de waarde op het moment dat hij gegenereerd wordt. In produ
 - De volgorde van methodeaanroepen tussen klassen is verkeerd
 - Twee klassen gebruiken een impliciete afspraak over een formaat of type die in productie niet klopt
 - Een shared instantie wordt verwacht maar beide klassen krijgen een aparte instantie mee
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 5](/downloads/shopwave-05-integration-testing.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).

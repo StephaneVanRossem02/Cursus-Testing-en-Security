@@ -5,8 +5,6 @@ sidebar_label: "Oplossingen"
 
 # Oplossingen: HTTPS en TLS
 
-> [Download het volledige ShopWave-project van les 6](/downloads/shopwave-06-https-en-tls.zip) (ZIP). Bevat alle code tot en met deze les, klaar om te bouwen en te testen.
-
 **Bekijk dit pas nadat je de oefeningen zelf geprobeerd hebt.** Lees de toelichting ook als je het juist had.
 
 ---
@@ -314,3 +312,13 @@ Bij het certificaat van `ap.be` is de issuer een CA die opgenomen is in de trust
 **Vraag 6: aanvaller wijzigt bedrag via HTTPS**
 
 Nee, dat is niet mogelijk via een man-in-the-middle-aanval als de verbinding HTTPS gebruikt. TLS garandeert integriteit via een berichtauthenticatiecode (MAC). Elke byte van elk pakket is beschermd. Als een aanvaller ook maar één byte wijzigt, detecteert TLS dat onmiddellijk en verbreekt de verbinding. De aanvaller kan het pakket niet wijzigen zonder de sessiesleutel, en die heeft hij niet.
+
+---
+
+## Dit project downloaden
+
+[Download het volledige ShopWave-project van les 6](/downloads/shopwave-06-https-en-tls.zip) (ZIP)
+
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+
+Alle lessen samen vind je op [Oplossingen downloaden](../../oplossingen-downloaden.md).
