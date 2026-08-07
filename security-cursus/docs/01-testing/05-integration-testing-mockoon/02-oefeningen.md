@@ -11,6 +11,19 @@ De solution die je gebruikt is dezelfde ShopWave-solution als in les 1, 3 en 5. 
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 10](/downloads/shopwave-start-10-integration-testing-mockoon.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je meteen wat je code doet.
+
+---
+
 <h3 class="opdracht-titel">Opdracht</h3>
 
 ## Oefening 1: tweede bestemming testen via `[Theory]`
@@ -251,3 +264,16 @@ Beantwoord de volgende vragen. Schrijf je antwoorden op papier of in een tekstbe
 3. Stel dat de echte verzendservice morgen zijn JSON-structuur wijzigt: `"tarief"` wordt `"prijs"`. Welke test faalt als eerste? Leg uit waarom.
 
 4. De tests uit oefening 1 tot 3 vereisen dat Mockoon draait. De tests uit oefening 4 niet. Welk type test is meer geschikt voor een CI/CD-pipeline? Waarom?
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Start je mockserver en draai je tests | De tests praten met de mock, niet met een echte koeriersdienst |
+| Zet de mockserver uit en draai opnieuw | De Mockoon-tests falen, de WireMock-tests blijven groen: die starten hun eigen server |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

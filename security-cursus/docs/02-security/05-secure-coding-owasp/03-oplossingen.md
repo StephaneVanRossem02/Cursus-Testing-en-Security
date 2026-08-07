@@ -332,4 +332,4 @@ Een HTTP-client zoals Postman of curl stuurt geen `Origin`-header en voert geen 
 
 [Download het volledige ShopWave-project van les 9](/downloads/shopwave-09-secure-coding-owasp.zip) (ZIP)
 
-Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. De webshop `ShopWave.Web` zit erbij. Start hem met `dotnet run --project ShopWave.Web` en open https://localhost:5443 om je code aan het werk te zien.

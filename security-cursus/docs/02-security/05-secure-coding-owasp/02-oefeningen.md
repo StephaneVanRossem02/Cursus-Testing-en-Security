@@ -11,6 +11,19 @@ Je werkt verder in de bestaande ShopWave-solution. Nieuwe klassen maak je aan in
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 9](/downloads/shopwave-start-09-secure-coding-owasp.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je meteen wat je code doet.
+
+---
+
 <h3 class="opdracht-titel">Opdracht</h3>
 
 ## Oefening 1: SQL Injection op productnaam
@@ -319,3 +332,18 @@ De onderzoeker vond de JWT-sleutel `ShopWaveGeheimeSleutel2024!!XYZ#` terug in e
 **Bevinding 4:**
 
 Via het `/crash`-endpoint kon de onderzoeker een week eerder de volledige databaseconnectiestring lezen, inclusief het IP-adres, de gebruikersnaam en het wachtwoord van de databasegebruiker.
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Ga naar **Zoeken** en zoek veilig op `alice@shopwave.be` | Alleen de orders van Alice |
+| Zoek naïef op `alice@shopwave.be` | Hetzelfde resultaat. Zo lijkt de naïeve versie in orde. |
+| Zoek naïef op `@shopwave.be` | **Alle** orders, ook die van de beheerder. Dat is het lek. |
+| Zoek veilig op `@shopwave.be` | Niets, want er is geen account met dat adres |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

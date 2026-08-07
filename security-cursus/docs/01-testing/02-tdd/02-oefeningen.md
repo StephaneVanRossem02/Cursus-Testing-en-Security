@@ -9,6 +9,19 @@ Werk de oefeningen in volgorde. Schrijf bij elke oefening **eerst** de testlijst
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 3](/downloads/shopwave-start-03-test-driven-development.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je meteen wat je code doet.
+
+---
+
 ## Oefening 1: CartService via TDD
 
 **Leerdoel:** je bouwt een klasse volledig via TDD door de Red-Green-Refactor cyclus stap voor stap te doorlopen.
@@ -54,7 +67,9 @@ Noteer alle testgevallen die je verwacht nodig te hebben voor `CartService`. Sch
 
 ### Stap 2: bouw CartService via TDD
 
-Maak een lege `CartService`-klasse aan in `ShopWave` en een testklasse `CartServiceTests` in `ShopWave.Tests`. Werk de testlijst van boven naar onder af. Doorloop voor elk geval de volledige Red-Green-Refactor cyclus voor je naar het volgende gaat.
+In het startpakket staat `CartService` al klaar in `ShopWave`, met lege methodes `AddItem` en `Total`. Die twee staan er alleen in omdat de webshop de klasse anders niet kan compileren; de inhoud schrijf jij. Werk je zonder startpakket, maak dan zelf een lege `CartService`-klasse aan.
+
+Maak daarnaast een testklasse `CartServiceTests` in `ShopWave.Tests`. Werk de testlijst van boven naar onder af. Doorloop voor elk geval de volledige Red-Green-Refactor cyclus voor je naar het volgende gaat.
 
 **Verwacht resultaat:**
 
@@ -194,3 +209,21 @@ Beantwoord deze vragen voor jezelf voor je de oplossingen bekijkt.
 2. In stap 4 dwong de test ons om van een `List<string>` naar een `List<Coupon>` over te stappen. Wat zegt dit over hoe TDD het ontwerp beinvloedt?
 3. Wat is het verschil tussen de refactorfase en de groene fase? Waarom mag je tijdens de groene fase niet refactoren?
 4. Beschrijf een moment tijdens het uitwerken van de oefeningen waarbij een test je dwong iets te ontdekken wat je niet had verwacht.
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Voeg een Laptop toe aan je mandje | Eén regel in de tabel en een totaal van **999,99 EUR** |
+| Voeg er een Muis bij | Twee regels en een totaal van **1029,98 EUR** |
+| Voeg nog een Laptop toe | Geen derde regel maar aantal 2, en een totaal van **2029,97 EUR** |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.
+
+De mandjespagina in het startpakket kan alleen toevoegen en optellen, want meer heeft
+`CartService` op dat moment nog niet. Coupons, artikels verwijderen en het mandje legen
+zie je in de webshop vanaf les 4, zodra je klasse af is.

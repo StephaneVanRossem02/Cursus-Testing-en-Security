@@ -316,4 +316,4 @@ WireMock.Net is beter geschikt voor CI/CD. De server start en stopt automatisch 
 
 [Download het volledige ShopWave-project van les 10](/downloads/shopwave-10-integration-testing-mockoon.zip) (ZIP)
 
-Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. De webshop `ShopWave.Web` zit erbij. Start hem met `dotnet run --project ShopWave.Web` en open https://localhost:5443 om je code aan het werk te zien.

@@ -11,6 +11,19 @@ Je werkt verder in de bestaande ShopWave-solution. Nieuwe klassen maak je aan in
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 4](/downloads/shopwave-start-04-2fa-handtekeningen-en-x509.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je meteen wat je code doet.
+
+---
+
 <h3 class="opdracht-titel">Opdracht</h3>
 
 ## Oefening 1: Wachtwoordreset via 2FA
@@ -317,3 +330,20 @@ Beantwoord de volgende vragen op papier of in een tekstbestand.
 3. Welke CIA-pijler beschermt `AesEncryptor` en welke beschermt `OrderSigner`? Kan een systeem dat alleen `AesEncryptor` gebruikt, ooit bewijzen dat een orderbevestiging niet gemanipuleerd is? Leg uit.
 
 4. ShopWave overweegt het wachtwoord van een klant te bewaren als een AES-encryptie in plaats van als een BCrypt-hash, zodat een medewerker het wachtwoord kan opvragen als de klant het vergeten is. Leg uit waarom dit een beveiligingsfout is. Welke CIA-pijler is hier in het geding?
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Log in met een geldig wachtwoord | Je komt in stap 2 en de 2FA-code verschijnt op het scherm |
+| Voer een foute code in | `Ongeldige 2FA-code.` uit jouw `VerifyTwoFactor` |
+| Vraag een nieuwe code en voer die correct in | `Inloggen geslaagd.` |
+| Gebruik diezelfde code nog eens | Afgewezen: een code werkt maar één keer |
+| Vraag een reset aan bij **Wachtwoord vergeten** | De resetcode verschijnt, en na invoeren `Wachtwoord gewijzigd.` |
+| Ga naar **Orderbevestiging** en wijzig één teken in de tekst | De handtekening wordt ongeldig: `OrderSigner.Verify()` geeft false |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

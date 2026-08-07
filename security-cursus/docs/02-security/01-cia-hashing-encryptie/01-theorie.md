@@ -323,10 +323,10 @@ namespace ShopWave.Security
 }
 ```
 
-**Over `Program.cs`.** Het consoleproject gebruikt geen top-level statements maar een gewone `Program`-klasse met een `Main`-methode:
+**Over `Program.cs`.** Het consoleproject heet `ShopWave.ConsoleDemo` en gebruikt geen top-level statements maar een gewone `Program`-klasse met een `Main`-methode:
 
 ```csharp
-namespace ShopWave
+namespace ShopWave.ConsoleDemo
 {
     public class Program
     {

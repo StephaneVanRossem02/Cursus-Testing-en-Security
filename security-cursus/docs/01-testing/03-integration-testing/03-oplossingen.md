@@ -249,6 +249,7 @@ namespace ShopWave
         public void Clear()
         {
             items.Clear();
+            couponDiscount = 0;
         }
     }
 }
@@ -625,4 +626,4 @@ De callback geeft je de waarde op het moment dat hij gegenereerd wordt. In produ
 
 [Download het volledige ShopWave-project van les 5](/downloads/shopwave-05-integration-testing.zip) (ZIP)
 
-Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. De webshop `ShopWave.Web` zit erbij. Start hem met `dotnet run --project ShopWave.Web` en open http://localhost:5000 om je code aan het werk te zien.

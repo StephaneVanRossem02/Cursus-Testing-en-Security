@@ -384,12 +384,15 @@ We bouwen de tests stap voor stap. Na elke stap voer je de tests uit en bekijk j
 
 ### Stap 1: solution opzetten
 
-Maak in Visual Studio een nieuwe solution aan met twee projecten:
+Maak in Visual Studio een nieuwe solution aan met deze projecten:
 
-- **`ShopWave`**: Console App (.NET 8). De productiecode staat hier.
+- **`ShopWave`**: Class Library (.NET 8). De productiecode staat hier. Alle klassen die je in deze cursus schrijft en test, komen in dit project.
 - **`ShopWave.Tests`**: xUnit Test Project (.NET 8). De tests staan hier.
+- **`ShopWave.ConsoleDemo`**: Console App (.NET 8). Telkens als in de cursus staat "voeg toe aan `Program.cs`", bedoelen we dit project.
 
-Voeg een project reference toe: rechtsklik op `ShopWave.Tests` > `Add` > `Project Reference` > vink `ShopWave` aan.
+Voeg project references toe: rechtsklik op `ShopWave.Tests` > `Add` > `Project Reference` > vink `ShopWave` aan, en doe hetzelfde voor `ShopWave.ConsoleDemo`.
+
+Gebruik je het startpakket bij de oefeningen, dan staat dit alles al klaar, samen met een vierde project `ShopWave.Web`: de webshop waarin je je code ziet draaien.
 
 Installeer in `ShopWave.Tests` de volgende NuGet-pakketten via `Tools` > `NuGet Package Manager` > `Manage NuGet Packages for Solution`:
 - `FluentAssertions`

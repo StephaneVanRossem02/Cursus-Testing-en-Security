@@ -11,6 +11,19 @@ Je werkt verder in de bestaande ShopWave-solution. Nieuwe klassen maak je aan in
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 11](/downloads/shopwave-start-11-ethisch-hacken.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je meteen wat je code doet.
+
+---
+
 <h3 class="opdracht-titel">Opdracht</h3>
 
 ## Oefening 1: JWT-manipulatie in C#
@@ -426,3 +439,17 @@ Druk het rapport af via `PrintSummary()` en beantwoord daarna:
 1. Welke bevinding heeft de hoogste CVSS-score? Onderbouw je keuze.
 2. Welke maatregelen zijn al correct geconfigureerd in ShopWave?
 3. Welke bevinding heeft de hoogste prioriteit om op te lossen? Waarom?
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Ga naar **Token**, kopieer de payload en wijzig de rol naar `admin` | Het token wordt afgewezen: de signature klopt niet meer |
+| Ga naar **Pentestrapport** | De bevindingen die jouw `PentestReport` teruggeeft |
+| Voeg een bevinding met risico `High` toe | Ze verschijnt in de lijst en in de telling per risiconiveau |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

@@ -11,6 +11,19 @@ Je werkt verder in de bestaande ShopWave-solution. Nieuwe klassen maak je aan in
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 12](/downloads/shopwave-start-12-shopwave-in-productie.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je meteen wat je code doet.
+
+---
+
 <h3 class="opdracht-titel">Opdracht</h3>
 
 ## Oefening 1: Productieomgeving configureren
@@ -431,3 +444,17 @@ Beantwoord daarna schriftelijk de volgende vragen:
 4. Welke stap in de DevSecOps-pipeline uit de theorie heeft de meeste waarde voor een klein team van twee developers? Waarom?
 
 5. Je stage-bedrijf gebruikt nog geen HTTPS. Je wil dit aankaarten. Welke twee concrete bevindingen uit ShopWave gebruik je om het risico te illustreren?
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Loop de volledige webshop door met je checklist ernaast | Voor elk item kan je aanwijzen waar het in de code zit |
+| Controleer of er nog geheimen in `appsettings.json` staan | Wat je `SecretsAudit` vindt, moet overeenkomen met wat er echt staat |
+| Draai `IsFullyImplemented()` | Zolang er items op `NotImplemented` staan, geeft die false terug |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

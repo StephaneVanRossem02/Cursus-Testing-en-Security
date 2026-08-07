@@ -7,6 +7,19 @@ sidebar_label: "Oefeningen"
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 1](/downloads/shopwave-start-01-unit-testing-en-mocking.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je meteen wat je code doet.
+
+---
+
 ## Oefening 1: DiscountCalculator
 
 **Leerdoel:** je schrijft tests met het AAA-patroon en past ZOMBIES toe om testgevallen te kiezen.
@@ -284,3 +297,18 @@ Beantwoord deze vragen voor jezelf voor je de oplossingen bekijkt:
 1. Wat zou er gebeuren als je `DiscountCalculator` ook via een interface injecteert in `CheckoutService`? Wat is het voordeel? Wat is het nadeel?
 2. In oefening 3 test je dat `ProcessPayment` nooit aangeroepen wordt als het product niet op voorraad is. Waarom is dat een waardevolle test, ook al test je al dat het resultaat `"Product niet beschikbaar"` is?
 3. Stel dat `IShippingService.GetShippingCost` een netwerkoproep doet naar een externe API. Wat zou er gebeuren met je tests als je geen mock gebruikt?
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Ga naar **Producten** | De vijf producten met hun voorraad. De Webcam staat op 0. |
+| Bestel 2 Laptops met 10 procent korting | `Bestelling bevestigd` en een totaal van **1799,98 EUR** |
+| Bestel 1 Webcam | `Product niet beschikbaar`, want `IStockService` geeft 0 terug |
+| Bestel 1 Laptop zonder korting | `Bestelling bevestigd` en een totaal van **999,99 EUR** |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

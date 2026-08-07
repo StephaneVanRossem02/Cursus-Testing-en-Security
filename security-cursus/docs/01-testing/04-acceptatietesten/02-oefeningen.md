@@ -9,6 +9,19 @@ Werk de oefeningen in volgorde. Schrijf bij elke oefening eerst de feature file,
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 8](/downloads/shopwave-start-08-acceptatietesten.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je meteen wat je code doet.
+
+---
+
 ## Oefening 1: Scenario Outline voor de loginflow
 
 **Leerdoel:** je vervangt meerdere identieke scenario's door één `Scenario Outline` met een `Examples`-tabel.
@@ -177,3 +190,17 @@ Beantwoord deze vragen voor jezelf voor je de oplossingen bekijkt.
 3. In oefening 4 gebruik je `ctx.LastCode` om de 2FA-code op te vangen. Waarom kan je de returnwaarde van `Login(...)` niet gebruiken om de code te achterhalen?
 
 4. Wanneer is een `Scenario Outline` beter dan meerdere afzonderlijke scenario's? En wanneer schrijf je liever afzonderlijke scenario's?
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Loop de loginflow in de webshop door: registreren, inloggen, 2FA | Precies de stappen die je in je `.feature`-bestanden beschrijft |
+| Log drie keer fout in | De lockout die je in `Lockout.feature` vastlegt |
+| Vergelijk je scenario's met wat je op het scherm ziet | Elke `Given`, `When` en `Then` heeft een tegenhanger in de webshop |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

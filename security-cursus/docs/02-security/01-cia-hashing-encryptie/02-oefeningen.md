@@ -11,6 +11,19 @@ Je werkt in de bestaande ShopWave-solution. Alle nieuwe klassen maak je aan in `
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 2](/downloads/shopwave-start-02-cia-hashing-en-encryptie.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je meteen wat je code doet.
+
+---
+
 <h3 class="opdracht-titel">Opdracht</h3>
 
 ## Oefening 1: AccountRepository bouwen
@@ -331,3 +344,20 @@ Beantwoord de volgende vragen op papier of in een tekstbestand.
 **Situatie C:** ShopWave wordt aangevallen met een DDoS-aanval. De webshop is vier uur lang niet bereikbaar tijdens een drukke promotieperiode. Welke CIA-pijler is geschonden? Welke maatregel kan ShopWave nemen om de impact te beperken?
 
 **Situatie D:** een medewerker van ShopWave kan de klantnotities uit oefening 4 lezen door rechtstreeks in de database te kijken, omdat de notities als plain text opgeslagen zijn. Welke CIA-pijler is hier in het geding? Wat lost oefening 4 precies op?
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Registreer met wachtwoord `123` | `Wachtwoord moet minstens 8 tekens lang zijn.` uit jouw `PasswordValidator` |
+| Registreer met wachtwoord `wachtwoord` | `Wachtwoord moet minstens één hoofdletter bevatten.` |
+| Registreer met wachtwoord `Wachtwoord1!` | `Registratie geslaagd.` |
+| Registreer datzelfde adres nog eens | `Account bestaat al.` |
+| Log drie keer na elkaar fout in | Bij de derde poging `Account geblokkeerd.` uit jouw lockout |
+| Sla een order op bij **Mijn bestellingen** en sla hem nog eens op | Twee keer een andere versleutelde tekst, want elke keer een nieuwe IV |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

@@ -279,10 +279,13 @@ namespace ShopWave
         public void Clear()
         {
             items.Clear();
+            couponDiscount = 0;
         }
     }
 }
 ```
+
+`Clear` zet ook de couponkorting terug op 0. Doe je dat niet, dan blijft de korting hangen nadat het mandje leeg is: de klant vult een nieuw mandje en krijgt stilzwijgend korting zonder geldige coupon. De test hieronder legt dat vast.
 
 ### CartServiceTests.cs (coupon)
 
@@ -337,6 +340,22 @@ namespace ShopWave.Tests
         }
 
         [Fact]
+        public void Clear_AfterCouponApplied_RemovesDiscount()
+        {
+            Mock<ICouponService> mockCoupon = new Mock<ICouponService>();
+            mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(true);
+            mockCoupon.Setup(c => c.GetDiscount("ZOMER10")).Returns(10);
+
+            CartService cart = new CartService(mockCoupon.Object);
+            cart.AddItem("Laptop", 100.0);
+            cart.ApplyCoupon("ZOMER10");
+            cart.Clear();
+            cart.AddItem("Muis", 50.0);
+
+            cart.Total.Should().Be(50.0);
+        }
+
+        [Fact]
         public void ApplyCoupon_WithInvalidCoupon_NeverCallsMarkAsUsed()
         {
             Mock<ICouponService> mockCoupon = new Mock<ICouponService>();
@@ -357,6 +376,8 @@ namespace ShopWave.Tests
 `ApplyCoupon` is een goede kandidaat voor TDD omdat de logica afhankelijk is van een externe service. Door `ICouponService` te mocken, test je de logica van `CartService` volledig geïsoleerd, zonder dat de echte `CouponService` betrokken is.
 
 **Veelgemaakte fout:** studenten vergeten de `Verify`-test voor `MarkAsUsed`. Het resultaat van het totaal is correct, maar als `MarkAsUsed` nooit aangeroepen wordt, kan dezelfde coupon onbeperkt hergebruikt worden. De `Verify`-test legt dit gedrag expliciet vast.
+
+**Waarom `Clear_AfterCouponApplied_RemovesDiscount` nodig is.** Er bestaat al een test `Clear_NonEmptyCart_ResetsTotal`, en die slaagt ook als `Clear` de couponkorting laat staan. De reden: die test past nooit een coupon toe, en met een leeg mandje is `subtotal * (1 - korting / 100)` altijd 0, welke korting er ook nog ingesteld staat. De test kan de fout dus niet zien. Pas als je na het legen opnieuw een artikel toevoegt, valt op dat de korting er nog op zit. Dat is een goed voorbeeld van een test die groen staat zonder het gedrag echt vast te leggen.
 
 **Alternatieve aanpak:** sommige studenten controleren of het totaal opnieuw correct is na een tweede `ApplyCoupon`-aanroep. Dat werkt ook, maar de `Verify`-test is directer: hij test het gedrag, niet enkel het resultaat.
 
@@ -544,4 +565,4 @@ De `OrderServiceCouponTests` gebruikt een constructor om de mocks en de service 
 
 [Download het volledige ShopWave-project van les 3](/downloads/shopwave-03-test-driven-development.zip) (ZIP)
 
-Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. In de `README.md` staat wat er nieuw is en hoeveel tests er horen te slagen.
+Bevat alle code tot en met deze les, klaar om te openen in Visual Studio. Bouwen en testen doe je met `dotnet build` en `dotnet test`. De webshop `ShopWave.Web` zit erbij. Start hem met `dotnet run --project ShopWave.Web` en open http://localhost:5000 om je code aan het werk te zien.

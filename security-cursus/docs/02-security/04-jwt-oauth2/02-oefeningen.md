@@ -11,6 +11,19 @@ Je werkt verder in de bestaande ShopWave-solution. Nieuwe klassen maak je aan in
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 7](/downloads/shopwave-start-07-jwt-en-oauth2.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je meteen wat je code doet.
+
+---
+
 <h3 class="opdracht-titel">Opdracht</h3>
 
 ## Oefening 1: /me endpoint uitbreiden
@@ -340,3 +353,18 @@ Beantwoord de volgende vragen op papier of in een tekstbestand.
 4. OAuth 2.0 gebruikt scopes om toegang te beperken. Een fitness-app vraagt `calendar.events.write`. Welke CIA-pijler staat hier centraal? Hoe helpt het principe van least privilege bij het ontwerpen van scopes?
 
 5. In de JWT-flow stuurt de client het token mee in de `Authorization`-header. Als de verbinding niet via HTTPS loopt, is die header zichtbaar voor iedereen op het netwerk. Leg de rol uit van HTTPS (les 6) en JWT (les 7) samen. Wat beschermt elk van de twee?
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Ga naar **Token** en maak een token aan voor rol `user` | De drie delen apart: header, payload en signature |
+| Bekijk de payload | Je e-mailadres en je rol zijn gewoon leesbaar, zonder sleutel |
+| Maak een token aan voor rol `admin` | Dezelfde header, een andere payload, een andere signature |
+| Plak het token in jwt.io | Dezelfde claims. Een token is ondertekend, niet versleuteld. |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

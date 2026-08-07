@@ -9,6 +9,19 @@ Werk de oefeningen in volgorde. Gebruik bij elke oefening echte klassen voor eig
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 5](/downloads/shopwave-start-05-integration-testing.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je meteen wat je code doet.
+
+---
+
 ## Oefening 1: CheckoutService integreren
 
 **Leerdoel:** je schrijft een integration test waarbij meerdere eigen klassen samenwerken zonder mocks voor eigen code.
@@ -18,6 +31,8 @@ Werk de oefeningen in volgorde. Gebruik bij elke oefening echte klassen voor eig
 ### Startcode
 
 Voeg deze klasse toe aan `ShopWave`. Je hoeft hem niet aan te passen.
+
+> **Let op:** deze `CheckoutService` **vervangt** de klasse met dezelfde naam uit les 1. Die oude versie rekende met `CalculateFinalTotal`; deze rekent af vanuit het winkelmandje. Verwijder daarom de oude `CheckoutService` en ook `ShopWave.Tests/CheckoutServiceTests.cs`, anders compileert je project niet meer. In het startpakket is dat al gebeurd.
 
 ```csharp
 namespace ShopWave
@@ -81,13 +96,15 @@ Test minstens de volgende scenario's:
 
 ### Startcode
 
-Voeg deze klasse toe aan `ShopWave`:
+`DiscountCalculator` bestaat al sinds les 1. Voeg de methode `Apply` eraan **toe**; laat `ApplyDiscount` staan, want de tests van les 1 gebruiken die nog.
 
 ```csharp
 namespace ShopWave
 {
     public class DiscountCalculator
     {
+        // ApplyDiscount uit les 1 blijft staan.
+
         public double Apply(double amount, int discountPercent)
         {
             if (discountPercent < 0 || discountPercent > 100)
@@ -275,3 +292,18 @@ Beantwoord deze vragen voor jezelf voor je de oplossingen bekijkt.
 3. In oefening 4 gebruik je een callback om de bevestigingscode op te vangen. Waarom is dit beter dan een publieke property `ConfirmationCode` toevoegen aan de klasse?
 
 4. Je schrijft een integration test en hij faalt. De unit tests voor alle betrokken klassen slagen. Wat zijn mogelijke oorzaken van de fout?
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open http://localhost:5000. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Vul je mandje en ga naar **Bestellen** | Het bedrag komt uit `CartService.Total`, niet meer uit een los product |
+| Reken een leeg mandje af | `Mandje is leeg` uit jouw `CheckoutService.Checkout()` |
+| Reken een gevuld mandje af | `Betaling geslaagd` en een bevestigingscode in de vorm `ORD-000001-3CED` |
+| Bestel nog eens | Een andere bevestigingscode: `OrderConfirmationService` genereert elke keer een nieuwe |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

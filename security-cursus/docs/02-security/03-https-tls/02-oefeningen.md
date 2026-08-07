@@ -11,6 +11,19 @@ Je werkt verder in de ShopWave-solution. Oefening 1 maakt `ShopWave.Api` aan als
 
 ---
 
+## Startpakket downloaden
+
+[Download het startpakket van les 6](/downloads/shopwave-start-06-https-en-tls.zip) (ZIP)
+
+Hierin staat alles wat je in de vorige lessen gebouwd hebt, samen met de code die je
+tijdens de theorie van deze les opbouwt. Wat je in de oefeningen zelf moet schrijven,
+staat erin als skelet met de melding `// jouw code hier`.
+
+De webshop zit erbij. Je hoeft geen Razor te kennen: start hem met
+`dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je meteen wat je code doet.
+
+---
+
 <h3 class="opdracht-titel">Opdracht</h3>
 
 ## Oefening 1: ShopWave API op HTTPS
@@ -258,3 +271,18 @@ Beantwoord de volgende vragen op papier of in een tekstbestand:
 4. Wat is het verschil tussen dit certificaat en het self-signed certificaat uit de demo? Waarom vertrouwt de browser dit certificaat wel?
 5. ShopWave verstuurt een betaling via HTTPS. Welke CIA-pijler beschermt de versleuteling? Welke beschermt de integriteitscontrole? En welke beschermt de authenticatie van de server?
 6. Een aanvaller slaagt erin de response van de ShopWave API te onderscheppen en het bedrag te wijzigen van 999 EUR naar 1 EUR. De verbinding gebruikt HTTPS. Is dit mogelijk? Leg uit waarom wel of niet.
+
+---
+
+## Controleer je werk in de webshop
+
+Start de webshop met `dotnet run --project ShopWave.Web` en open https://localhost:5443. Zo zie je je eigen code draaien in plaats van alleen een groene testbalk.
+
+| Wat je doet | Wat je ziet als je code klopt |
+|-------------|-------------------------------|
+| Start de webshop en open `https://localhost:5443` | Een certificaatwaarschuwing. Die hoort er te zijn bij een self-signed certificaat. |
+| Bekijk het certificaat in je browser | Subject en issuer zijn allebei `CN=ShopWave`: het certificaat tekent zichzelf |
+| Open de netwerktab van je browser en bekijk de response headers | `X-Content-Type-Options`, `X-Frame-Options` en `Strict-Transport-Security` |
+| Probeer `http://localhost:5443` | Dat werkt niet: de poort spreekt alleen TLS |
+
+Onder elk resultaat staat uit welke klasse het komt. Zie je iets anders dan hierboven, dan weet je meteen welke methode je moet nakijken.

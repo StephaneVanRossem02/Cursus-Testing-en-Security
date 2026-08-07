@@ -634,7 +634,7 @@ using (RSA rsa = RSA.Create(2048))
         DateTimeOffset.UtcNow,
         DateTimeOffset.UtcNow.AddYears(1));
 
-    return certificate;
+    return new X509Certificate2(certificate.Export(X509ContentType.Pfx));
 }
 ```
 
@@ -643,6 +643,11 @@ Regel voor regel:
 - `CertificateRequest` is een aanvraag voor een certificaat. Je geeft drie dingen mee: de identiteit (`CN=ShopWave`), het RSA-sleutelpaar, en het hash-algoritme voor de handtekening van het certificaat zelf.
 - `CN={subjectName}` is de **Common Name**: de naam van de eigenaar in het certificaat. Voor ShopWave is dat `"ShopWave"`.
 - `CreateSelfSigned` ondertekent het certificaat met de private sleutel die we zelf aangemaakt hebben. Er is geen externe Certificate Authority betrokken. Het certificaat is 1 jaar geldig.
+- `certificate.Export(X509ContentType.Pfx)` en het opnieuw inlezen zijn geen overbodige stap. Zonder die twee is het certificaat wel bruikbaar om te ondertekenen, maar kan je er in les 6 geen HTTPS mee opzetten. Zie de uitleg hieronder.
+
+**Waarom die export nodig is.** Het `using`-blok geeft het RSA-object vrij zodra de methode klaar is. Het certificaat dat je teruggeeft verwijst naar die sleutel, en meldt daarna nog altijd braaf `HasPrivateKey = true`. Toch is de sleutel intussen vrijgegeven. Voor ondertekenen merk je daar niets van, maar de TLS-laag van het besturingssysteem heeft een sleutel nodig die blijft bestaan. Zonder de export start je webserver in les 6 wel op, maar mislukt elke HTTPS-verbinding met een handshake-fout.
+
+`Export(X509ContentType.Pfx)` schrijft certificaat en sleutel samen weg als bytes, nog binnen het `using`-blok, dus terwijl de sleutel nog leeft. Het nieuwe `X509Certificate2` dat je daaruit maakt heeft een eigen kopie van de sleutel en blijft dus werken.
 
 Bouw de solution.
 
