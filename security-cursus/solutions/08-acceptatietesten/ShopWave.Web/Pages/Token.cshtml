@@ -1,0 +1,68 @@
+@page
+@model ShopWave.Web.Pages.TokenModel
+@{
+    ViewData["Title"] = "Token bekijken";
+}
+
+<h1>Token bekijken</h1>
+
+<div class="uitleg">
+    Een JWT bestaat uit drie delen: <strong>header</strong>, <strong>payload</strong> en
+    <strong>signature</strong>. De handtekening zorgt dat niemand het token kan wijzigen.
+    Maar de payload is alleen gecodeerd, niet versleuteld: iedereen die het token heeft
+    kan hem lezen, ook zonder de geheime sleutel. Zet er dus nooit gevoelige gegevens in.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+}
+
+<form method="post">
+    <label for="Email">E-mailadres</label>
+    <input type="text" id="Email" name="Email" value="@Model.Email" />
+
+    <label for="Rol">Rol</label>
+    <select id="Rol" name="Rol">
+        <option value="user" selected="@(Model.Rol == "user")">user</option>
+        <option value="admin" selected="@(Model.Rol == "admin")">admin</option>
+    </select>
+
+    <button type="submit">Token aanmaken</button>
+</form>
+
+@if (Model.HeeftToken)
+{
+    <h2>Het token</h2>
+    <div class="herkomst">Dit token is aangemaakt door <code>JwtTokenService.GenerateToken()</code>.</div>
+
+    <table>
+        <tr><th>Header</th><td><code>@Model.Header</code></td></tr>
+        <tr><th>Payload</th><td><code>@Model.Payload</code></td></tr>
+        <tr><th>Signature</th><td><code>@Model.Signature</code></td></tr>
+    </table>
+
+    <h2>De payload, gelezen zonder sleutel</h2>
+
+    <table>
+        <thead>
+            <tr><th>Claim</th><th>Waarde</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var claim in Model.Claims)
+            {
+                <tr>
+                    <td>@claim.Type</td>
+                    <td>@claim.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p>Dit token verloopt op @Model.VerlooptOp.ToString("dd/MM/yyyy HH:mm:ss") (UTC).</p>
+
+    <p>
+        Merk op dat hier geen geheime sleutel aan te pas kwam. De sleutel is alleen nodig
+        om de handtekening te maken en te controleren, niet om de payload te lezen.
+    </p>
+}

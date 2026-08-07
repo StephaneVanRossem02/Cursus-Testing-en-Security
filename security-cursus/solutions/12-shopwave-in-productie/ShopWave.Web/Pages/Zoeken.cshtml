@@ -1,0 +1,74 @@
+@page
+@model ShopWave.Web.Pages.ZoekenModel
+@{
+    ViewData["Title"] = "Bestellingen zoeken";
+}
+
+<h1>Bestellingen zoeken</h1>
+
+<div class="uitleg">
+    Les 9 gaat over invoer die je nooit zomaar vertrouwt. Deze pagina controleert eerst
+    of de zoekterm klopt en zoekt daarna alleen op het e-mailveld, exact. Probeer
+    <code>' OR '1'='1</code> of een leeg veld en kijk wat er gebeurt.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+}
+
+<form method="post">
+    <label for="Zoekterm">E-mailadres van de klant</label>
+    <input type="text" id="Zoekterm" name="Zoekterm" value="@Model.Zoekterm" />
+
+    <button type="submit">Zoeken</button>
+</form>
+
+<p>Er staan @Model.TotaalAantal bestellingen in de gesimuleerde database.</p>
+
+@if (Model.HeeftGezocht)
+{
+    <h2>Veilig zoeken</h2>
+
+    @if (Model.VeiligResultaat.Count == 0)
+    {
+        <p>Geen resultaten.</p>
+    }
+    else
+    {
+        <table>
+            <thead><tr><th>Bestelling</th></tr></thead>
+            <tbody>
+                @foreach (var regel in Model.VeiligResultaat)
+                {
+                    <tr><td>@regel</td></tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <h2>Wat een naieve zoekopdracht zou geven</h2>
+
+    <p>
+        Deze variant kijkt of de zoekterm ergens in de regel voorkomt, zoals een query
+        die de invoer aan elkaar plakt. Bij een gewone zoekterm valt het verschil niet op,
+        maar bij een lege of te ruime term geeft ze bestellingen van andere klanten terug.
+    </p>
+
+    @if (Model.OnveiligResultaat.Count == 0)
+    {
+        <p>Geen resultaten.</p>
+    }
+    else
+    {
+        <table>
+            <thead><tr><th>Bestelling</th></tr></thead>
+            <tbody>
+                @foreach (var regel in Model.OnveiligResultaat)
+                {
+                    <tr><td>@regel</td></tr>
+                }
+            </tbody>
+        </table>
+    }
+}

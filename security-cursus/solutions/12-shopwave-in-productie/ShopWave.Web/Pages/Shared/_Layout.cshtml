@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ShopWave</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a class="brand" asp-page="/Index">ShopWave</a>
+            <nav>
+                <a asp-page="/Producten">Producten</a>
+                <a asp-page="/Winkelmandje">Mandje</a>
+                <a asp-page="/Bestellen">Bestellen</a>
+                <a asp-page="/Registreren">Registreren</a>
+                <a asp-page="/Inloggen">Inloggen</a>
+                <a asp-page="/MijnBestellingen">Mijn bestellingen</a>
+                <a asp-page="/Orderbevestiging">Bevestiging</a>
+                <a asp-page="/Zoeken">Zoeken</a>
+                <a asp-page="/Token">Token</a>
+                <a asp-page="/Pentestrapport">Pentest</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer>
+        <div class="container">
+            ShopWave - demo-webshop bij de cursus Testing en Security
+        </div>
+    </footer>
+</body>
+</html>

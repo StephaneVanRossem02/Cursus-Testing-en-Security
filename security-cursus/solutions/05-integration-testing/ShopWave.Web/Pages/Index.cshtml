@@ -1,0 +1,30 @@
+@page
+@model ShopWave.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Welkom";
+}
+
+<h1>ShopWave</h1>
+
+<p>
+    Dit is de demo-webshop bij de cursus Testing en Security. De webshop toont de
+    domeinklassen die je in de lessen bouwt en test.
+</p>
+
+<h2>Wat kan je hier al?</h2>
+
+<ul>
+    <li><a asp-page="/Producten">Producten</a> bekijken met korting via <code>DiscountCalculator</code></li>
+    <li><a asp-page="/Bestellen">Bestellen</a> via <code>CheckoutService</code> en <code>OrderService</code></li>
+    <li><a asp-page="/Registreren">Registreren</a> met gehashte wachtwoorden via <code>AccountRepository</code></li>
+    <li><a asp-page="/Inloggen">Inloggen</a> met blokkering na drie foute pogingen</li>
+    <li><a asp-page="/MijnBestellingen">Mijn bestellingen</a> versleuteld opslaan met <code>AesEncryptor</code></li>
+    <li><a asp-page="/Winkelmandje">Winkelmandje</a> met coupons via <code>CartService</code></li>
+    <li><a asp-page="/WachtwoordVergeten">Wachtwoord resetten</a> via <code>PasswordResetService</code></li>
+    <li><a asp-page="/Orderbevestiging">Orderbevestiging</a> ondertekenen met <code>OrderSigner</code></li>
+</ul>
+
+<div class="uitleg">
+    De webshop groeit mee met de cursus. Elke les die iets toevoegt wat een klant ziet,
+    voegt hier een pagina of een stap toe.
+</div>

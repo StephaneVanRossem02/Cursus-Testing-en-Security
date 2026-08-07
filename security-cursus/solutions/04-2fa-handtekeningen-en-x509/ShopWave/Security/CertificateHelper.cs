@@ -19,7 +19,7 @@ namespace ShopWave.Security
                     DateTimeOffset.UtcNow,
                     DateTimeOffset.UtcNow.AddYears(1));
 
-                return certificate;
+                return new X509Certificate2(certificate.Export(X509ContentType.Pfx));
             }
         }
     }

@@ -1,0 +1,87 @@
+@page
+@model ShopWave.Web.Pages.WinkelmandjeModel
+@{
+    ViewData["Title"] = "Winkelmandje";
+}
+
+<h1>Winkelmandje</h1>
+
+<div class="uitleg">
+    <strong>CartService</strong> uit les 3 telt je mandje op en past de coupon toe.
+    Geldige codes zijn <code>ZOMER10</code>, <code>WELKOM20</code> en <code>TROUWE5</code>.
+    Elke coupon werkt maar een keer: <strong>CouponService</strong> markeert hem daarna
+    als gebruikt.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+}
+
+<h2>Artikel toevoegen</h2>
+
+<form method="post" asp-page-handler="Toevoegen">
+    <label for="ProductId">Product</label>
+    <select id="ProductId" name="ProductId">
+        @foreach (var product in Model.Producten)
+        {
+            <option value="@product.Id">@product.Name (@product.Price.ToString("0.00") EUR)</option>
+        }
+    </select>
+
+    <label for="Aantal">Aantal</label>
+    <input type="number" id="Aantal" name="Aantal" value="1" min="1" />
+
+    <button type="submit">Toevoegen</button>
+</form>
+
+<h2>Inhoud</h2>
+
+@if (Model.Regels.Count == 0)
+{
+    <p>Je mandje is leeg.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Artikel</th>
+                <th>Prijs</th>
+                <th>Aantal</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var regel in Model.Regels)
+            {
+                <tr>
+                    <td>@regel.Name</td>
+                    <td>@regel.Price.ToString("0.00") EUR</td>
+                    <td>@regel.Quantity</td>
+                    <td>
+                        <form method="post" asp-page-handler="Verwijderen">
+                            <input type="hidden" name="ArtikelNaam" value="@regel.Name" />
+                            <button type="submit">Verwijderen</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<p><strong>Totaal: @Model.Totaal.ToString("0.00") EUR</strong></p>
+<div class="herkomst">Dit totaal komt uit <code>CartService.Total</code>. Staat er 0,00 terwijl je mandje gevuld is, dan is die property nog niet af.</div>
+
+<h2>Coupon</h2>
+
+<form method="post" asp-page-handler="Coupon">
+    <label for="Couponcode">Couponcode</label>
+    <input type="text" id="Couponcode" name="Couponcode" value="ZOMER10" />
+    <button type="submit">Toepassen</button>
+</form>
+
+<form method="post" asp-page-handler="Legen">
+    <button type="submit">Mandje legen</button>
+</form>

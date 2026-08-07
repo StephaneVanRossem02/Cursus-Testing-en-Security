@@ -48,6 +48,23 @@ namespace ShopWave.Tests
         }
 
         [Fact]
+        public void Clear_AfterCouponApplied_RemovesDiscount()
+        {
+            Mock<ICouponService> mockCoupon = new Mock<ICouponService>();
+            mockCoupon.Setup(c => c.IsValid("ZOMER10")).Returns(true);
+            mockCoupon.Setup(c => c.GetDiscount("ZOMER10")).Returns(10);
+
+            CartService cart = new CartService(mockCoupon.Object);
+            cart.AddItem("Laptop", 100.0);
+            cart.ApplyCoupon("ZOMER10");
+            cart.Clear();
+            cart.AddItem("Muis", 50.0);
+
+            cart.Total.Should().Be(50.0);
+        }
+
+
+        [Fact]
         public void ApplyCoupon_WithInvalidCoupon_NeverCallsMarkAsUsed()
         {
             Mock<ICouponService> mockCoupon = new Mock<ICouponService>();

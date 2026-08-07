@@ -1,0 +1,46 @@
+@page
+@model ShopWave.Web.Pages.BestellenModel
+@{
+    ViewData["Title"] = "Bestellen";
+}
+
+<h1>Bestellen</h1>
+
+<div class="uitleg">
+    <strong>CheckoutService</strong> berekent het eindtotaal (prijs, korting en verzendkost).
+    <strong>OrderService</strong> controleert de voorraad en verwerkt de betaling.
+    Beide komen uit les 1.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">
+        @Model.Melding
+        @if (Model.HeeftResultaat)
+        {
+            <br />
+            <text>Totaal inclusief verzending: @Model.Totaal.ToString("0.00") EUR</text>
+        }
+    </div>
+    <div class="herkomst">Deze melding is de returnwaarde van jouw <code>CheckoutService</code>.</div>
+}
+
+<form method="post">
+    <label for="ProductId">Product</label>
+    <select id="ProductId" name="ProductId">
+        @foreach (var product in Model.Producten)
+        {
+            <option value="@product.Id" selected="@(product.Id == Model.ProductId)">
+                @product.Name (@product.Price.ToString("0.00") EUR)
+            </option>
+        }
+    </select>
+
+    <label for="Aantal">Aantal</label>
+    <input type="number" id="Aantal" name="Aantal" value="@Model.Aantal" min="1" />
+
+    <label for="KortingPercent">Korting (procent)</label>
+    <input type="number" id="KortingPercent" name="KortingPercent" value="@Model.KortingPercent" min="0" max="100" />
+
+    <button type="submit">Bestelling plaatsen</button>
+</form>

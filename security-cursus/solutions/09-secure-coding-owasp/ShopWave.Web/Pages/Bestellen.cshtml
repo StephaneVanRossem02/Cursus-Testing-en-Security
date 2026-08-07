@@ -1,0 +1,61 @@
+@page
+@model ShopWave.Web.Pages.BestellenModel
+@{
+    ViewData["Title"] = "Afrekenen";
+}
+
+<h1>Afrekenen</h1>
+
+<div class="uitleg">
+    Vanaf les 5 rekent <strong>CheckoutService</strong> je volledige mandje af. Hij
+    haalt het totaal bij <strong>CartService</strong> en stuurt dat naar de betaaldienst.
+    <strong>OrderConfirmationService</strong> maakt daarna je bevestigingscode.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">
+        @Model.Melding
+        @if (Model.Bevestigingscode != string.Empty)
+        {
+            <br />
+            <text>Je bevestigingscode: <strong>@Model.Bevestigingscode</strong></text>
+        }
+    </div>
+    <div class="herkomst">Deze melding is de returnwaarde van jouw <code>CheckoutService</code>.</div>
+}
+
+<h2>Je mandje</h2>
+
+@if (Model.Regels.Count == 0)
+{
+    <p>Je mandje is leeg. Voeg eerst iets toe in het <a asp-page="/Winkelmandje">winkelmandje</a>.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Artikel</th>
+                <th>Prijs</th>
+                <th>Aantal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var regel in Model.Regels)
+            {
+                <tr>
+                    <td>@regel.Name</td>
+                    <td>@regel.Price.ToString("0.00") EUR</td>
+                    <td>@regel.Quantity</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p><strong>Te betalen: @Model.Totaal.ToString("0.00") EUR</strong></p>
+
+    <form method="post">
+        <button type="submit">Afrekenen</button>
+    </form>
+}

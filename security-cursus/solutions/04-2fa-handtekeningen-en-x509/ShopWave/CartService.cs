@@ -65,6 +65,7 @@ namespace ShopWave
         public void Clear()
         {
             items.Clear();
+            couponDiscount = 0;
         }
     }
 }

@@ -1,0 +1,28 @@
+@page
+@model ShopWave.Web.Pages.InloggenModel
+@{
+    ViewData["Title"] = "Inloggen";
+}
+
+<h1>Inloggen</h1>
+
+<div class="uitleg">
+    <strong>AccountRepository</strong> vergelijkt je wachtwoord met de opgeslagen
+    BCrypt-hash. Na drie foute pogingen blokkeert het account.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+    <div class="herkomst">Deze melding is letterlijk de returnwaarde van jouw <code>AccountRepository</code>.</div>
+}
+
+<form method="post">
+    <label for="Email">E-mailadres</label>
+    <input type="text" id="Email" name="Email" value="@Model.Email" />
+
+    <label for="Wachtwoord">Wachtwoord</label>
+    <input type="password" id="Wachtwoord" name="Wachtwoord" />
+
+    <button type="submit">Inloggen</button>
+</form>
