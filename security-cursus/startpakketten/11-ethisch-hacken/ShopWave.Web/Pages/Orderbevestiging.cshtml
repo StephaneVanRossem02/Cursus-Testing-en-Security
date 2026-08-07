@@ -1,0 +1,44 @@
+@page
+@model ShopWave.Web.Pages.OrderbevestigingModel
+@{
+    ViewData["Title"] = "Orderbevestiging";
+}
+
+<h1>Ondertekende orderbevestiging</h1>
+
+<div class="uitleg">
+    <strong>OrderSigner</strong> uit les 4 ondertekent de orderdata met de private sleutel
+    uit een X.509-certificaat. Verander hieronder het bedrag en controleer opnieuw:
+    de handtekening klopt dan niet meer.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+    <div class="herkomst">Geldig of ongeldig wordt bepaald door <code>OrderSigner.Verify()</code>.</div>
+}
+
+<form method="post" asp-page-handler="Ondertekenen">
+    <label for="Orderdata">Orderdata</label>
+    <input type="text" id="Orderdata" name="Orderdata" value="@Model.Orderdata" />
+
+    <button type="submit">Ondertekenen</button>
+</form>
+
+@if (Model.HeeftHandtekening)
+{
+    <h2>Handtekening</h2>
+    <p><code>@Model.Handtekening</code></p>
+
+    <h2>Controleren</h2>
+    <p>Pas de orderdata gerust aan voor je controleert.</p>
+
+    <form method="post" asp-page-handler="Controleren">
+        <input type="hidden" name="Handtekening" value="@Model.Handtekening" />
+
+        <label for="TeControleren">Orderdata om te controleren</label>
+        <input type="text" id="TeControleren" name="TeControleren" value="@Model.TeControleren" />
+
+        <button type="submit">Handtekening controleren</button>
+    </form>
+}

@@ -1,0 +1,48 @@
+@page
+@model ShopWave.Web.Pages.InloggenModel
+@{
+    ViewData["Title"] = "Inloggen";
+}
+
+<h1>Inloggen</h1>
+
+<div class="uitleg">
+    Vanaf les 4 verloopt inloggen in twee stappen. <strong>AccountRepository</strong>
+    controleert eerst je wachtwoord, daarna genereert <strong>TwoFactorService</strong>
+    een code die 30 seconden geldig is en maar een keer werkt.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+    <div class="herkomst">Deze melding is letterlijk de returnwaarde van jouw <code>AccountRepository</code>.</div>
+}
+
+@if (!Model.WachtOpCode)
+{
+    <form method="post" asp-page-handler="Wachtwoord">
+        <label for="Email">E-mailadres</label>
+        <input type="text" id="Email" name="Email" value="@Model.Email" />
+
+        <label for="Wachtwoord">Wachtwoord</label>
+        <input type="password" id="Wachtwoord" name="Wachtwoord" />
+
+        <button type="submit">Volgende</button>
+    </form>
+}
+else
+{
+    <div class="uitleg">
+        In een echte webshop krijg je deze code per sms of e-mail. Voor deze demo tonen
+        we hem hier: <strong>@Model.DemoCode</strong>
+    </div>
+
+    <form method="post" asp-page-handler="Code">
+        <input type="hidden" name="Email" value="@Model.Email" />
+
+        <label for="Code">2FA-code</label>
+        <input type="text" id="Code" name="Code" maxlength="6" />
+
+        <button type="submit">Inloggen</button>
+    </form>
+}

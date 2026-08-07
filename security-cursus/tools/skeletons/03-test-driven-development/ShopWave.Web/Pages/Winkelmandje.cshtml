@@ -1,0 +1,67 @@
+@page
+@model ShopWave.Web.Pages.WinkelmandjeModel
+@{
+    ViewData["Title"] = "Winkelmandje";
+}
+
+<h1>Winkelmandje</h1>
+
+<div class="uitleg">
+    Deze pagina toont wat <strong>CartService</strong> doet. Zolang <code>AddItem</code>
+    en <code>Total</code> leeg zijn, blijft het mandje leeg en staat het totaal op 0.
+    Schrijf je tests, vul de methodes in, herstart de webshop en kijk opnieuw.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+}
+
+<h2>Artikel toevoegen</h2>
+
+<form method="post" asp-page-handler="Toevoegen">
+    <label for="ProductId">Product</label>
+    <select id="ProductId" name="ProductId">
+        @foreach (var product in Model.Producten)
+        {
+            <option value="@product.Id">@product.Name (@product.Price.ToString("0.00") EUR)</option>
+        }
+    </select>
+
+    <label for="Aantal">Aantal</label>
+    <input type="number" id="Aantal" name="Aantal" value="1" min="1" />
+
+    <button type="submit">Toevoegen</button>
+</form>
+
+<h2>Inhoud</h2>
+
+@if (Model.Regels.Count == 0)
+{
+    <p>Je mandje is leeg.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Artikel</th>
+                <th>Prijs</th>
+                <th>Aantal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var regel in Model.Regels)
+            {
+                <tr>
+                    <td>@regel.Name</td>
+                    <td>@regel.Price.ToString("0.00") EUR</td>
+                    <td>@regel.Quantity</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<p><strong>Totaal: @Model.Totaal.ToString("0.00") EUR</strong></p>
+<div class="herkomst">Dit totaal komt uit <code>CartService.Total</code>. Staat er 0,00 terwijl je mandje gevuld is, dan is die property nog niet af.</div>

@@ -1,0 +1,34 @@
+@page
+@model ShopWave.Web.Pages.RegistrerenModel
+@{
+    ViewData["Title"] = "Registreren";
+}
+
+<h1>Registreren</h1>
+
+<div class="uitleg">
+    <strong>AccountRepository</strong> slaat je wachtwoord nooit als leesbare tekst op:
+    <strong>PasswordHasher</strong> hasht het met BCrypt. Na de registratie log je in
+    met twee stappen, want vanaf les 4 komt daar een 2FA-code bij.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+    <div class="herkomst">Deze melding is letterlijk de returnwaarde van <code>AccountRepository.Register()</code>, de methode die jij schrijft.</div>
+}
+
+<form method="post">
+    <label for="Email">E-mailadres</label>
+    <input type="text" id="Email" name="Email" value="@Model.Email" />
+
+    <label for="Wachtwoord">Wachtwoord</label>
+    <input type="password" id="Wachtwoord" name="Wachtwoord" />
+
+    <button type="submit">Account aanmaken</button>
+</form>
+
+<p>
+    Ben je je wachtwoord kwijt? Gebruik dan
+    <a asp-page="/WachtwoordVergeten">wachtwoord vergeten</a>.
+</p>

@@ -1,0 +1,50 @@
+@page
+@model ShopWave.Web.Pages.WachtwoordVergetenModel
+@{
+    ViewData["Title"] = "Wachtwoord vergeten";
+}
+
+<h1>Wachtwoord vergeten</h1>
+
+<div class="uitleg">
+    <strong>PasswordResetService</strong> uit les 4 maakt een code die 15 minuten geldig
+    is. Na een poging is de code verbruikt, of hij nu klopte of niet.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+    <div class="herkomst">Deze melding komt uit jouw <code>PasswordResetService</code>.</div>
+}
+
+@if (!Model.WachtOpCode)
+{
+    <form method="post" asp-page-handler="Aanvragen">
+        <label for="Email">E-mailadres</label>
+        <input type="text" id="Email" name="Email" value="@Model.Email" />
+
+        <button type="submit">Resetcode aanvragen</button>
+    </form>
+}
+else
+{
+    @if (Model.DemoCode != string.Empty)
+    {
+        <div class="uitleg">
+            In een echte webshop gaat deze code per e-mail. Voor deze demo:
+            <strong>@Model.DemoCode</strong>
+        </div>
+    }
+
+    <form method="post" asp-page-handler="Resetten">
+        <input type="hidden" name="Email" value="@Model.Email" />
+
+        <label for="Code">Resetcode</label>
+        <input type="text" id="Code" name="Code" maxlength="6" />
+
+        <label for="NieuwWachtwoord">Nieuw wachtwoord</label>
+        <input type="password" id="NieuwWachtwoord" name="NieuwWachtwoord" />
+
+        <button type="submit">Wachtwoord wijzigen</button>
+    </form>
+}

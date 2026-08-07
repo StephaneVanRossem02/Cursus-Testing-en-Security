@@ -1,0 +1,45 @@
+@page
+@model ShopWave.Web.Pages.ProductenModel
+@{
+    ViewData["Title"] = "Producten";
+}
+
+<h1>Producten</h1>
+
+<div class="uitleg">
+    De prijs na korting wordt berekend door <strong>DiscountCalculator</strong> uit les 1.
+    De voorraad komt uit de demo-implementatie van <strong>IStockService</strong>.
+</div>
+
+@if (Model.Foutmelding != string.Empty)
+{
+    <div class="melding fout">@Model.Foutmelding</div>
+}
+
+<form method="get">
+    <label for="KortingPercent">Actiekorting (procent)</label>
+    <input type="number" id="KortingPercent" name="KortingPercent" value="@Model.KortingPercent" min="0" max="100" />
+    <button type="submit">Toepassen</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Prijs</th>
+            <th>Na korting</th>
+            <th>Voorraad</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model.Producten)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Price.ToString("0.00") EUR</td>
+                <td>@Model.PrijsNaKorting(product).ToString("0.00") EUR</td>
+                <td>@Model.Voorraad(product)</td>
+            </tr>
+        }
+    </tbody>
+</table>

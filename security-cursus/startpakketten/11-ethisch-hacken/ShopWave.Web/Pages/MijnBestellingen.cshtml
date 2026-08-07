@@ -1,0 +1,48 @@
+@page
+@model ShopWave.Web.Pages.MijnBestellingenModel
+@{
+    ViewData["Title"] = "Mijn bestellingen";
+}
+
+<h1>Mijn bestellingen</h1>
+
+<div class="uitleg">
+    <strong>OrderRepository</strong> uit les 2 slaat ordergegevens versleuteld op met
+    <strong>AesEncryptor</strong>. Wie de opslag inkijkt, ziet alleen de versleutelde
+    tekst hieronder. Pas bij het opvragen wordt ze weer leesbaar.
+</div>
+
+@if (Model.Melding != string.Empty)
+{
+    <div class="melding @(Model.IsFout ? "fout" : "")">@Model.Melding</div>
+}
+
+<form method="post">
+    <label for="OrderId">Ordernummer</label>
+    <input type="text" id="OrderId" name="OrderId" value="@Model.OrderId" />
+
+    <label for="OrderData">Ordergegevens</label>
+    <input type="text" id="OrderData" name="OrderData" value="@Model.OrderData" />
+
+    <button type="submit">Versleuteld opslaan</button>
+</form>
+
+@if (Model.Versleuteld != string.Empty)
+{
+    <h2>Wat er in de opslag staat</h2>
+    <div class="herkomst">Wat hieronder staat, is door jouw <code>OrderRepository</code> en <code>OrderEncryptor</code> gegaan.</div>
+    <table>
+        <tr>
+            <th>Versleuteld</th>
+            <td><code>@Model.Versleuteld</code></td>
+        </tr>
+        <tr>
+            <th>Ontsleuteld</th>
+            <td>@Model.Ontsleuteld</td>
+        </tr>
+    </table>
+    <p>
+        Sla dezelfde gegevens nog eens op en je krijgt een andere versleutelde tekst.
+        Dat komt door de willekeurige IV die <code>AesEncryptor</code> per keer genereert.
+    </p>
+}
