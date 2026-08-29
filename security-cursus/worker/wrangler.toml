@@ -1,0 +1,35 @@
+name = "oefening-assistent-testing"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# KV-namespace met de downloadbare ZIP's (startpakketten + oplossing-projecten). Die staan
+# bewust NIET in de publieke site; de Worker levert ze pas na de juiste code. Sleutels:
+# start-Lxx en oplossing-Lxx. Vullen met scripts/upload-downloads.js (kv key put).
+[[kv_namespaces]]
+binding = "DOWNLOADS"
+id = "2ec4942e7a9148d294a1c1a2036cb1e4"
+
+# De Worker heeft geen eigen Gemini-key: die van de student komt per aanvraag mee in de
+# header x-student-key.
+#
+# Secrets per les:
+#   LESCODE_L01 .. LESCODE_L12   -> geeft de oplossingspagina + het oplossing-project (ZIP) vrij
+#   STARTCODE_L01 .. STARTCODE_L12 -> geeft het startpakket (ZIP) vrij, bij aanvang van de les
+# Geen secret = die inhoud is nog niet vrijgegeven (403). Zo geef je les per les vrij door de
+# juiste code te noemen en het secret te zetten.
+#
+# Een les vrijgeven (productie, vraagt een Cloudflare-account):
+#   npx wrangler secret put LESCODE_L01
+#   -> geef de code in die je in de les aan de studenten noemt
+#
+# Een les terug afschermen: verwijder het secret weer:
+#   npx wrangler secret delete LESCODE_L01
+#
+# Lokaal draaien en testen (zonder account):
+#   npx wrangler dev --port 8787
+#   De codes komen dan uit worker/.dev.vars (niet in git zetten), bv:
+#     LESCODE_L01 = "test-l01"
+#
+# Deployen:
+#   npx wrangler login
+#   npx wrangler deploy

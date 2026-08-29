@@ -1,0 +1,46 @@
+# Dependencies
+/node_modules
+
+# Production
+/build
+
+# Generated files
+.docusaurus
+.cache-loader
+
+# Misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Cloudflare Worker: lokale lescodes (secrets), nooit committen
+worker/.dev.vars
+
+# Cloudflare Worker: de oplossingen zelf. NOOIT in de (publieke) repo — ze leven enkel
+# lokaal en in de gedeployde Worker. Zo blijven ze afgeschermd achter de lescode.
+worker/oplossingen.json
+worker/oplossingen-paginas.json
+
+# Lokale editor/agent-config
+.claude/
+
+# Wrangler lokale cache/tmp: bevat o.a. de gebundelde Worker MET de oplossingen erin
+worker/.wrangler/
+
+# De downloadbare ZIP's (startpakketten + oplossing-projecten): staan in KV, niet publiek.
+# Lokaal bewaard voor back-up en her-upload naar KV.
+worker/downloads/
+
+# Bron-projecten waaruit de ZIP's gebouwd worden. NOOIT publiek:
+# - solutions/ = de volledige uitgewerkte oplossingen
+# - startpakketten/ = cumulatief, bevat dus de oplossingen van EERDERE lessen
+# - tools/skeletons/ = de per-les stubs waaruit de startpakketten gebouwd worden
+solutions/
+startpakketten/
+tools/skeletons/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

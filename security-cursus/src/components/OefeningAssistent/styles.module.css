@@ -1,0 +1,305 @@
+/* Kleuren komen uit de Docusaurus-variabelen, zodat donkere modus vanzelf klopt. */
+
+.kader {
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-surface-color);
+}
+
+.kop {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.badge {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--ifm-color-primary);
+  color: var(--ifm-color-white, #fff);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.titel {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.quota {
+  margin-left: auto;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.8rem;
+}
+
+.uitleg {
+  margin: 0 0 0.75rem;
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.92rem;
+}
+
+.stappen {
+  margin: 0 0 0.75rem;
+  padding-left: 1.2rem;
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.9rem;
+}
+
+.stappen li {
+  margin-bottom: 0.25rem;
+}
+
+/* --- key-formulier --- */
+
+.keyForm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.keyRij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.keyInvoer {
+  flex: 1 1 18rem;
+  min-width: 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.9rem;
+}
+
+/* --- gesprek --- */
+
+.gesprek {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 26rem;
+  overflow-y: auto;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-emphasis-100);
+}
+
+.vanStudent,
+.vanAssistent {
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--ifm-global-radius);
+  font-size: 0.92rem;
+}
+
+/*
+ * Bewust een neutrale achtergrond met een accentrand, geen vlak in de huisstijlkleur.
+ * --ifm-color-primary-lightest is niet noodzakelijk een bleke tint: in deze site is het
+ * #fd8803, bijna vol oranje. Grijze tekst valt daarop weg.
+ */
+.vanStudent {
+  align-self: flex-end;
+  max-width: 85%;
+  border-right: 3px solid var(--ifm-color-primary);
+  background: var(--ifm-color-emphasis-200);
+}
+
+.vanAssistent {
+  align-self: flex-start;
+  max-width: 95%;
+  border-left: 3px solid var(--ifm-color-primary);
+  background: var(--ifm-background-surface-color);
+}
+
+.rolLabel {
+  display: block;
+  margin-bottom: 0.2rem;
+  /* emphasis-700, niet 600: op de bubbelachtergrond haalt 600 de WCAG-drempel niet. */
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.alinea {
+  margin: 0 0 0.5rem;
+  white-space: pre-wrap;
+}
+
+.alinea:last-child {
+  margin-bottom: 0;
+}
+
+.codeblok {
+  margin: 0.5rem 0;
+  padding: 0.6rem 0.8rem;
+  overflow-x: auto;
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-emphasis-200);
+  font-size: 0.85rem;
+}
+
+/* --- voorzetten: klikbare startvragen als het gesprek nog leeg is --- */
+
+.voorzetten {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+
+.voorzet {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ifm-color-emphasis-800);
+  font-family: inherit;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+
+.voorzet:hover {
+  border-color: var(--ifm-color-primary);
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-font-color-base);
+}
+
+/* --- invoer --- */
+
+.vraagForm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.vraagInvoer,
+.codeInvoer {
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  font-family: inherit;
+  font-size: 0.92rem;
+  resize: vertical;
+}
+
+.codeInvoer {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.85rem;
+}
+
+.knopRij {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.knop {
+  padding: 0.45rem 1.1rem;
+  border: none;
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-primary);
+  color: var(--ifm-color-white, #fff);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.knop:hover:not(:disabled) {
+  background: var(--ifm-color-primary-dark);
+}
+
+.knop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tekstKnop {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ifm-color-primary);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.hint {
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.8rem;
+}
+
+.teller,
+.tellerFout {
+  font-size: 0.78rem;
+}
+
+.teller {
+  color: var(--ifm-color-emphasis-600);
+}
+
+.tellerFout {
+  color: var(--ifm-color-danger);
+  font-weight: 600;
+}
+
+/* --- meldingen --- */
+
+.fout,
+.quotaOp,
+.waarschuwing {
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--ifm-global-radius);
+  font-size: 0.88rem;
+}
+
+.fout {
+  border-left: 3px solid var(--ifm-color-danger);
+  background: var(--ifm-color-danger-contrast-background);
+  color: var(--ifm-color-danger-contrast-foreground);
+}
+
+.quotaOp {
+  border-left: 3px solid var(--ifm-color-warning);
+  background: var(--ifm-color-warning-contrast-background);
+  color: var(--ifm-color-warning-contrast-foreground);
+}
+
+.waarschuwing {
+  border-left: 3px solid var(--ifm-color-warning);
+  background: var(--ifm-color-warning-contrast-background);
+  color: var(--ifm-color-warning-contrast-foreground);
+}
+
+@media (max-width: 570px) {
+  .quota {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .vanStudent {
+    max-width: 100%;
+  }
+}

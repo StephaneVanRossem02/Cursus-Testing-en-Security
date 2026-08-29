@@ -1,0 +1,70 @@
+/* Kleuren uit de Docusaurus-variabelen, zodat de donkere modus vanzelf klopt. */
+
+.kader {
+  margin: 1rem 0 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-surface-color);
+}
+
+.uitleg {
+  margin: 0 0 0.75rem;
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.rij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.invoer {
+  flex: 1 1 11rem;
+  min-width: 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  font-size: 0.95rem;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.invoer:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 1px;
+}
+
+.knop {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-primary);
+  color: var(--ifm-color-white, #fff);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.knop:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.klaar {
+  margin: 0.6rem 0 0;
+  color: var(--ifm-color-success-dark, #1a7f37);
+  font-size: 0.9rem;
+}
+
+.fout {
+  margin: 0.6rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-danger-contrast-background, #ffe6e6);
+  color: var(--ifm-color-danger-dark, #a12622);
+  font-size: 0.9rem;
+}

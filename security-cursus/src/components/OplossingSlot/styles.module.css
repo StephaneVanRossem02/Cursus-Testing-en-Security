@@ -1,0 +1,133 @@
+/* Kleuren komen uit de Docusaurus-variabelen, zodat de donkere modus vanzelf klopt. */
+
+.kader {
+  margin: 1.5rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-surface-color);
+}
+
+.uitleg {
+  margin: 0 0 1rem;
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.codeRij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.codeInvoer {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  font-size: 0.95rem;
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.codeInvoer:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 1px;
+}
+
+.knop {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-primary);
+  color: var(--ifm-color-white, #fff);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.knop:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tekstKnop {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ifm-color-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.fout {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-danger-contrast-background, #ffe6e6);
+  color: var(--ifm-color-danger-dark, #a12622);
+  font-size: 0.9rem;
+}
+
+/* --- ontgrendelde weergave --- */
+
+.ontgrendeldBalk {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0 1rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-success-contrast-background, #e6f6e6);
+}
+
+.slotOpen {
+  color: var(--ifm-color-success-dark, #1a7f37);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ontgrendeldBalk .tekstKnop {
+  margin-left: auto;
+}
+
+/* --- gerenderde oplossing --- */
+
+.inhoud {
+  overflow-wrap: break-word;
+}
+
+.inhoud h2 {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.inhoud h3 {
+  margin-top: 1.5rem;
+}
+
+.tabel {
+  display: block;
+  overflow-x: auto;
+  width: max-content;
+  max-width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+}
+
+.tabel th,
+.tabel td {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabel th {
+  background: var(--ifm-color-emphasis-100);
+}

@@ -1,0 +1,50 @@
+{
+  "L01": {
+    "start": "shopwave-start-01-unit-testing-en-mocking.zip",
+    "oplossing": "shopwave-01-unit-testing-en-mocking.zip"
+  },
+  "L02": {
+    "start": "shopwave-start-02-cia-hashing-en-encryptie.zip",
+    "oplossing": "shopwave-02-cia-hashing-en-encryptie.zip"
+  },
+  "L03": {
+    "start": "shopwave-start-03-test-driven-development.zip",
+    "oplossing": "shopwave-03-test-driven-development.zip"
+  },
+  "L04": {
+    "start": "shopwave-start-04-2fa-handtekeningen-en-x509.zip",
+    "oplossing": "shopwave-04-2fa-handtekeningen-en-x509.zip"
+  },
+  "L05": {
+    "start": "shopwave-start-05-integration-testing.zip",
+    "oplossing": "shopwave-05-integration-testing.zip"
+  },
+  "L06": {
+    "start": "shopwave-start-06-https-en-tls.zip",
+    "oplossing": "shopwave-06-https-en-tls.zip"
+  },
+  "L07": {
+    "start": "shopwave-start-07-jwt-en-oauth2.zip",
+    "oplossing": "shopwave-07-jwt-en-oauth2.zip"
+  },
+  "L08": {
+    "start": "shopwave-start-08-acceptatietesten.zip",
+    "oplossing": "shopwave-08-acceptatietesten.zip"
+  },
+  "L09": {
+    "start": "shopwave-start-09-secure-coding-owasp.zip",
+    "oplossing": "shopwave-09-secure-coding-owasp.zip"
+  },
+  "L10": {
+    "start": "shopwave-start-10-integration-testing-mockoon.zip",
+    "oplossing": "shopwave-10-integration-testing-mockoon.zip"
+  },
+  "L11": {
+    "start": "shopwave-start-11-ethisch-hacken.zip",
+    "oplossing": "shopwave-11-ethisch-hacken.zip"
+  },
+  "L12": {
+    "start": "shopwave-start-12-shopwave-in-productie.zip",
+    "oplossing": "shopwave-12-shopwave-in-productie.zip"
+  }
+}
