@@ -8,12 +8,59 @@
   background: var(--ifm-background-surface-color);
 }
 
+/* De kop is de <summary> van een standaard-gesloten <details>: een klikbalk. */
 .kop {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem 0.75rem;
+  margin-bottom: 0;
+  padding-right: 1.75rem;
+  position: relative;
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Het standaard-driehoekje van <summary> weg; we tonen zelf een chevron. */
+.kop::-webkit-details-marker {
+  display: none;
+}
+
+.kop::after {
+  content: '';
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-top: -0.4rem;
+  border-right: 2px solid var(--ifm-color-emphasis-600);
+  border-bottom: 2px solid var(--ifm-color-emphasis-600);
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.kop:hover::after {
+  border-color: var(--ifm-color-primary);
+}
+
+.openHint {
+  margin-left: auto;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.8rem;
+}
+
+/* Open: chevron omhoog, hint weg, ruimte onder de kop. */
+.kader[open] > .kop {
   margin-bottom: 0.75rem;
+}
+
+.kader[open] > .kop::after {
+  transform: rotate(-135deg);
+}
+
+.kader[open] .openHint {
+  display: none;
 }
 
 .badge {
@@ -33,7 +80,7 @@
 }
 
 .quota {
-  margin-left: auto;
+  margin: 0 0 0.5rem;
   color: var(--ifm-color-emphasis-600);
   font-size: 0.8rem;
 }

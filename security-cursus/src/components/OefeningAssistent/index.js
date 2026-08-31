@@ -178,28 +178,31 @@ export default function OefeningAssistent({ oefening, hoofdstuk }) {
   // neutrale schil voorkomt dat de inhoud verspringt bij het hydrateren.
   if (!isBrowser) {
     return (
-      <section className={styles.kader} aria-busy="true">
-        <header className={styles.kop}>
+      <details className={styles.kader} aria-busy="true">
+        <summary className={styles.kop}>
           <span className={styles.badge}>Vastgelopen?</span>
           <h3 className={styles.titel}>Hulp bij {titel}</h3>
-        </header>
+          <span className={styles.openHint}>klik voor hulp</span>
+        </summary>
         <p className={styles.uitleg}>De assistent wordt geladen…</p>
-      </section>
+      </details>
     );
   }
 
   return (
-    <section className={styles.kader}>
-      <header className={styles.kop}>
+    <details className={styles.kader}>
+      <summary className={styles.kop}>
         <span className={styles.badge}>Vastgelopen?</span>
         <h3 className={styles.titel}>Hulp bij {titel}</h3>
-        {key && (
-          <span className={styles.quota}>
-            {Math.max(0, config.vragenPerDag - verbruik)} van {config.vragenPerDag} vragen over
-            vandaag
-          </span>
-        )}
-      </header>
+        <span className={styles.openHint}>klik voor hulp</span>
+      </summary>
+
+      {key && (
+        <p className={styles.quota}>
+          {Math.max(0, config.vragenPerDag - verbruik)} van {config.vragenPerDag} vragen over
+          vandaag
+        </p>
+      )}
 
       {!oefeningData && (
         <p className={styles.waarschuwing}>
@@ -386,6 +389,6 @@ export default function OefeningAssistent({ oefening, hoofdstuk }) {
           </form>
         </>
       )}
-    </section>
+    </details>
   );
 }
