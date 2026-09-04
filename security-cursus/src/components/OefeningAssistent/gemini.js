@@ -65,6 +65,102 @@ function leesAntwoordTekst(kandidaat) {
     .trim();
 }
 
+/** Kleine pauze tussen herpogingen. */
+function wacht(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Maakt van een geslaagd (HTTP 200) antwoord de uiteindelijke tekst, of gooit een
+ * begrijpelijke fout als er geen bruikbare tekst in zit (blokkade, leeg, afgekapt).
+ */
+function verwerkAntwoord(data) {
+  if (!data) {
+    throw new AssistentFout('onbekend', 'Het antwoord van de server was onleesbaar.');
+  }
+
+  const blokkade = data?.promptFeedback?.blockReason;
+  if (blokkade) {
+    throw new AssistentFout('geblokkeerd', `Google blokkeerde deze vraag (${blokkade}).`);
+  }
+
+  const kandidaat = data?.candidates?.[0];
+  const tekst = leesAntwoordTekst(kandidaat);
+
+  if (!tekst) {
+    if (kandidaat?.finishReason === 'MAX_TOKENS') {
+      throw new AssistentFout(
+        'te-lang',
+        'Het model had zijn tokenbudget op voor het aan een antwoord toekwam.',
+      );
+    }
+    if (kandidaat?.finishReason === 'SAFETY') {
+      throw new AssistentFout('geblokkeerd', 'Het antwoord werd tegengehouden door een filter.');
+    }
+    throw new AssistentFout('leeg', 'Het model gaf een leeg antwoord terug.');
+  }
+
+  // Wel tekst, maar afgekapt: tonen met een waarschuwing is beter dan weggooien.
+  if (kandidaat?.finishReason === 'MAX_TOKENS') {
+    return `${tekst}\n\n_(Dit antwoord werd afgekapt. Stel je vraag wat specifieker.)_`;
+  }
+
+  return tekst;
+}
+
+/**
+ * Doet exact EEN aanvraag voor een bepaald model, en geeft de rauwe Response terug
+ * (ook bij een 5xx: de beller beslist of er herprobeerd wordt).
+ *
+ * Staat er een Worker ingesteld, dan gaat de aanvraag daarlangs — die plakt de
+ * referentie-oplossing bij de prompt. Is de Worker onbereikbaar (netwerkfout), dan valt
+ * deze functie in dezelfde poging terug op een rechtstreekse aanroep van Google, zodat een
+ * platliggende Worker de assistent niet stukmaakt (wel zonder oplossing om mee te vergelijken).
+ */
+async function doeAanvraag({
+  apiKey,
+  systemPrompt,
+  contents,
+  generationConfig,
+  config,
+  signal,
+  oefening,
+  hoofdstuk,
+  modelNaam,
+}) {
+  if (config.workerUrl) {
+    try {
+      return await fetch(config.workerUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-student-key': apiKey },
+        body: JSON.stringify({
+          oefening,
+          hoofdstuk,
+          geschiedenis: contents,
+          model: modelNaam,
+          generationConfig,
+        }),
+        signal,
+      });
+    } catch (fout) {
+      if (fout?.name === 'AbortError') throw fout;
+      // Worker onbereikbaar: verder naar het rechtstreekse pad hieronder.
+    }
+  }
+
+  const url = `${config.apiBasis}/models/${encodeURIComponent(modelNaam)}:generateContent`;
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents,
+      generationConfig,
+    }),
+    signal,
+  });
+}
+
 /**
  * Stelt een vraag aan Gemini.
  *
@@ -103,109 +199,78 @@ export async function vraagAanGemini({
     parts: [{ text: beurt.tekst }],
   }));
 
-  let response;
-  let viaWorker = false;
+  // Eerst het ingestelde model, dan het terugvalmodel. Op een 5xx (meestal "overloaded"
+  // op het drukke gratis flash-lite) herproberen we een paar keer; blijft dat model
+  // weigeren, dan schakelen we over naar het stabielere terugvalmodel.
+  const modellen = [config.model];
+  if (config.fallbackModel && config.fallbackModel !== config.model) {
+    modellen.push(config.fallbackModel);
+  }
+  const maxPogingen = Math.max(1, config.maxPogingen ?? 1);
+  const basisWacht = config.herpogingWachtMs ?? 500;
 
-  if (config.workerUrl) {
-    try {
-      response = await fetch(config.workerUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-student-key': apiKey },
-        body: JSON.stringify({
+  let laatsteTijdelijkeFout = null;
+
+  for (const modelNaam of modellen) {
+    for (let poging = 1; poging <= maxPogingen; poging += 1) {
+      const isLaatstePoging = poging === maxPogingen;
+
+      let response;
+      try {
+        response = await doeAanvraag({
+          apiKey,
+          systemPrompt,
+          contents,
+          generationConfig,
+          config,
+          signal,
           oefening,
           hoofdstuk,
-          geschiedenis: contents,
-          model: config.model,
-          generationConfig,
-        }),
-        signal,
-      });
-      viaWorker = true;
-    } catch (fout) {
-      if (fout?.name === 'AbortError') throw fout;
-      // Worker onbereikbaar. Niet doorbreken: hieronder valt hij terug op Google.
-      // De assistent werkt dan zonder referentie-oplossing, en dat is beter dan niets.
-      response = null;
+          modelNaam,
+        });
+      } catch (fout) {
+        if (fout?.name === 'AbortError') throw fout;
+        // Netwerk-/CORS-fout: tijdelijk, dus herproberen heeft zin.
+        laatsteTijdelijkeFout = new AssistentFout('netwerk', 'Geen verbinding met de Gemini-API.');
+        if (!isLaatstePoging) {
+          await wacht(basisWacht * poging);
+          continue;
+        }
+        break; // pogingen op → volgend model proberen
+      }
+
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
+      if (response.ok) {
+        return verwerkAntwoord(data);
+      }
+
+      // Een 5xx is tijdelijk (server/overbelasting): herproberen, of naar het volgende model.
+      if (response.status >= 500) {
+        laatsteTijdelijkeFout = new AssistentFout(
+          'server',
+          'De server van Google antwoordt even niet.',
+        );
+        if (!isLaatstePoging) {
+          await wacht(basisWacht * poging);
+          continue;
+        }
+        break; // pogingen op → volgend model proberen
+      }
+
+      // 400/401/403/404/429: opnieuw proberen of van model wisselen lost dit niet op.
+      // Meteen een begrijpelijke fout tonen.
+      vertaalHttpFout(response.status, data);
     }
   }
 
-  if (!response) {
-    const body = {
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents,
-      generationConfig,
-    };
-    const url = `${config.apiBasis}/models/${encodeURIComponent(config.model)}:generateContent`;
-
-    try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify(body),
-        signal,
-      });
-    } catch (fout) {
-      if (fout?.name === 'AbortError') throw fout;
-      // fetch gooit hier bij offline zijn, een geblokkeerde request of een CORS-probleem.
-      throw new AssistentFout('netwerk', 'Geen verbinding met de Gemini-API.');
-    }
-  }
-
-  // 5xx van de Worker zelf: ook dan nog een keer rechtstreeks proberen.
-  if (viaWorker && response.status >= 500) {
-    const body = {
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents,
-      generationConfig,
-    };
-    const url = `${config.apiBasis}/models/${encodeURIComponent(config.model)}:generateContent`;
-    try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify(body),
-        signal,
-      });
-    } catch {
-      /* de oorspronkelijke reactie van de Worker wordt hieronder afgehandeld */
-    }
-  }
-
-  let data = null;
-  try {
-    data = await response.json();
-  } catch {
-    if (!response.ok) vertaalHttpFout(response.status, null);
-    throw new AssistentFout('onbekend', 'Het antwoord van de server was onleesbaar.');
-  }
-
-  if (!response.ok) vertaalHttpFout(response.status, data);
-
-  const blokkade = data?.promptFeedback?.blockReason;
-  if (blokkade) {
-    throw new AssistentFout('geblokkeerd', `Google blokkeerde deze vraag (${blokkade}).`);
-  }
-
-  const kandidaat = data?.candidates?.[0];
-  const tekst = leesAntwoordTekst(kandidaat);
-
-  if (!tekst) {
-    if (kandidaat?.finishReason === 'MAX_TOKENS') {
-      throw new AssistentFout(
-        'te-lang',
-        'Het model had zijn tokenbudget op voor het aan een antwoord toekwam.',
-      );
-    }
-    if (kandidaat?.finishReason === 'SAFETY') {
-      throw new AssistentFout('geblokkeerd', 'Het antwoord werd tegengehouden door een filter.');
-    }
-    throw new AssistentFout('leeg', 'Het model gaf een leeg antwoord terug.');
-  }
-
-  // Wel tekst, maar afgekapt: tonen met een waarschuwing is beter dan weggooien.
-  if (kandidaat?.finishReason === 'MAX_TOKENS') {
-    return `${tekst}\n\n_(Dit antwoord werd afgekapt. Stel je vraag wat specifieker.)_`;
-  }
-
-  return tekst;
+  // Alle modellen en pogingen uitgeput op een tijdelijke fout.
+  throw (
+    laatsteTijdelijkeFout ?? new AssistentFout('server', 'De server van Google antwoordt even niet.')
+  );
 }

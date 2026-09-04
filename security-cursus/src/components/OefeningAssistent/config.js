@@ -17,6 +17,26 @@ export const DEFAULT_CONFIG = {
    */
   model: 'gemini-3.5-flash-lite',
 
+  /**
+   * Terugvalmodel. Als het hoofdmodel na alle herpogingen blijft antwoorden met een
+   * serverfout (5xx, meestal "model overloaded" op het drukke gratis flash-lite), wisselt
+   * de assistent naar dit stabielere model. Zet op null om nooit te wisselen.
+   */
+  fallbackModel: 'gemini-2.5-flash',
+
+  /**
+   * Aantal pogingen PER model bij een tijdelijke serverfout (5xx) of netwerkfout, voor
+   * de student een fout te zien krijgt. Google's gratis modellen geven op piekmomenten
+   * geregeld een 503 ("overloaded"); zo'n fout is bijna altijd na een seconde weg.
+   */
+  maxPogingen: 3,
+
+  /**
+   * Basiswachttijd (ms) tussen herpogingen. Loopt op per poging (500, 1000, ...), zodat
+   * een overbelast model even ademruimte krijgt zonder de student lang te laten wachten.
+   */
+  herpogingWachtMs: 500,
+
   apiBasis: 'https://generativelanguage.googleapis.com/v1beta',
 
   /**
