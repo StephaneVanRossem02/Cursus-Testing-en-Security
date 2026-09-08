@@ -20,8 +20,8 @@ const config = {
   },
 
   // Set the production url of your site here
-  url: 'https://StephaneVanRossem02.github.io',
-  baseUrl: '/Cursus-Testing-en-Security/',
+  url: 'https://testing-en-security.apload.be',
+  baseUrl: '/',
 
   organizationName: 'StephaneVanRossem02',
   projectName: 'Cursus-Testing-en-Security',

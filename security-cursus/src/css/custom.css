@@ -63,7 +63,17 @@
 .navbar {
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
   box-shadow: none;
-  backdrop-filter: blur(6px);
+}
+
+/* Frosted-glass enkel op desktop. backdrop-filter maakt van de navbar een
+   containing block voor position:fixed-kinderen; op mobiel zou dat de
+   uitklapbare navigatie-sidebar (position:fixed) opsluiten in de navbar,
+   waardoor het hamburgermenu niet opent. Boven de Docusaurus-breakpoint
+   (997px) is er geen mobiele sidebar, dus daar is het effect veilig. */
+@media (min-width: 997px) {
+  .navbar {
+    backdrop-filter: blur(6px);
+  }
 }
 
 

@@ -22,6 +22,8 @@ import downloadManifest from '../downloads-manifest.json';
 
 const TOEGELATEN_ORIGINS = [
   'https://stephanevanrossem02.github.io',
+  'https://testing-en-security.apload.be',
+  'http://testing-en-security.apload.be',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
