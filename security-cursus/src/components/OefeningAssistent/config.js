@@ -66,7 +66,7 @@ export const DEFAULT_CONFIG = {
    * een 400 op. Als jouw model het wel ondersteunt, zet dit op 'minimal' voor
    * snellere en goedkopere antwoorden.
    */
-  thinkingLevel: null,
+  thinkingLevel: 'medium',
 
   temperature: 0.4,
 
