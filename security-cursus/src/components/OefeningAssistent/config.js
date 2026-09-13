@@ -18,24 +18,21 @@ export const DEFAULT_CONFIG = {
   model: 'gemini-3.5-flash-lite',
 
   /**
-   * Terugvalmodel. Als het hoofdmodel na alle herpogingen blijft antwoorden met een
-   * serverfout (5xx, meestal "model overloaded" op het drukke gratis flash-lite), wisselt
-   * de assistent naar dit stabielere model. Zet op null om nooit te wisselen.
+   * Terugvalmodel bij aanhoudende serverfouten. Standaard UIT (null): overschakelen naar
+   * een zwaarder model maakt trage momenten net trager. Zet enkel een modelnaam als je
+   * beschikbaarheid boven snelheid verkiest.
    */
-  fallbackModel: 'gemini-2.5-flash',
+  fallbackModel: null,
 
   /**
-   * Aantal pogingen PER model bij een tijdelijke serverfout (5xx) of netwerkfout, voor
-   * de student een fout te zien krijgt. Google's gratis modellen geven op piekmomenten
-   * geregeld een 503 ("overloaded"); zo'n fout is bijna altijd na een seconde weg.
+   * Aantal pogingen bij een tijdelijke serverfout (5xx) of netwerkfout voor de student een
+   * fout ziet. Bewust laag (2 = één snelle herpoging): dat vangt een eenmalige 503 op
+   * zonder dat de student bij echte overbelasting seconden staat te wachten.
    */
-  maxPogingen: 3,
+  maxPogingen: 2,
 
-  /**
-   * Basiswachttijd (ms) tussen herpogingen. Loopt op per poging (500, 1000, ...), zodat
-   * een overbelast model even ademruimte krijgt zonder de student lang te laten wachten.
-   */
-  herpogingWachtMs: 500,
+  /** Wachttijd (ms) voor de herpoging. Kort gehouden zodat het amper voelbaar is. */
+  herpogingWachtMs: 350,
 
   apiBasis: 'https://generativelanguage.googleapis.com/v1beta',
 
@@ -86,7 +83,7 @@ export const DEFAULT_CONFIG = {
    * Aantal eerdere beurten dat meegestuurd wordt als context.
    * Hoger = beter geheugen, maar meer tokens per vraag.
    */
-  maxBeurtenGeheugen: 6,
+  maxBeurtenGeheugen: 4,
 };
 
 /**
